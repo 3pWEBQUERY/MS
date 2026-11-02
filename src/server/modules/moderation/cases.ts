@@ -104,7 +104,7 @@ export async function listCases(
   if (scope === "escalated") conds.push(eq(moderationCases.status, "escalated"));
   if (scope === "approvals")
     conds.push(
-      dsql`exists (select 1 from moderation.actions a where a.case_id = ${moderationCases.id} and a.requires_second_approval = 1 and a.approved_at is null)`,
+      dsql`exists (select 1 from moderation.actions a where a.case_id = "cases"."id" and a.requires_second_approval = 1 and a.approved_at is null)`,
     );
   const status = opts.status ?? "open";
   if (status === "open") conds.push(inArray(moderationCases.status, OPEN_STATUSES));
@@ -128,9 +128,9 @@ export async function listCases(
       createdAt: moderationCases.createdAt,
       targetType: moderationCases.targetType,
       assigneeId: moderationCases.assigneeId,
-      reportCount: dsql<number>`(select count(*)::int from moderation.reports r where r.case_id = ${moderationCases.id})`,
-      reasons: dsql<string[]>`coalesce((select array_agg(distinct r.reason::text) from moderation.reports r where r.case_id = ${moderationCases.id}), '{}')`,
-      pendingApprovals: dsql<number>`(select count(*)::int from moderation.actions a where a.case_id = ${moderationCases.id} and a.requires_second_approval = 1 and a.approved_at is null)`,
+      reportCount: dsql<number>`(select count(*)::int from moderation.reports r where r.case_id = "cases"."id")`,
+      reasons: dsql<string[]>`coalesce((select array_agg(distinct r.reason::text) from moderation.reports r where r.case_id = "cases"."id"), '{}')`,
+      pendingApprovals: dsql<number>`(select count(*)::int from moderation.actions a where a.case_id = "cases"."id" and a.requires_second_approval = 1 and a.approved_at is null)`,
     })
     .from(moderationCases)
     .where(and(...conds))
@@ -161,7 +161,7 @@ export async function caseCounts(viewer: Viewer) {
     .select({
       priority: moderationCases.priority,
       total: count(),
-      overdue: dsql<number>`count(*) filter (where ${moderationCases.dueAt} < ${now})`,
+      overdue: dsql<number>`count(*) filter (where ${moderationCases.dueAt} < ${now.toISOString()}::timestamptz)`,
     })
     .from(moderationCases)
     .where(and(inArray(moderationCases.status, OPEN_STATUSES), scopeCond))
@@ -178,7 +178,7 @@ export async function caseCounts(viewer: Viewer) {
   const [approvals] = await db
     .select({
       c: count(),
-      overdue: dsql<number>`count(*) filter (where ${moderationActions.createdAt} < ${new Date(now.getTime() - SECOND_APPROVAL_WINDOW_MS)})`,
+      overdue: dsql<number>`count(*) filter (where ${moderationActions.createdAt} < ${new Date(now.getTime() - SECOND_APPROVAL_WINDOW_MS).toISOString()}::timestamptz)`,
     })
     .from(moderationActions)
     .where(and(eq(moderationActions.requiresSecondApproval, 1), isNull(moderationActions.approvedAt)));
@@ -186,7 +186,7 @@ export async function caseCounts(viewer: Viewer) {
   const [openAppeals] = await db
     .select({
       c: count(),
-      overdue: dsql<number>`count(*) filter (where ${appeals.createdAt} < ${new Date(now.getTime() - APPEAL_TARGET_MS)})`,
+      overdue: dsql<number>`count(*) filter (where ${appeals.createdAt} < ${new Date(now.getTime() - APPEAL_TARGET_MS).toISOString()}::timestamptz)`,
     })
     .from(appeals)
     .where(and(inArray(appeals.status, ["open", "in_review"]), appealScope));

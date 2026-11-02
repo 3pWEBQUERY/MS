@@ -10,6 +10,7 @@ import { seedCommunity } from "./seed/community";
 import { seedContent } from "./seed/content";
 import { DEMO_PASSWORD, DEMO_TOTP_SECRET, seedCore } from "./seed/core";
 import { seedHealth } from "./seed/health";
+import { seedModeration } from "./seed/moderation";
 
 async function main() {
   const sql = postgres(process.env.DATABASE_URL ?? "postgres://postgres@localhost:5432/ms", { max: 1, onnotice: () => {} });
@@ -18,6 +19,7 @@ async function main() {
   await seedHealth(ctx);
   await seedContent(ctx);
   await seedCommunity(ctx);
+  await seedModeration(ctx);
   await sql.end();
   console.log("Seed abgeschlossen.");
   console.log(`Demo-Passwort: ${DEMO_PASSWORD}`);

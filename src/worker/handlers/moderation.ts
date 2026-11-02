@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull, lt, sql as dsql } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull, lt, sql as dsql } from "drizzle-orm";
 import { audit } from "@/server/audit";
 import { db } from "@/server/db";
 import { evidenceItems, moderationActions, moderationCases, reports } from "@/server/db/schema";
@@ -30,7 +30,7 @@ export const moderationTasks: PeriodicTask[] = [
       const cases = await db
         .select({ id: moderationCases.id })
         .from(moderationCases)
-        .where(and(eq(moderationCases.priority, "P0"), inArray(moderationCases.status, [...OPEN]), dsql`${moderationCases.updatedAt} > ${since}`))
+        .where(and(eq(moderationCases.priority, "P0"), inArray(moderationCases.status, [...OPEN]), gt(moderationCases.updatedAt, since)))
         .limit(100);
       if (cases.length === 0) return;
       const recipients = await leads();
@@ -53,7 +53,7 @@ export const moderationTasks: PeriodicTask[] = [
           and(
             inArray(moderationCases.status, [...OPEN]),
             lt(moderationCases.dueAt, new Date()),
-            dsql`not exists (select 1 from ops.audit_events e where e.action = 'case.deadline_missed' and e.object_id = ${moderationCases.id}::text)`,
+            dsql`not exists (select 1 from ops.audit_events e where e.action = 'case.deadline_missed' and e.object_id = "cases"."id"::text)`,
           ),
         )
         .limit(200);
