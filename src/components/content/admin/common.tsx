@@ -52,13 +52,19 @@ export function StatusNotice({ code, messages }: { code: string | undefined; mes
   return <Notice tone="success" role="status" title={text} />;
 }
 
-export function RedaktionNav({ active, counts }: { active: string; counts?: Partial<Record<string, number>> }) {
+/** Navigation der Redaktion; Bereiche nur für passende Rollen (die Seiten prüfen zusätzlich selbst). */
+export function RedaktionNav({ active, counts, roles }: { active: string; counts?: Partial<Record<string, number>>; roles: readonly string[] }) {
+  const editor = roles.includes("editor") || roles.includes("admin");
   const items = [
     { href: "/verwaltung/redaktion", key: "artikel", label: "Artikel" },
     { href: "/verwaltung/redaktion?ansicht=faellig", key: "faellig", label: "Überfällig und bald fällig" },
     { href: "/verwaltung/redaktion/pruefung", key: "pruefung", label: "Prüfvorrat" },
-    { href: "/verwaltung/redaktion/hinweise", key: "hinweise", label: "Hinweise" },
-    { href: "/verwaltung/redaktion/mein-moment", key: "moment", label: "Mein Moment" },
+    ...(editor
+      ? [
+          { href: "/verwaltung/redaktion/hinweise", key: "hinweise", label: "Hinweise" },
+          { href: "/verwaltung/redaktion/mein-moment", key: "moment", label: "Mein Moment" },
+        ]
+      : []),
   ];
   return (
     <SegmentNav

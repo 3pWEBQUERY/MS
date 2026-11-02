@@ -909,3 +909,1020 @@ Unter «Anzeige und Bedienung» kannst du eine einfache Ansicht wählen, die Sch
 In der Schweiz regelt das Behindertengleichstellungsgesetz unter anderem den Zugang zu Dienstleistungen des Bundes. Für private Angebote gelten teilweise andere Regeln. Dieser Text gibt einen allgemeinen Überblick und ist keine Rechtsberatung.`,
   },
 ];
+
+/* ─────────────────────────── Hilfsangebote ─────────────────────────── */
+
+type SeedOffer = {
+  slug: string;
+  organization: string;
+  title: string;
+  summary: string;
+  description: string;
+  topics: string[];
+  cantons: string[];
+  languages: string[];
+  audience: string;
+  responsibility: string;
+  access: string;
+  costNote?: string;
+  contactWay: string;
+  url: string;
+};
+
+const WEB = "Telefon, E-Mail oder Kontaktformular gemäss Website des Anbieters";
+
+function proInfirmisCanton(code: string, name: string): SeedOffer {
+  return {
+    slug: `pro-infirmis-${code.toLowerCase()}`,
+    organization: `Pro Infirmis ${name}`,
+    title: `Sozialberatung von Pro Infirmis im Kanton ${name}`,
+    summary: `Regionale Beratungsstelle von Pro Infirmis für Menschen mit Behinderung und ihre Angehörigen im Kanton ${name}.`,
+    description: `Die kantonale Beratungsstelle von Pro Infirmis berät gemäss Anbieter zu Fragen rund um Alltag, Wohnen, Arbeit, Finanzen und Sozialversicherungen.\n\nDie Beratung richtet sich an Menschen mit körperlicher, psychischer oder kognitiver Beeinträchtigung – dazu kann auch eine chronische Erkrankung wie MS gehören – sowie an ihr Umfeld. Welche Leistungen im Kanton ${name} angeboten werden, ist auf der Website von Pro Infirmis beschrieben.`,
+    topics: ["beratung", "finanzen", "recht"],
+    cantons: [code],
+    languages: ["de"],
+    audience: "Menschen mit Behinderung oder chronischer Erkrankung und ihre Angehörigen",
+    responsibility: `Kantonale Beratungsstelle von Pro Infirmis für den Kanton ${name}`,
+    access: "Terminvereinbarung direkt bei der Beratungsstelle; keine ärztliche Zuweisung nötig",
+    costNote: "Kosten gemäss Anbieter (Sozialberatung gemäss Angaben von Pro Infirmis in der Regel kostenlos)",
+    contactWay: WEB,
+    url: "https://www.proinfirmis.ch",
+  };
+}
+
+const OFFERS: SeedOffer[] = [
+  {
+    slug: "ms-gesellschaft-beratung",
+    organization: "Schweizerische Multiple Sklerose Gesellschaft",
+    title: "Beratung und Information zu MS",
+    summary: "Fachliche Beratung für Menschen mit MS und ihre Angehörigen – zu Erkrankung, Alltag und sozialen Fragen.",
+    description:
+      "Die Schweizerische MS-Gesellschaft bietet gemäss Anbieter Beratung durch Fachpersonen an, etwa aus Pflege und Sozialarbeit. Themen können die Erkrankung selbst, der Umgang mit Beschwerden, Arbeit, Finanzen oder Fragen von Angehörigen sein.\n\nZusätzlich stellt die Organisation Informationsmaterial in mehreren Landessprachen zur Verfügung.",
+    topics: ["beratung", "finanzen"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen mit MS, Angehörige und Interessierte",
+    responsibility: "Schweizweite Patientenorganisation für Menschen mit MS",
+    access: "Kontaktaufnahme direkt über die Organisation, ohne Zuweisung",
+    contactWay: WEB,
+    url: "https://www.multiplesklerose.ch",
+  },
+  {
+    slug: "ms-gesellschaft-regionalgruppen",
+    organization: "Schweizerische Multiple Sklerose Gesellschaft",
+    title: "Regionalgruppen und Austausch",
+    summary: "Regionale Gruppen für Begegnung und Austausch unter Menschen mit MS in vielen Regionen der Schweiz.",
+    description:
+      "Gemäss Anbieter gibt es in vielen Regionen Gruppen, in denen sich Menschen mit MS treffen, austauschen und gemeinsam etwas unternehmen. Die Gruppen werden von der Schweizerischen MS-Gesellschaft begleitet.\n\nWelche Gruppen in deiner Nähe bestehen, findest du auf der Website der Organisation.",
+    topics: ["selbsthilfe"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen mit MS und teilweise Angehörige",
+    responsibility: "Schweizerische MS-Gesellschaft mit regionalen Gruppen",
+    access: "Kontakt zur Gruppe über die Organisation",
+    contactWay: WEB,
+    url: "https://www.multiplesklerose.ch",
+  },
+  {
+    slug: "pro-infirmis-schweiz",
+    organization: "Pro Infirmis",
+    title: "Beratung und Unterstützung für Menschen mit Behinderung",
+    summary: "Schweizweite Fachorganisation mit kantonalen Beratungsstellen für Menschen mit Behinderung und ihre Angehörigen.",
+    description:
+      "Pro Infirmis bietet gemäss Anbieter Sozialberatung, Unterstützung bei Fragen zu Wohnen, Arbeit und Finanzen sowie weitere Dienstleistungen an. Die Beratung erfolgt in kantonalen Beratungsstellen.\n\nAuf der Website findest du die Stelle in deinem Kanton.",
+    topics: ["beratung", "finanzen", "entlastung"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen mit Behinderung oder chronischer Erkrankung und ihre Angehörigen",
+    responsibility: "Schweizweite Fachorganisation mit kantonalen Beratungsstellen",
+    access: "Kontakt zur kantonalen Beratungsstelle, ohne Zuweisung",
+    contactWay: WEB,
+    url: "https://www.proinfirmis.ch",
+  },
+  proInfirmisCanton("ZH", "Zürich"),
+  proInfirmisCanton("BE", "Bern"),
+  proInfirmisCanton("LU", "Luzern"),
+  proInfirmisCanton("AG", "Aargau"),
+  proInfirmisCanton("SG", "St. Gallen"),
+  {
+    slug: "procap-sozialversicherungsberatung",
+    organization: "Procap Schweiz",
+    title: "Beratung zu Sozialversicherungen",
+    summary: "Beratung und rechtliche Unterstützung für Menschen mit Behinderung, insbesondere zu IV und weiteren Sozialversicherungen.",
+    description:
+      "Procap berät gemäss Anbieter Mitglieder und Interessierte zu Fragen der Sozialversicherungen, zum Beispiel zur Invalidenversicherung. Je nach Situation ist auch eine Begleitung in Verfahren möglich.\n\nDie genauen Bedingungen, etwa für Mitglieder, sind auf der Website beschrieben.",
+    topics: ["recht", "finanzen", "arbeit"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen mit Behinderung und ihre Angehörigen",
+    responsibility: "Schweizweite Selbsthilfeorganisation von Menschen mit Behinderung",
+    access: "Kontaktaufnahme über die regionalen Stellen oder die Rechtsberatung",
+    contactWay: WEB,
+    url: "https://www.procap.ch",
+  },
+  {
+    slug: "inclusion-handicap-rechtsberatung",
+    organization: "Inclusion Handicap",
+    title: "Rechtsberatung zu Gleichstellung und Sozialversicherungen",
+    summary: "Dachverband der Behindertenorganisationen mit Rechtsberatung, etwa zu Gleichstellung und Sozialversicherungsrecht.",
+    description:
+      "Inclusion Handicap setzt sich gemäss Anbieter für die Rechte von Menschen mit Behinderung ein und bietet eine Rechtsberatung an. Themen können Benachteiligungen im Alltag oder Fragen zu Sozialversicherungen sein.",
+    topics: ["recht"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen mit Behinderung",
+    responsibility: "Dachverband der Behindertenorganisationen in der Schweiz",
+    access: "Anfrage über die Website",
+    contactWay: WEB,
+    url: "https://www.inclusion-handicap.ch",
+  },
+  {
+    slug: "agile-ch",
+    organization: "AGILE.CH",
+    title: "Selbsthilfe-Dachverband von Menschen mit Behinderung",
+    summary: "Dachorganisation der Selbsthilfe von Menschen mit Behinderung – mit Informationen zu Sozialpolitik und Teilhabe.",
+    description:
+      "AGILE.CH vertritt gemäss Anbieter die Interessen von Menschen mit Behinderung und ihren Selbsthilfeorganisationen. Auf der Website gibt es Informationen zu Sozialversicherungen, Arbeit und Teilhabe.",
+    topics: ["selbsthilfe", "recht"],
+    cantons: ["CH"],
+    languages: ["de", "fr"],
+    audience: "Menschen mit Behinderung und ihre Organisationen",
+    responsibility: "Schweizweiter Dachverband der Behinderten-Selbsthilfe",
+    access: "Informationen auf der Website; Kontakt über die Geschäftsstelle",
+    contactWay: WEB,
+    url: "https://www.agile.ch",
+  },
+  {
+    slug: "informationsstelle-ahv-iv",
+    organization: "Informationsstelle AHV/IV",
+    title: "Merkblätter und Formulare zur Invalidenversicherung",
+    summary: "Offizielle Merkblätter, Formulare und Adressen der kantonalen IV-Stellen.",
+    description:
+      "Die Informationsstelle AHV/IV stellt gemäss Anbieter verständliche Merkblätter zu den Leistungen der Invalidenversicherung bereit, etwa zu Früherfassung, beruflichen Massnahmen, Hilfsmitteln und Renten. Zudem findest du dort Anmeldeformulare und die Adressen der IV-Stellen.",
+    topics: ["arbeit", "finanzen", "recht"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it", "en"],
+    audience: "Alle Versicherten",
+    responsibility: "Informationsstelle der AHV/IV",
+    access: "Informationen frei zugänglich auf der Website",
+    costNote: "Kosten gemäss Anbieter (Informationen frei zugänglich)",
+    contactWay: "Informationen und Adressen der IV-Stellen auf der Website",
+    url: "https://www.ahv-iv.ch",
+  },
+  {
+    slug: "iv-stelle-zuerich",
+    organization: "SVA Zürich",
+    title: "IV-Stelle des Kantons Zürich",
+    summary: "Zuständig für Anmeldung, Früherfassung, Eingliederung und weitere IV-Leistungen im Kanton Zürich.",
+    description:
+      "Die SVA Zürich führt gemäss Anbieter die IV-Stelle des Kantons Zürich. Sie ist zuständig für die Abklärung von IV-Leistungen, etwa Früherfassung, Frühintervention und berufliche Eingliederung.",
+    topics: ["arbeit", "finanzen"],
+    cantons: ["ZH"],
+    languages: ["de"],
+    audience: "Versicherte mit Wohnsitz im Kanton Zürich",
+    responsibility: "IV-Stelle des Kantons Zürich",
+    access: "Anmeldung über die offiziellen IV-Formulare",
+    costNote: "Kosten gemäss Anbieter (Abklärung durch die IV-Stelle)",
+    contactWay: WEB,
+    url: "https://www.svazurich.ch",
+  },
+  {
+    slug: "iv-stelle-bern",
+    organization: "IV-Stelle Kanton Bern",
+    title: "IV-Stelle des Kantons Bern",
+    summary: "Zuständig für Anmeldung, Früherfassung, Eingliederung und weitere IV-Leistungen im Kanton Bern.",
+    description:
+      "Die IV-Stelle Kanton Bern klärt gemäss Anbieter Ansprüche auf Leistungen der Invalidenversicherung ab und begleitet Massnahmen zur beruflichen Eingliederung.",
+    topics: ["arbeit", "finanzen"],
+    cantons: ["BE"],
+    languages: ["de", "fr"],
+    audience: "Versicherte mit Wohnsitz im Kanton Bern",
+    responsibility: "IV-Stelle des Kantons Bern",
+    access: "Anmeldung über die offiziellen IV-Formulare",
+    costNote: "Kosten gemäss Anbieter (Abklärung durch die IV-Stelle)",
+    contactWay: WEB,
+    url: "https://www.ivbe.ch",
+  },
+  {
+    slug: "iv-stelle-aargau",
+    organization: "SVA Aargau",
+    title: "IV-Stelle des Kantons Aargau",
+    summary: "Zuständig für Anmeldung, Früherfassung, Eingliederung und weitere IV-Leistungen im Kanton Aargau.",
+    description: "Die SVA Aargau führt gemäss Anbieter die IV-Stelle des Kantons Aargau und klärt Leistungen der Invalidenversicherung ab.",
+    topics: ["arbeit", "finanzen"],
+    cantons: ["AG"],
+    languages: ["de"],
+    audience: "Versicherte mit Wohnsitz im Kanton Aargau",
+    responsibility: "IV-Stelle des Kantons Aargau",
+    access: "Anmeldung über die offiziellen IV-Formulare",
+    costNote: "Kosten gemäss Anbieter (Abklärung durch die IV-Stelle)",
+    contactWay: WEB,
+    url: "https://www.sva-ag.ch",
+  },
+  {
+    slug: "iv-stelle-luzern",
+    organization: "WAS Wirtschaft Arbeit Soziales Luzern",
+    title: "IV-Stelle des Kantons Luzern",
+    summary: "Zuständig für Anmeldung, Früherfassung, Eingliederung und weitere IV-Leistungen im Kanton Luzern.",
+    description: "Die IV-Stelle Luzern ist gemäss Anbieter Teil von WAS Wirtschaft Arbeit Soziales und klärt Leistungen der Invalidenversicherung ab.",
+    topics: ["arbeit", "finanzen"],
+    cantons: ["LU"],
+    languages: ["de"],
+    audience: "Versicherte mit Wohnsitz im Kanton Luzern",
+    responsibility: "IV-Stelle des Kantons Luzern",
+    access: "Anmeldung über die offiziellen IV-Formulare",
+    costNote: "Kosten gemäss Anbieter (Abklärung durch die IV-Stelle)",
+    contactWay: WEB,
+    url: "https://www.was-luzern.ch",
+  },
+  {
+    slug: "iv-stelle-st-gallen",
+    organization: "SVA St.Gallen",
+    title: "IV-Stelle des Kantons St. Gallen",
+    summary: "Zuständig für Anmeldung, Früherfassung, Eingliederung und weitere IV-Leistungen im Kanton St. Gallen.",
+    description: "Die SVA St.Gallen führt gemäss Anbieter die IV-Stelle des Kantons St. Gallen und klärt Leistungen der Invalidenversicherung ab.",
+    topics: ["arbeit", "finanzen"],
+    cantons: ["SG"],
+    languages: ["de"],
+    audience: "Versicherte mit Wohnsitz im Kanton St. Gallen",
+    responsibility: "IV-Stelle des Kantons St. Gallen",
+    access: "Anmeldung über die offiziellen IV-Formulare",
+    costNote: "Kosten gemäss Anbieter (Abklärung durch die IV-Stelle)",
+    contactWay: WEB,
+    url: "https://www.svasg.ch",
+  },
+  {
+    slug: "compasso",
+    organization: "Compasso",
+    title: "Informationen für Arbeitgebende zur beruflichen Eingliederung",
+    summary: "Portal mit Informationen und Werkzeugen für Arbeitgebende, wenn Mitarbeitende gesundheitlich eingeschränkt sind.",
+    description:
+      "Compasso richtet sich gemäss Anbieter an Arbeitgebende und Führungspersonen. Das Portal erklärt, wie Arbeitsplätze erhalten und angepasst werden können und welche Stellen unterstützen. Auch für Arbeitnehmende kann es hilfreich sein, um ein Gespräch vorzubereiten.",
+    topics: ["arbeit"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Arbeitgebende, Führungspersonen und interessierte Arbeitnehmende",
+    responsibility: "Verein zur Förderung der beruflichen Eingliederung",
+    access: "Informationen frei zugänglich auf der Website",
+    contactWay: "Informationen auf der Website",
+    url: "https://www.compasso.ch",
+  },
+  {
+    slug: "spitex-schweiz",
+    organization: "Spitex Schweiz",
+    title: "Pflege und Unterstützung zu Hause",
+    summary: "Dachverband der gemeinnützigen Spitex – mit Hinweisen zu Pflege, Hauswirtschaft und Unterstützung zu Hause.",
+    description:
+      "Die Spitex unterstützt gemäss Anbieter Menschen, die zu Hause Pflege oder Hilfe im Haushalt brauchen. Spitex Schweiz ist der Dachverband; die Leistungen werden von lokalen Organisationen erbracht. Pflegeleistungen setzen in der Regel eine ärztliche Verordnung voraus.",
+    topics: ["entlastung"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen, die zu Hause Pflege oder Unterstützung benötigen, und ihre Angehörigen",
+    responsibility: "Dachverband der gemeinnützigen Spitex-Organisationen",
+    access: "Kontakt zur lokalen Spitex-Organisation; Pflege meist mit ärztlicher Verordnung",
+    contactWay: "Suche nach der lokalen Organisation auf der Website",
+    url: "https://www.spitex.ch",
+  },
+  {
+    slug: "entlastungsdienst-schweiz",
+    organization: "Entlastungsdienst Schweiz",
+    title: "Entlastung für betreuende Angehörige",
+    summary: "Betreuung zu Hause, damit pflegende und betreuende Angehörige Zeit für sich haben.",
+    description:
+      "Der Entlastungsdienst Schweiz bietet gemäss Anbieter stundenweise Betreuung zu Hause an, damit Angehörige entlastet werden. Die Angebote werden von regionalen Organisationen erbracht.",
+    topics: ["entlastung"],
+    cantons: ["CH"],
+    languages: ["de"],
+    audience: "Betreuende Angehörige von Menschen mit Unterstützungsbedarf",
+    responsibility: "Verband regionaler Entlastungsdienste",
+    access: "Anfrage bei der regionalen Organisation",
+    contactWay: WEB,
+    url: "https://www.entlastungsdienst.ch",
+  },
+  {
+    slug: "srk-schweiz",
+    organization: "Schweizerisches Rotes Kreuz",
+    title: "Fahrdienst und Entlastung durch das Rote Kreuz",
+    summary: "Angebote der kantonalen Rotkreuz-Verbände, etwa Fahrdienste zu Terminen oder Entlastung für Angehörige.",
+    description:
+      "Das Schweizerische Rote Kreuz und seine Kantonalverbände bieten gemäss Anbieter verschiedene Dienstleistungen im Alltag an, zum Beispiel Fahrdienste zu Arztterminen oder Entlastung für betreuende Angehörige. Das Angebot unterscheidet sich je nach Kanton.",
+    topics: ["mobilitaet", "entlastung"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen mit eingeschränkter Mobilität und betreuende Angehörige",
+    responsibility: "Kantonale Rotkreuz-Verbände",
+    access: "Anfrage beim Rotkreuz-Kantonalverband",
+    contactWay: WEB,
+    url: "https://www.redcross.ch",
+  },
+  {
+    slug: "srk-kanton-zuerich",
+    organization: "Schweizerisches Rotes Kreuz Kanton Zürich",
+    title: "Rotkreuz-Fahrdienst und Entlastung im Kanton Zürich",
+    summary: "Regionale Angebote des Roten Kreuzes im Kanton Zürich, etwa Fahrdienst und Entlastung.",
+    description: "Der Kantonalverband Zürich des Schweizerischen Roten Kreuzes bietet gemäss Anbieter Dienstleistungen wie Fahrdienste und Entlastung für Angehörige an.",
+    topics: ["mobilitaet", "entlastung"],
+    cantons: ["ZH"],
+    languages: ["de"],
+    audience: "Menschen im Kanton Zürich mit eingeschränkter Mobilität und betreuende Angehörige",
+    responsibility: "Rotkreuz-Kantonalverband Zürich",
+    access: "Anfrage direkt beim Kantonalverband",
+    contactWay: WEB,
+    url: "https://www.srk-zuerich.ch",
+  },
+  {
+    slug: "srk-kanton-bern",
+    organization: "Schweizerisches Rotes Kreuz Kanton Bern",
+    title: "Rotkreuz-Fahrdienst und Entlastung im Kanton Bern",
+    summary: "Regionale Angebote des Roten Kreuzes im Kanton Bern, etwa Fahrdienst und Entlastung.",
+    description: "Der Kantonalverband Bern des Schweizerischen Roten Kreuzes bietet gemäss Anbieter Dienstleistungen wie Fahrdienste und Entlastung für Angehörige an.",
+    topics: ["mobilitaet", "entlastung"],
+    cantons: ["BE"],
+    languages: ["de", "fr"],
+    audience: "Menschen im Kanton Bern mit eingeschränkter Mobilität und betreuende Angehörige",
+    responsibility: "Rotkreuz-Kantonalverband Bern",
+    access: "Anfrage direkt beim Kantonalverband",
+    contactWay: WEB,
+    url: "https://www.srk-bern.ch",
+  },
+  {
+    slug: "selbsthilfe-schweiz",
+    organization: "Selbsthilfe Schweiz",
+    title: "Selbsthilfegruppen finden",
+    summary: "Nationale Koordination der Selbsthilfe mit Verzeichnis von Selbsthilfegruppen und regionalen Selbsthilfezentren.",
+    description:
+      "Selbsthilfe Schweiz unterstützt gemäss Anbieter die gemeinschaftliche Selbsthilfe und vermittelt über regionale Selbsthilfezentren Kontakte zu Gruppen. Auf der Website lassen sich Gruppen zu vielen Themen suchen.",
+    topics: ["selbsthilfe"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Betroffene und Angehörige, die Austausch suchen",
+    responsibility: "Nationale Dachorganisation der Selbsthilfe",
+    access: "Suche auf der Website oder Kontakt zu einem regionalen Selbsthilfezentrum",
+    contactWay: WEB,
+    url: "https://www.selbsthilfeschweiz.ch",
+  },
+  {
+    slug: "selbsthilfe-zuerich",
+    organization: "Selbsthilfecenter Zürich",
+    title: "Selbsthilfegruppen in der Region Zürich",
+    summary: "Regionales Selbsthilfezentrum, das Kontakte zu Selbsthilfegruppen vermittelt und bei der Gründung unterstützt.",
+    description: "Das Selbsthilfecenter Zürich vermittelt gemäss Anbieter Kontakte zu bestehenden Selbsthilfegruppen und unterstützt Menschen, die eine neue Gruppe gründen möchten.",
+    topics: ["selbsthilfe"],
+    cantons: ["ZH"],
+    languages: ["de"],
+    audience: "Betroffene und Angehörige in der Region Zürich",
+    responsibility: "Regionales Selbsthilfezentrum",
+    access: "Kontakt über die Website",
+    contactWay: WEB,
+    url: "https://www.selbsthilfezuerich.ch",
+  },
+  {
+    slug: "dargebotene-hand-143",
+    organization: "Die Dargebotene Hand",
+    title: "Telefon 143 – Gespräch in schwierigen Momenten",
+    summary: "Anonyme Gespräche am Telefon, per Chat oder E-Mail, wenn dich etwas belastet.",
+    description:
+      "Die Dargebotene Hand ist gemäss Anbieter unter der Nummer 143 rund um die Uhr erreichbar. Die Gespräche sind vertraulich und anonym. Zusätzlich gibt es Beratung per Chat und E-Mail.",
+    topics: ["psyche"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Alle Menschen in belastenden Situationen",
+    responsibility: "Schweizweiter Verband mit regionalen Stellen",
+    access: "Direkt anrufen, chatten oder schreiben – ohne Anmeldung",
+    costNote: "Kosten gemäss Anbieter (Anruf gemäss Anbieter kostenlos)",
+    contactWay: "Telefon 143; Chat und E-Mail gemäss Website",
+    url: "https://www.143.ch",
+  },
+  {
+    slug: "pro-mente-sana",
+    organization: "Pro Mente Sana",
+    title: "Beratung zu psychischer Gesundheit",
+    summary: "Informationen und Beratung für Menschen mit psychischen Belastungen und ihre Angehörigen.",
+    description:
+      "Pro Mente Sana setzt sich gemäss Anbieter für die Anliegen von Menschen mit psychischen Beeinträchtigungen ein. Angeboten werden Informationen sowie psychosoziale und rechtliche Beratung.",
+    topics: ["psyche", "recht"],
+    cantons: ["CH"],
+    languages: ["de", "fr"],
+    audience: "Menschen mit psychischen Belastungen, Angehörige und Fachpersonen",
+    responsibility: "Schweizerische Stiftung für psychische Gesundheit",
+    access: "Kontakt über die Website",
+    contactWay: WEB,
+    url: "https://www.promentesana.ch",
+  },
+  {
+    slug: "fsp-psychotherapie-finden",
+    organization: "Föderation der Schweizer Psychologinnen und Psychologen (FSP)",
+    title: "Psychotherapeutin oder Psychotherapeuten finden",
+    summary: "Verzeichnis von Psychologinnen und Psychologen, darunter Psychotherapeutinnen und Psychotherapeuten.",
+    description:
+      "Der Berufsverband FSP bietet gemäss Anbieter ein Verzeichnis, in dem du nach Region, Sprache und Schwerpunkt suchen kannst. Psychologische Psychotherapie kann auf ärztliche Anordnung über die Grundversicherung abgerechnet werden.",
+    topics: ["psyche", "therapie"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen, die psychologische Unterstützung suchen",
+    responsibility: "Berufsverband der Psychologinnen und Psychologen",
+    access: "Suche im Verzeichnis, Kontakt direkt mit der Fachperson",
+    contactWay: "Suche und Kontaktdaten der Fachpersonen auf der Website",
+    url: "https://www.psychologie.ch",
+  },
+  {
+    slug: "physioswiss",
+    organization: "physioswiss",
+    title: "Physiotherapeutin oder Physiotherapeuten finden",
+    summary: "Verzeichnis des Schweizer Physiotherapie Verbands, auch mit Fachrichtungen wie Neurologie.",
+    description:
+      "physioswiss bietet gemäss Anbieter eine Suche nach Physiotherapeutinnen und Physiotherapeuten an. Physiotherapie wird bei ärztlicher Verordnung von der Grundversicherung übernommen.",
+    topics: ["therapie"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen, die Physiotherapie suchen",
+    responsibility: "Schweizer Physiotherapie Verband",
+    access: "Suche im Verzeichnis; Therapie in der Regel mit ärztlicher Verordnung",
+    contactWay: "Suche und Kontaktdaten der Praxen auf der Website",
+    url: "https://www.physioswiss.ch",
+  },
+  {
+    slug: "ergotherapie-verband",
+    organization: "ErgotherapeutInnen-Verband Schweiz (EVS)",
+    title: "Ergotherapeutin oder Ergotherapeuten finden",
+    summary: "Verzeichnis des Berufsverbands – Ergotherapie unterstützt bei Alltag, Beruf und Energiemanagement.",
+    description:
+      "Der EVS bietet gemäss Anbieter eine Suche nach Ergotherapeutinnen und Ergotherapeuten an. Ergotherapie wird bei ärztlicher Verordnung von der Grundversicherung übernommen.",
+    topics: ["therapie"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen, die Ergotherapie suchen",
+    responsibility: "Berufsverband der Ergotherapeutinnen und Ergotherapeuten",
+    access: "Suche im Verzeichnis; Therapie in der Regel mit ärztlicher Verordnung",
+    contactWay: "Suche und Kontaktdaten der Praxen auf der Website",
+    url: "https://www.ergotherapie.ch",
+  },
+  {
+    slug: "logopaedie-verband",
+    organization: "Deutschschweizer Logopädinnen- und Logopädenverband (DLV)",
+    title: "Logopädin oder Logopäden finden",
+    summary: "Verzeichnis des Berufsverbands – Logopädie unterstützt bei Sprech-, Stimm- und Schluckbeschwerden.",
+    description: "Der DLV bietet gemäss Anbieter Informationen und eine Suche nach Logopädinnen und Logopäden in der Deutschschweiz an.",
+    topics: ["therapie"],
+    cantons: ["CH"],
+    languages: ["de"],
+    audience: "Menschen mit Sprech-, Stimm- oder Schluckbeschwerden",
+    responsibility: "Berufsverband der Logopädinnen und Logopäden in der Deutschschweiz",
+    access: "Suche im Verzeichnis; Therapie in der Regel mit ärztlicher Verordnung",
+    contactWay: "Suche und Kontaktdaten auf der Website",
+    url: "https://www.logopaedie.ch",
+  },
+  {
+    slug: "sahb-hilfsmittelberatung",
+    organization: "SAHB Hilfsmittelberatung",
+    title: "Beratung zu Hilfsmitteln",
+    summary: "Fachstelle für Hilfsmittel wie Rollstühle oder Gehhilfen – Beratung, Abgabe und Anpassung.",
+    description:
+      "Die SAHB berät gemäss Anbieter zu Hilfsmitteln für Mobilität und Alltag und arbeitet dabei unter anderem mit der Invalidenversicherung zusammen. Die Website nennt die regionalen Stellen.",
+    topics: ["mobilitaet"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen, die Hilfsmittel für Mobilität und Alltag benötigen",
+    responsibility: "Schweizerische Fachstelle für Hilfsmittelberatung",
+    access: "Kontakt zur regionalen Stelle; Kostenübernahme je nach Versicherung",
+    contactWay: WEB,
+    url: "https://www.sahb.ch",
+  },
+  {
+    slug: "hindernisfreie-architektur",
+    organization: "Hindernisfreie Architektur – Die Schweizer Fachstelle",
+    title: "Hindernisfrei bauen und wohnen",
+    summary: "Fachstelle mit Informationen zum hindernisfreien Bauen und Anpassen von Wohnungen.",
+    description:
+      "Die Schweizer Fachstelle für hindernisfreie Architektur stellt gemäss Anbieter Informationen, Merkblätter und Kontakte zu regionalen Beratungsstellen bereit, etwa wenn eine Wohnung angepasst werden soll.",
+    topics: ["mobilitaet"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen mit Mobilitätseinschränkung, Angehörige, Bauherrschaften",
+    responsibility: "Schweizer Fachstelle für hindernisfreie Architektur",
+    access: "Informationen auf der Website, Vermittlung regionaler Beratung",
+    contactWay: WEB,
+    url: "https://www.hindernisfreie-architektur.ch",
+  },
+  {
+    slug: "pro-senectute",
+    organization: "Pro Senectute",
+    title: "Beratung und Unterstützung im Alter",
+    summary: "Beratung und Dienstleistungen für ältere Menschen und ihre Angehörigen, regional organisiert.",
+    description:
+      "Pro Senectute bietet gemäss Anbieter Sozialberatung, Unterstützung im Alltag und weitere Dienstleistungen für Menschen im Pensionsalter an. Die Angebote unterscheiden sich je nach Kanton.",
+    topics: ["beratung", "entlastung"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Ältere Menschen und ihre Angehörigen",
+    responsibility: "Kantonale und regionale Pro-Senectute-Organisationen",
+    access: "Kontakt zur kantonalen Organisation",
+    contactWay: WEB,
+    url: "https://www.prosenectute.ch",
+  },
+  {
+    slug: "caritas-schweiz",
+    organization: "Caritas Schweiz",
+    title: "Sozial- und Schuldenberatung",
+    summary: "Regionale Caritas-Stellen beraten bei finanziellen Schwierigkeiten und sozialen Fragen.",
+    description:
+      "Die regionalen Caritas-Organisationen bieten gemäss Anbieter Sozial- und Schuldenberatung sowie weitere Unterstützung für Menschen in schwierigen finanziellen Situationen an.",
+    topics: ["finanzen", "beratung"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen in finanziell schwierigen Situationen",
+    responsibility: "Regionale Caritas-Organisationen",
+    access: "Kontakt zur regionalen Caritas-Stelle",
+    contactWay: WEB,
+    url: "https://www.caritas.ch",
+  },
+  {
+    slug: "budgetberatung-schweiz",
+    organization: "Budgetberatung Schweiz",
+    title: "Budget planen",
+    summary: "Vorlagen, Richtwerte und Beratungsstellen für die Budgetplanung im Haushalt.",
+    description: "Budgetberatung Schweiz stellt gemäss Anbieter Budgetvorlagen und Merkblätter bereit und nennt regionale Beratungsstellen.",
+    topics: ["finanzen"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Alle, die ihr Haushaltsbudget planen möchten",
+    responsibility: "Dachverband der Budgetberatungsstellen",
+    access: "Informationen auf der Website, Beratung bei regionalen Stellen",
+    contactWay: WEB,
+    url: "https://www.budgetberatung.ch",
+  },
+  {
+    slug: "schuldenberatung-schweiz",
+    organization: "Schuldenberatung Schweiz",
+    title: "Schuldenberatung finden",
+    summary: "Dachverband der Schuldenberatungsstellen mit Verzeichnis anerkannter Beratungsstellen.",
+    description: "Schuldenberatung Schweiz bietet gemäss Anbieter Informationen zu Schulden und ein Verzeichnis gemeinnütziger Beratungsstellen in den Regionen.",
+    topics: ["finanzen"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Menschen mit Schulden oder drohender Verschuldung",
+    responsibility: "Dachverband gemeinnütziger Schuldenberatungsstellen",
+    access: "Kontakt zur regionalen Beratungsstelle",
+    contactWay: WEB,
+    url: "https://www.schulden.ch",
+  },
+  {
+    slug: "ombudsstelle-krankenversicherung",
+    organization: "Ombudsstelle Krankenversicherung",
+    title: "Vermittlung bei Konflikten mit der Krankenkasse",
+    summary: "Neutrale Anlaufstelle bei Streitigkeiten mit der Krankenversicherung.",
+    description:
+      "Die Ombudsstelle Krankenversicherung vermittelt gemäss Anbieter bei Konflikten zwischen Versicherten und ihrer Krankenversicherung, etwa bei abgelehnten Leistungen.",
+    topics: ["finanzen", "recht"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it"],
+    audience: "Versicherte mit Fragen oder Konflikten zur Krankenversicherung",
+    responsibility: "Unabhängige Ombudsstelle",
+    access: "Anfrage über die Website",
+    contactWay: WEB,
+    url: "https://www.om-kv.ch",
+  },
+  {
+    slug: "elternnotruf",
+    organization: "Elternnotruf",
+    title: "Beratung für Eltern",
+    summary: "Beratung für Eltern und Bezugspersonen in belastenden Situationen mit Kindern und in der Familie.",
+    description: "Der Elternnotruf berät gemäss Anbieter Eltern und Bezugspersonen bei Fragen und Krisen im Familienalltag – telefonisch und online.",
+    topics: ["psyche", "entlastung"],
+    cantons: ["CH"],
+    languages: ["de"],
+    audience: "Eltern und Bezugspersonen von Kindern und Jugendlichen",
+    responsibility: "Gemeinnützige Beratungsorganisation",
+    access: "Direkt anrufen oder online Kontakt aufnehmen",
+    contactWay: WEB,
+    url: "https://www.elternnotruf.ch",
+  },
+  {
+    slug: "tox-info-suisse",
+    organization: "Tox Info Suisse",
+    title: "Notfallberatung bei Vergiftungen",
+    summary: "Ärztliche Beratung bei Vergiftungen oder Verdacht auf Vergiftung, auch durch Medikamente – Telefon 145.",
+    description:
+      "Tox Info Suisse ist gemäss Anbieter unter der Nummer 145 rund um die Uhr erreichbar und berät bei Vergiftungen oder Verdacht darauf. Bei Bewusstlosigkeit oder Atemnot ruf direkt den Sanitätsnotruf 144 an.",
+    topics: ["beratung"],
+    cantons: ["CH"],
+    languages: ["de", "fr", "it", "en"],
+    audience: "Alle Menschen bei Verdacht auf Vergiftung",
+    responsibility: "Offizielles Informationszentrum der Schweiz für Vergiftungen",
+    access: "Direkt anrufen, ohne Anmeldung",
+    costNote: "Kosten gemäss Anbieter (Notfallberatung gemäss Anbieter kostenlos)",
+    contactWay: "Telefon 145",
+    url: "https://www.toxinfo.ch",
+  },
+];
+
+/* ─────────────────────────── Rechtstexte (Entwürfe) ─────────────────────────── */
+
+const DRAFT_NOTE =
+  "Entwurf – rechtliche Prüfung D01 ausstehend. Trägerschaft, Kontaktadressen und Dienstleister werden vor dem Pilotstart ergänzt. Dieser Text ist noch keine verbindliche Erklärung.";
+
+const LEGAL_PAGES: { slug: string; title: string; textVersion: string; validFrom: string; body: string }[] = [
+  {
+    slug: "regeln",
+    title: "Community-Regeln",
+    textVersion: COMMUNITY_RULES_VERSION,
+    validFrom: "2026-11-01",
+    body: `Diese Regeln gelten für alle Beiträge, Antworten, Profile und Gespräche in der Community. Du bestätigst sie vor deinem ersten Beitrag. Wenn sich die Regeln ändern, zeigen wir dir die neue Fassung und bitten dich erneut um Bestätigung.
+
+## Worum es hier geht
+Die Community ist ein geschützter Ort für den Austausch unter Erwachsenen mit MS. Wir wollen, dass sich alle sicher fühlen – auch an Tagen mit wenig Energie.
+
+## Was willkommen ist
+- Eigene Erfahrungen teilen, auch mit Behandlungen, Therapien und dem Alltag
+- Fragen stellen, Mut machen, zuhören
+- Unterschiedliche Meinungen, solange sie respektvoll geäussert werden
+- Hinweise auf geprüfte Informationen und Hilfsangebote
+
+## Was nicht erlaubt ist
+- Belästigung, Beleidigung, Drohungen und Diskriminierung
+- Doxxing: persönliche Daten anderer veröffentlichen, etwa Namen, Adressen, Arbeitgeber oder Fotos
+- Betrug, Spendenaufrufe unter falschen Angaben und Spam
+- Werbung für Produkte, Dienstleistungen oder Studien ohne vorherige Freigabe durch das Team
+- Gefährliche individuelle Therapieanweisungen, etwa «Setz dein Medikament ab» oder konkrete Dosierungsempfehlungen für andere
+- Inhalte, die zu Selbstverletzung oder Gewalt auffordern
+
+## Erfahrungen sind keine Behandlungspläne
+Du darfst erzählen, was dir geholfen hat. Bitte formuliere es als eigene Erfahrung und nicht als Empfehlung für andere. Für Entscheidungen zur Behandlung sind die behandelnden Fachpersonen zuständig.
+
+## Privatsphäre
+Teile nur, was du teilen möchtest. Gib keine Informationen über andere Personen weiter, ohne deren Einverständnis. Screenshots aus Gesprächen gehören nicht in die Community.
+
+## Melden und Blockieren
+Wenn dich etwas stört oder beunruhigt, kannst du Beiträge, Antworten, Profile, Nachrichten und Gruppen melden. Du kannst andere Mitglieder jederzeit blockieren. Meldende bleiben gegenüber der gemeldeten Person anonym.
+
+## Moderation
+Die Moderation ist täglich von 9 bis 18 Uhr im Dienst. Sie berücksichtigt den Zusammenhang eines Beitrags und kann Inhalte ausblenden, verwarnen oder das Schreiben zeitweise sperren. Dauerhafte Sperren brauchen eine zweite Freigabe. Gegen Entscheide kannst du innerhalb von 30 Tagen Einspruch erheben; eine andere Person prüft ihn.
+
+## In akuten Krisen
+Die Community ist kein Notfalldienst. Bei akuter Gefahr ruf den Sanitätsnotruf 144 an. Weitere Hilfewege findest du auf der Seite «Sicherheit und akute Hilfe».`,
+  },
+  {
+    slug: "datenschutz",
+    title: "Datenschutzinformation",
+    textVersion: PRIVACY_VERSION,
+    validFrom: "2026-11-01",
+    body: `${DRAFT_NOTE}
+
+## Das Wichtigste in Kürze
+- Dein Tagebuch ist nur für dich sichtbar. Es gibt keine Freigabe an Kontakte, Moderation, Redaktion oder Fachpersonen.
+- In der Community bist du mit einem Pseudonym unterwegs. Deine E-Mail-Adresse ist nie sichtbar.
+- Wir verkaufen keine Daten, zeigen keine Werbung und verwenden keine Werbe-Tracker oder Session-Replays.
+- Du kannst deine Daten jederzeit exportieren und dein Konto löschen.
+
+## Bitte beachte
+Schon die Mitgliedschaft auf einer Plattform für Menschen mit MS lässt Rückschlüsse auf deine Gesundheit zu. Wir behandeln deshalb auch Kontodaten mit besonderer Sorgfalt.
+
+## Verantwortliche Stelle
+[Name und Adresse der Trägerschaft – vor Pilotstart festzulegen]
+Kontakt für Datenschutzanliegen: über das Kontaktformular, Kategorie «Datenschutz und meine Rechte», oder per E-Mail an die Datenschutzkontaktstelle [Adresse folgt].
+
+## Welche Daten wir bearbeiten und wozu
+- Konto: E-Mail-Adresse, Passwort (nur als sicherer Hash), Anmeldezeiten – um dir einen sicheren Zugang zu ermöglichen.
+- Community-Profil: Pseudonym, freiwillige Interessen und optional dein Kanton – damit andere Mitglieder dich in der Community erkennen.
+- Beiträge, Antworten und Nachrichten – damit der Austausch funktioniert.
+- Gesundheitsbereich (nur nach ausdrücklicher Aktivierung): Check-ins, Symptome, Fatigue und Notizen – ausschliesslich für dich.
+- Meldungen und Moderationsfälle – um die Community zu schützen.
+- Kontaktformular: dein Anliegen und optional eine Antwortadresse – um dein Anliegen zu bearbeiten.
+- Technische Protokolle ohne Inhalte – für Sicherheit und Betrieb.
+
+## Wer Daten erhält
+Mitarbeitende sehen nur, was ihre Aufgabe erfordert. Die Moderation sieht gemeldete Inhalte, aber kein Tagebuch. Für den Betrieb setzen wir Dienstleister ein, etwa für Hosting, Datenbank, Objektablage und E-Mail-Versand. Sie bearbeiten Daten nur in unserem Auftrag.
+[Liste der Dienstleister mit Sitz und Datenstandort – vor Pilotstart zu ergänzen]
+
+## In welchen Ländern
+Ziel ist eine primäre Datenhaltung einschliesslich Backups in der Schweiz. Ob Daten in andere Länder bekanntgegeben werden, etwa durch Fernzugriffe von Dienstleistern, wird vor dem Pilotstart geprüft und hier offengelegt.
+
+## Wie lange wir Daten aufbewahren
+Die folgenden Fristen sind vorgeschlagene betriebliche Obergrenzen und werden vor dem Pilotstart geprüft.
+- Unbestätigte Konten: 7 Tage
+- Konto und Profil: bis zur Löschung; nach 24 Monaten Inaktivität erhältst du zuerst eine Nachricht und hast 30 Tage Zeit zu reagieren
+- Check-ins und Tagebuch: bis du sie löschst oder die Einwilligung widerrufst; danach sofort gesperrt und innert 30 Tagen gelöscht
+- Beiträge und Nachrichten: bis zur Löschung des Inhalts oder Kontos
+- Einwilligungsnachweise: während der Nutzung und vorgeschlagen 3 Jahre danach
+- Meldungen und Belege: 180 Tage nach Abschluss des Falls
+- Sicherheits- und Auditprotokolle: 180 Tage, ohne Inhalte
+- Exporte: höchstens 24 Stunden ab Bereitstellung
+- Backups: rollierend höchstens 35 Tage
+
+## Deine Rechte
+Du kannst Auskunft über deine Daten verlangen, falsche Daten berichtigen lassen, deine Daten exportieren und löschen. Vieles davon kannst du direkt unter «Daten und Konto» erledigen. Für weitere Anliegen nutze das Kontaktformular. Du kannst dich ausserdem an den Eidgenössischen Datenschutz- und Öffentlichkeitsbeauftragten (EDÖB) wenden.
+
+## Einwilligungen
+Den Gesundheitsbereich aktivierst du mit einer gesonderten, freiwilligen Entscheidung. Du kannst sie jederzeit widerrufen. Ohne Gesundheitsbereich stehen dir alle anderen Bereiche offen.
+
+## Sicherheit
+Freitexte wie Tagebuchnotizen und Nachrichten werden verschlüsselt gespeichert. Mitarbeitende melden sich mit einem zweiten Faktor an. Privilegierte Zugriffe werden protokolliert.`,
+  },
+  {
+    slug: "bedingungen",
+    title: "Nutzungsbedingungen",
+    textVersion: TERMS_VERSION,
+    validFrom: "2026-11-01",
+    body: `${DRAFT_NOTE}
+
+## Wer die Plattform nutzen kann
+Die Plattform richtet sich an Erwachsene ab 18 Jahren, die selbst mit MS leben, sowie an Interessierte, die die öffentlichen Inhalte lesen. Wir verlangen keinen Diagnosenachweis.
+
+## Was die Plattform bietet
+- freiwillige, private Alltagsdokumentation
+- moderierten Austausch in der Community und in Gesprächen nach gegenseitiger Zustimmung
+- redaktionell geprüftes Wissen und ein Verzeichnis von Schweizer Hilfsangeboten
+
+## Was die Plattform nicht ist
+- kein Notfalldienst und keine Überwachung rund um die Uhr
+- keine medizinische Beratung, Diagnose oder Therapieempfehlung
+- keine Vermittlung von Behandlungen oder Terminen
+- keine Garantie, dass andere Mitglieder antworten
+
+## Dein Konto
+Bitte schütze dein Passwort und melde dich auf fremden Geräten ab. Ein Konto ist persönlich und darf nicht geteilt werden.
+
+## Inhalte, die du teilst
+Du bist für deine Beiträge verantwortlich. Es gelten die Community-Regeln. Du behältst die Rechte an deinen Texten und erlaubst uns, sie innerhalb der Community anzuzeigen, solange du sie nicht löschst.
+
+## Moderation und Massnahmen
+Bei Regelverstössen können Inhalte ausgeblendet, Verwarnungen ausgesprochen oder Schreibrechte zeitweise eingeschränkt werden. Du erhältst einen begründeten Entscheid und kannst innerhalb von 30 Tagen Einspruch erheben. Auch bei einer Sperre bleiben Auskunft, Export, Löschung und Einspruch möglich.
+
+## Verfügbarkeit
+Wir bemühen uns um einen zuverlässigen Betrieb. Bei Störungen können einzelne Funktionen vorübergehend eingeschränkt sein; die Sicherheitsseite bleibt nach Möglichkeit erreichbar.
+
+## Konto löschen
+Du kannst dein Konto jederzeit löschen. Die Folgen und Fristen werden dir vor der Bestätigung angezeigt.
+
+## Änderungen
+Wenn sich diese Bedingungen wesentlich ändern, informieren wir dich und zeigen die neue Fassung mit Gültigkeitsdatum an.`,
+  },
+  {
+    slug: "impressum",
+    title: "Impressum",
+    textVersion: "impressum-2026-11-v1",
+    validFrom: "2026-11-01",
+    body: `${DRAFT_NOTE}
+
+## Betreiberin
+[Name der Trägerschaft]
+[Rechtsform]
+[Strasse und Hausnummer]
+[Postleitzahl und Ort], Schweiz
+
+## Kontakt
+Bitte nutze das Kontaktformular. Es ist kein Notfallkanal – bei akuter Gefahr ruf den Sanitätsnotruf 144 an.
+
+## Verantwortlich für den Inhalt
+- Produktverantwortung: [Name folgt]
+- Medizinische Redaktionsleitung: [Name folgt]
+- Moderationsleitung: [Name folgt]
+- Datenschutzkontaktstelle: [Name folgt]
+
+## Hinweis zu Inhalten
+Die Wissensartikel enthalten allgemeine Informationen und ersetzen keine ärztliche oder therapeutische Beratung. Beiträge in der Community geben die persönliche Sicht der Mitglieder wieder und sind nicht fachlich geprüft.
+
+## Externe Links
+Links zu externen Websites sind als solche gekennzeichnet. Für deren Inhalte sind die jeweiligen Anbieter verantwortlich. Beim Öffnen werden keine Profil- oder Gesundheitsdaten übertragen.`,
+  },
+  {
+    slug: "barrierefreiheit",
+    title: "Erklärung zur Barrierefreiheit",
+    textVersion: "barrierefreiheit-2026-11-v1",
+    validFrom: "2026-11-01",
+    body: `Diese Plattform wird für Menschen mit Fatigue, Seh- und motorischen Einschränkungen entwickelt. Barrierefreiheit ist deshalb kein Zusatz, sondern Grundlage.
+
+## Unser Ziel
+Wir streben die Konformität mit den Web Content Accessibility Guidelines (WCAG) 2.2 auf Stufe AA für alle Ansichten an, einschliesslich der Verwaltung. Eine verbindliche Konformitätsaussage machen wir erst nach einer dokumentierten Prüfung des gesamten Angebots.
+
+## Stand
+Die Plattform befindet sich im Aufbau. Eine vollständige Prüfung mit automatischen Tests, Tastatur, Screenreadern (VoiceOver, NVDA, TalkBack), 200 Prozent Textgrösse und 400 Prozent Zoom ist vor dem Pilotstart vorgesehen. Die Ergebnisse veröffentlichen wir hier.
+
+## Was wir bereits umsetzen
+- Bedienung vollständig per Tastatur mit sichtbarem Fokus
+- Kontraste von mindestens 4,5 zu 1 für normalen Text
+- Darstellung ab 320 Pixel Breite ohne seitliches Scrollen
+- grosse Schaltflächen von mindestens 44 mal 44 Pixel für Hauptaktionen
+- einfache Ansicht, Schriftvergrösserung und reduzierte Bewegung unter «Anzeige und Bedienung» – auch ohne Konto
+- Status nie nur über Farbe, sondern immer auch als Text
+- keine Zeitlimits, keine automatisch startenden Medien, keine Endlos-Feeds
+
+## Bekannte Einschränkungen
+Einzelne Bereiche wurden noch nicht vollständig mit Screenreadern geprüft. Dekorative Animationen werden bei reduzierter Bewegung und in der einfachen Ansicht ausgeschaltet.
+
+## Barriere melden
+Wenn dir eine Barriere auffällt oder du Inhalte in einer anderen Form brauchst, schreib uns über das Kontaktformular mit der Kategorie «Barriere melden». Beschreibe, wo das Problem auftritt und welches Gerät oder Hilfsmittel du nutzt. Wir melden uns, wenn du eine Antwortadresse angibst.`,
+  },
+];
+
+/* ─────────────────────────── Sicherheitskontakte (S49) ─────────────────────────── */
+
+/**
+ * Nur allgemein bekannte, offizielle Schweizer Nummern. PRD 10 verlangt eine fachliche
+ * Verifikation vor dem Launch – im Demo-Seed ausdrücklich als ausstehend gekennzeichnet.
+ * Prüfung vor Produktivbetrieb erforderlich.
+ */
+const SAFETY_VERIFIER = "Demo – fachliche Prüfung ausstehend";
+const SAFETY_CONTACTS = [
+  { sort: 10, name: "Sanitätsnotruf 144", phone: "144", url: null, availability: "Rund um die Uhr", region: "Ganze Schweiz", description: "Bei akuter Lebensgefahr, schweren Verletzungen oder plötzlichen starken Beschwerden wie Lähmungen oder Sprachstörungen." },
+  { sort: 20, name: "Euronotruf 112", phone: "112", url: null, availability: "Rund um die Uhr", region: "Ganze Schweiz", description: "Allgemeine europäische Notrufnummer. Sie wird an die zuständige Notrufzentrale weitergeleitet." },
+  { sort: 30, name: "Polizeinotruf 117", phone: "117", url: null, availability: "Rund um die Uhr", region: "Ganze Schweiz", description: "Wenn du oder andere bedroht werden oder eine Straftat geschieht." },
+  { sort: 40, name: "Die Dargebotene Hand 143", phone: "143", url: "https://www.143.ch", availability: "Rund um die Uhr, auch per Chat und E-Mail", region: "Ganze Schweiz", description: "Anonymes Gespräch, wenn dich etwas belastet, du in einer Krise bist oder an Suizid denkst." },
+  { sort: 50, name: "Tox Info Suisse 145", phone: "145", url: "https://www.toxinfo.ch", availability: "Rund um die Uhr", region: "Ganze Schweiz", description: "Bei Vergiftungen oder Verdacht auf Vergiftung, auch durch Medikamente. Bei Bewusstlosigkeit direkt 144 anrufen." },
+];
+
+/* ─────────────────────────── Ablauf ─────────────────────────── */
+
+export async function seedContent(ctx: SeedContext): Promise<void> {
+  const { db, staff } = ctx;
+
+  // Themen für Hilfe (Katalog) und Wissen
+  for (const [i, [slug, name]] of HELP_TOPICS.entries()) {
+    await db.insert(s.helpTopics).values({ slug, name, sort: i }).onConflictDoUpdate({ target: s.helpTopics.slug, set: { name, sort: i } });
+  }
+  const topicIds = new Map<string, string>();
+  for (const [i, t] of KNOWLEDGE_TOPICS.entries()) {
+    const [row] = await db
+      .insert(s.knowledgeTopics)
+      .values({ ...t, sort: i })
+      .onConflictDoUpdate({ target: s.knowledgeTopics.slug, set: { name: t.name, description: t.description, sort: i } })
+      .returning({ id: s.knowledgeTopics.id });
+    topicIds.set(t.slug, row.id);
+  }
+
+  // Artikel: publiziert, mit Fremdprüfung (Demo) und nächstem Prüftermin in 12 Monaten (CON03)
+  for (const [i, a] of ARTICLES.entries()) {
+    const topicId = topicIds.get(a.topic);
+    if (!topicId) throw new Error(`Unbekanntes Thema ${a.topic}`);
+    const reviewedAt = daysAgo(3 + (i % 20));
+    const publishedAt = new Date(reviewedAt.getTime() + DAY / 2);
+    const reviewDueAt = addMonths(reviewedAt, 12);
+    const [existing] = await db.select({ id: s.articles.id, pv: s.articles.publishedVersionId }).from(s.articles).where(eq(s.articles.slug, a.slug));
+    let versionId: string;
+    if (!existing) {
+      const [article] = await db.insert(s.articles).values({ slug: a.slug, topicId }).returning({ id: s.articles.id });
+      const [v] = await db
+        .insert(s.articleVersions)
+        .values({
+          articleId: article.id,
+          versionNo: 1,
+          title: a.title,
+          summary: a.summary,
+          body: a.body,
+          authorId: staff.editor,
+          authorDisplay: "Redaktion MS Plattform",
+          status: "published",
+          isMedical: a.medical,
+          readingMinutes: a.minutes,
+          reviewDueAt,
+          publishedAt,
+        })
+        .returning({ id: s.articleVersions.id });
+      versionId = v.id;
+      await db.update(s.articles).set({ publishedVersionId: v.id }).where(eq(s.articles.id, article.id));
+    } else {
+      // Seed erneut ausgeführt: Text der Seed-Version aktualisieren, Prüftermin auffrischen.
+      const [v] = await db
+        .select({ id: s.articleVersions.id })
+        .from(s.articleVersions)
+        .where(and(eq(s.articleVersions.articleId, existing.id), eq(s.articleVersions.versionNo, 1)));
+      versionId = v.id;
+      await db.update(s.articles).set({ topicId }).where(eq(s.articles.id, existing.id));
+      await db
+        .update(s.articleVersions)
+        .set({ title: a.title, summary: a.summary, body: a.body, isMedical: a.medical, readingMinutes: a.minutes })
+        .where(eq(s.articleVersions.id, v.id));
+      // Nur die Seed-Version wieder publizieren, wenn keine neuere Version publiziert ist.
+      if (!existing.pv || existing.pv === v.id) {
+        await db
+          .update(s.articleVersions)
+          .set({ status: "published", reviewDueAt, publishedAt, withdrawnAt: null, withdrawReason: null })
+          .where(eq(s.articleVersions.id, v.id));
+        await db.update(s.articles).set({ publishedVersionId: v.id }).where(eq(s.articles.id, existing.id));
+      }
+      await db.delete(s.sourceReferences).where(eq(s.sourceReferences.versionId, v.id));
+    }
+    await db.insert(s.sourceReferences).values(
+      a.sources.map((src, j) => ({
+        versionId,
+        title: src.title,
+        publisher: src.publisher,
+        url: src.url,
+        publishedOn: "publishedOn" in src && src.publishedOn ? `${src.publishedOn}, ${RETRIEVED}` : RETRIEVED,
+        rightsNote: LINK_ONLY,
+        sort: j,
+      })),
+    );
+    const [review] = await db.select({ id: s.editorialReviews.id }).from(s.editorialReviews).where(eq(s.editorialReviews.versionId, versionId));
+    if (review) {
+      await db.update(s.editorialReviews).set({ specialty: a.specialty, nextReviewDueAt: reviewDueAt, createdAt: reviewedAt }).where(eq(s.editorialReviews.id, review.id));
+    } else {
+      // Vieraugenprinzip: Autor (Redaktion) ≠ Prüfperson (medizinische Prüfung), DB-Trigger prüft zusätzlich.
+      await db.insert(s.editorialReviews).values({
+        versionId,
+        reviewerId: staff.reviewer,
+        reviewerDisplay: "Medizinische Redaktion (Demo-Prüfung)",
+        specialty: a.specialty,
+        decision: "approved",
+        comment: "Demo-Prüfung für die Testumgebung. Vor Produktivbetrieb durch die benannte Prüfperson ersetzen.",
+        nextReviewDueAt: reviewDueAt,
+        createdAt: reviewedAt,
+      });
+    }
+  }
+
+  // Hilfsangebote: geprüft (Demo) und publiziert, nächste Prüfung spätestens nach sechs Monaten (CON05)
+  for (const [i, o] of OFFERS.entries()) {
+    const reviewedAt = daysAgo(2 + (i % 25));
+    const nextReviewAt = addMonths(reviewedAt, 6);
+    const values = {
+      slug: o.slug,
+      organization: o.organization,
+      title: o.title,
+      summary: o.summary,
+      description: o.description,
+      topicSlugs: o.topics,
+      cantons: o.cantons,
+      languages: o.languages,
+      audience: o.audience,
+      responsibility: o.responsibility,
+      access: o.access,
+      costNote: o.costNote ?? "Kosten gemäss Anbieter",
+      contactWay: o.contactWay,
+      url: o.url,
+      status: "published" as const,
+      reviewedAt,
+      nextReviewAt,
+    };
+    const { slug: _slug, ...update } = values;
+    void _slug;
+    const [row] = await db
+      .insert(s.supportOffers)
+      .values(values)
+      .onConflictDoUpdate({ target: s.supportOffers.slug, set: update })
+      .returning({ id: s.supportOffers.id });
+    const [rec] = await db
+      .select({ id: s.verificationRecords.id })
+      .from(s.verificationRecords)
+      .where(and(eq(s.verificationRecords.targetType, "offer"), eq(s.verificationRecords.targetId, row.id)));
+    if (!rec) {
+      await db.insert(s.verificationRecords).values({
+        targetType: "offer",
+        targetId: row.id,
+        verifierId: staff.editor,
+        method: "website",
+        verifiedAt: reviewedAt,
+        nextDueAt: nextReviewAt,
+        note: "Demo: Abgleich mit der offiziellen Website. Vor Produktivbetrieb beim Anbieter bestätigen.",
+      });
+    }
+  }
+
+  // Sicherheitskontakte (SAF06) – Prüfung vor Produktivbetrieb erforderlich
+  const safetyNames = SAFETY_CONTACTS.map((c) => c.name);
+  const existingSafety = await db.select({ id: s.safetyContacts.id, name: s.safetyContacts.name }).from(s.safetyContacts).where(inArray(s.safetyContacts.name, safetyNames));
+  for (const c of SAFETY_CONTACTS) {
+    const values = { ...c, active: true, verifiedAt: now, verifiedBy: SAFETY_VERIFIER, nextDueAt: new Date(now.getTime() + 30 * DAY) };
+    const found = existingSafety.find((e) => e.name === c.name);
+    let id = found?.id;
+    if (id) await db.update(s.safetyContacts).set(values).where(eq(s.safetyContacts.id, id));
+    else id = (await db.insert(s.safetyContacts).values(values).returning({ id: s.safetyContacts.id }))[0].id;
+    const [rec] = await db
+      .select({ id: s.verificationRecords.id })
+      .from(s.verificationRecords)
+      .where(and(eq(s.verificationRecords.targetType, "safety_contact"), eq(s.verificationRecords.targetId, id)));
+    if (!rec) {
+      await db.insert(s.verificationRecords).values({
+        targetType: "safety_contact",
+        targetId: id,
+        verifierId: staff.editor,
+        method: "website",
+        verifiedAt: now,
+        nextDueAt: new Date(now.getTime() + 30 * DAY),
+        note: "Demo-Eintrag. Prüfung vor Produktivbetrieb durch Krisenfachpersonen erforderlich (PRD 10).",
+      });
+    }
+  }
+
+  // Rechtstexte (S50)
+  for (const p of LEGAL_PAGES) {
+    await db
+      .insert(s.pages)
+      .values(p)
+      .onConflictDoUpdate({ target: s.pages.slug, set: { title: p.title, body: p.body, textVersion: p.textVersion, validFrom: p.validFrom } });
+  }
+
+  // Mein Moment: eine aktive Version mit der Standardkonfiguration (HOM02)
+  const [rule] = await db.select({ id: s.momentRules.id }).from(s.momentRules).limit(1);
+  if (!rule) {
+    await db.insert(s.momentRules).values({
+      versionLabel: "Standard 2026-11",
+      active: true,
+      config: DEFAULT_MOMENT_CONFIG,
+      createdBy: staff.editor,
+      publishedAt: now,
+    });
+  }
+
+  console.log(`Inhalte: ${ARTICLES.length} Artikel, ${OFFERS.length} Angebote, ${SAFETY_CONTACTS.length} Sicherheitskontakte, ${LEGAL_PAGES.length} Rechtstexte.`);
+}

@@ -7,7 +7,11 @@ import { ButtonLink } from "@/components/ui/button";
 import { EmptyState, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { getKnowledgeTopic, listPublicArticles } from "@/server/modules/content/articles";
 
-export const metadata: Metadata = { title: "Thema – Wissen" };
+export async function generateMetadata({ params }: PageProps<"/wissen/thema/[slug]">): Promise<Metadata> {
+  const { slug } = await params;
+  const topic = await getKnowledgeTopic(slug);
+  return topic ? { title: `${topic.name} – Wissen`, description: topic.description } : { title: "Wissen" };
+}
 
 /** Artikel eines Themas (S44, CON01). */
 export default function TopicPage({ params }: PageProps<"/wissen/thema/[slug]">) {

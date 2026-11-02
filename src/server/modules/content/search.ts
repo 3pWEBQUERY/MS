@@ -24,8 +24,9 @@ export function normalizeQuery(q: string | string[] | undefined): string {
     .slice(0, 120);
 }
 
+/** Wortanfang-Treffer im Titel (z. B. «fati» → «Fatigue»), ergänzend zur Volltextsuche. */
 function likePattern(q: string) {
-  return `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+  return `% ${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
 }
 
 export async function searchKnowledge(q: string, limit = 10): Promise<SearchSection> {
@@ -33,7 +34,7 @@ export async function searchKnowledge(q: string, limit = 10): Promise<SearchSect
   const rows = (await db.execute(dsql`
     with query as (select websearch_to_tsquery('german', ${q}) as tsq)
     select a.id, a.slug, v.title, t.name as topic,
-      ts_headline('german', regexp_replace(v.summary || ' ' || v.body, '(^|\n)(### |## |- )', '\\1', 'g'), query.tsq, ${HEADLINE_OPTS}) as snippet,
+      ts_headline('german', regexp_replace(v.summary || E'\\n' || v.body, '(^|\n)(### |## |- )', '\\1', 'g'), query.tsq, ${HEADLINE_OPTS}) as snippet,
       count(*) over() as total
     from content.articles a
     join content.article_versions v on v.id = a.published_version_id
@@ -41,8 +42,8 @@ export async function searchKnowledge(q: string, limit = 10): Promise<SearchSect
     cross join query
     where v.status = 'published' and v.review_due_at > now()
       and (to_tsvector('german', v.title || ' ' || v.summary || ' ' || v.body) @@ query.tsq
-           or v.title ilike ${likePattern(q)})
-    order by (v.title ilike ${likePattern(q)}) desc,
+           or (' ' || v.title) ilike ${likePattern(q)})
+    order by ((' ' || v.title) ilike ${likePattern(q)}) desc,
       ts_rank(to_tsvector('german', v.title || ' ' || v.summary || ' ' || v.body), query.tsq) desc, v.title
     limit ${limit}
   `)) as unknown as { id: string; slug: string; title: string; topic: string; snippet: string; total: string | number }[];
@@ -63,8 +64,8 @@ export async function searchOffers(q: string, limit = 10): Promise<SearchSection
     cross join query
     where o.status = 'published' and o.next_review_at > now()
       and (to_tsvector('german', o.organization || ' ' || o.title || ' ' || o.summary || ' ' || o.description) @@ query.tsq
-           or o.title ilike ${likePattern(q)} or o.organization ilike ${likePattern(q)})
-    order by (o.title ilike ${likePattern(q)} or o.organization ilike ${likePattern(q)}) desc,
+           or (' ' || o.title) ilike ${likePattern(q)} or (' ' || o.organization) ilike ${likePattern(q)})
+    order by ((' ' || o.title) ilike ${likePattern(q)} or (' ' || o.organization) ilike ${likePattern(q)}) desc,
       ts_rank(to_tsvector('german', o.organization || ' ' || o.title || ' ' || o.summary || ' ' || o.description), query.tsq) desc, o.title
     limit ${limit}
   `)) as unknown as { id: string; slug: string; title: string; organization: string; snippet: string; total: string | number }[];

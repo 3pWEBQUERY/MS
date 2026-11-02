@@ -23,7 +23,7 @@ export default function MomentRulesPage({ searchParams }: PageProps<"/verwaltung
 }
 
 async function MomentRules({ searchParams }: { searchParams: PageProps<"/verwaltung/redaktion/mein-moment">["searchParams"] }) {
-  await requireStaff(EDITOR_ROLES);
+  const viewer = await requireStaff(EDITOR_ROLES);
   const sp = await searchParams;
   const rows = await listMomentVersions();
   const active = rows.find((r) => r.active);
@@ -37,7 +37,7 @@ async function MomentRules({ searchParams }: { searchParams: PageProps<"/verwalt
         description="Welche höchstens drei Ziele erscheinen nach «Etwas festhalten», «Austausch finden» und «Wissen oder Hilfe finden». Ohne Tagebuch, Profilanalyse oder Bewertung."
       />
       <div className="flex flex-col gap-10">
-        <RedaktionNav active="moment" />
+        <RedaktionNav roles={viewer.roles} active="moment" />
         <StatusNotice
           code={one(sp.status)}
           messages={{ angelegt: "Neue Version angelegt. Aktiviere sie, damit sie auf «Heute» gilt.", aktiviert: "Version aktiviert. Sie gilt ab sofort." }}

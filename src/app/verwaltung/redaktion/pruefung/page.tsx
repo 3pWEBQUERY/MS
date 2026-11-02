@@ -32,7 +32,7 @@ async function ReviewQueue() {
         description="Versionen, die auf eine Freigabe oder Rückgabe warten. Die älteste steht oben."
       />
       <div className="flex flex-col gap-8">
-        <RedaktionNav active="pruefung" counts={{ pruefung: open.length }} />
+        <RedaktionNav roles={viewer.roles} active="pruefung" counts={{ pruefung: open.length }} />
         {queue.length === 0 ? (
           <EmptyState icon="check-circle" title="Keine offenen Prüfaufträge">
             Sobald die Redaktion eine Version zur Prüfung sendet, erscheint sie hier.

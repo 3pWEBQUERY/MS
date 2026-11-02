@@ -37,7 +37,7 @@ async function ContactInbox({ searchParams }: { searchParams: PageProps<"/verwal
         description="Fehlermeldungen zu Artikeln, Hinweise zu Angeboten, Barrieren und weitere Anliegen. Inhalte sind verschlüsselt gespeichert."
       />
       <div className="flex flex-col gap-8">
-        <RedaktionNav active="hinweise" />
+        {viewer.roles.some((r) => r === "editor" || r === "admin") && <RedaktionNav roles={viewer.roles} active="hinweise" />}
         <StatusNotice code={one(sp.status)} messages={{ erledigt: "Hinweis als erledigt markiert." }} />
         <p className="text-base">
           {done ? (

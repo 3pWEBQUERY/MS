@@ -54,7 +54,7 @@ async function EditorialContent({ searchParams }: { searchParams: PageProps<"/ve
         }
       />
       <div className="flex flex-col gap-8">
-        <RedaktionNav active={view} counts={{ faellig: dueRows.length, pruefung: openReviews, hinweise: hints.length }} />
+        <RedaktionNav roles={viewer.roles} active={view} counts={{ faellig: dueRows.length, pruefung: openReviews, hinweise: hints.length }} />
         {dueRows.some((r) => r.state === "overdue") && view === "artikel" && (
           <Notice tone="warning" title="Artikel mit abgelaufenem Prüftermin">
             Überfällige Artikel sind öffentlich nicht mehr sichtbar. Lege eine neue Version an und sende sie zur Prüfung.{" "}

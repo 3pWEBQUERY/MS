@@ -99,7 +99,7 @@ async function HelpContent({ searchParams }: { searchParams: PageProps<"/hilfe">
               <li key={t.slug}>
                 <Link
                   href={`/hilfe?thema=${t.slug}`}
-                  className="inline-flex min-h-11 items-center rounded-[12px] border border-line-2 bg-surface px-4 text-base font-medium text-ink transition-colors hover:border-field hover:bg-raised"
+                  className="inline-flex min-h-12 items-center rounded-[12px] border border-line-2 bg-surface px-4 text-base font-medium text-ink transition-colors hover:border-field hover:bg-raised"
                 >
                   {t.name}
                 </Link>
