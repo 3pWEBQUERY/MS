@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, inArray, isNotNull, isNull, ne, or, sql as dsql } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, lte, ne, or, sql as dsql } from "drizzle-orm";
 import { encrypt, receiptNumber } from "../../crypto";
 import { db, type Executor, type Tx } from "../../db";
 import {
@@ -277,7 +277,7 @@ async function deleteAllExportObjects(accountId: string, before?: Date): Promise
       and(
         eq(exportJobs.accountId, accountId),
         isNotNull(exportJobs.objectKey),
-        before ? dsql`${exportJobs.createdAt} <= ${before}` : undefined,
+        before ? lte(exportJobs.createdAt, before) : undefined,
       ),
     );
   if (jobs.length > 0 && !storageConfigured()) throw new Error("storage_not_configured");

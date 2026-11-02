@@ -30,7 +30,7 @@ async function rightsViewer({ reauth }: { reauth: boolean }) {
 }
 
 /* ───────────────────────── Auskunft anfordern (PRI03, PRD 11 Rechteprozess) ───────────────────────── */
-export async function requestAccessAction(_prev: ActionState): Promise<ActionState> {
+export async function requestAccessAction(): Promise<ActionState> {
   return runAction(async () => {
     const viewer = await rightsViewer({ reauth: false });
     const [open] = await db

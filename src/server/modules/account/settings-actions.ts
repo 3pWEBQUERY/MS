@@ -125,7 +125,7 @@ export async function revokeSessionAction(_prev: ActionState, formData: FormData
   });
 }
 
-export async function revokeOtherSessionsAction(_prev: ActionState): Promise<ActionState> {
+export async function revokeOtherSessionsAction(): Promise<ActionState> {
   return runAction(async () => {
     const viewer = await actionViewer({ allowSuspended: true });
     const count = await revokeAllSessions(viewer.accountId, viewer.sessionId);

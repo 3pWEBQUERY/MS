@@ -35,7 +35,6 @@ async function Requests({ searchParams }: { searchParams: PageProps<"/verwaltung
   const sp = await searchParams;
   const filter = (FILTERS.find((f) => f.key === sp.filter)?.key ?? "offen") as AdminFilter;
   const rows = await listRequestsForOfficer(filter);
-  const now = Date.now();
 
   return (
     <div className="flex flex-col gap-8">
@@ -69,8 +68,7 @@ async function Requests({ searchParams }: { searchParams: PageProps<"/verwaltung
           </thead>
           <tbody>
             {rows.map((r) => {
-              const overdue = r.status !== "completed" && r.status !== "rejected" && r.dueAt.getTime() < now;
-              const exceptionDue = r.exceptionUntil && r.exceptionUntil.getTime() < now;
+              const { overdue, exceptionDue } = r;
               return (
                 <tr key={r.id}>
                   <td className="whitespace-nowrap">

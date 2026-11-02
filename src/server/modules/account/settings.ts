@@ -75,10 +75,3 @@ export async function getMfaState(viewer: Viewer) {
     unusedRecoveryCodes: Number(codes?.c ?? 0),
   };
 }
-
-/** Maskierte Darstellung, z. B. «b•••@beispiel.ch» */
-export function maskEmail(email: string): string {
-  const [local, domain] = email.split("@");
-  if (!domain) return "•••";
-  return `${local.slice(0, 1)}${"•".repeat(Math.max(2, Math.min(6, local.length - 1)))}@${domain}`;
-}

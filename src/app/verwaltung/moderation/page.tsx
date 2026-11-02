@@ -108,6 +108,22 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
         <p className="text-sm text-ink-2">{OPERATING_HOURS_NOTE}</p>
       </section>
 
+      {counts.byPriority.P0.total > 0 && (
+        <Notice
+          tone="danger"
+          icon="shield-alert"
+          role="status"
+          title={counts.byPriority.P0.total === 1 ? "Ein offener Fall mit akuter Gefahr (P0)" : `${counts.byPriority.P0.total} offene Fälle mit akuter Gefahr (P0)`}
+          action={
+            <Link href={query(base, { ansicht: lead ? "all" : "mine", prioritaet: "P0" })} className="font-semibold text-ink underline underline-offset-4">
+              P0-Fälle ansehen
+            </Link>
+          }
+        >
+          Prüfung binnen 30 Minuten während der Betriebszeit. Krisenablauf K01 beachten; die Moderationsleitung wird automatisch alarmiert.
+        </Notice>
+      )}
+
       {lead && counts.escalated > 0 && (
         <Notice
           tone="warning"

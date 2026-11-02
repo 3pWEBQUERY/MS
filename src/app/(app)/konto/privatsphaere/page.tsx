@@ -112,6 +112,7 @@ async function Privacy() {
           title="Privatsphäre und Einwilligungen"
           description="Jede Entscheidung ist getrennt, nichts ist vorausgewählt. Du kannst sie jederzeit selbst ändern – ohne Support."
           className="pb-0 sm:pb-0"
+          back={viewer.accountSuspended ? { href: "/konto/gesperrt", label: "Zurück zur Übersicht" } : undefined}
         />
         {!viewer.accountSuspended && <AccountNav current="privatsphaere" />}
       </div>

@@ -154,11 +154,10 @@ async function PrivacyOverview() {
 
 async function OpsOverview() {
   const [o, d, flagsOff] = await Promise.all([outboxSummary(), deliveryProblems(), disabledFlagCount()]);
-  const age = o.oldestOpen ? Date.now() - o.oldestOpen.getTime() : 0;
   return (
     <AdminSectionBlock id="betrieb" title="Betrieb" action={<SectionLink href="/verwaltung/betrieb">Zum Betrieb</SectionLink>}>
       <StatGrid>
-        <StatTile label="Wartende Ereignisse" value={o.totals.pending} icon="hourglass" hint={o.oldestOpen ? `Queuealter ${formatSpan(age)}` : "Warteschlange leer"} />
+        <StatTile label="Wartende Ereignisse" value={o.totals.pending} icon="hourglass" hint={o.oldestOpen ? `Queuealter ${formatSpan(o.queueAgeMs)}` : "Warteschlange leer"} />
         <StatTile label="Fehlerwarteschlange" value={o.totals.dead} icon="alert" tone={o.totals.dead > 0 ? "danger" : "neutral"} hint={`${o.totals.failed} werden wiederholt`} />
         <StatTile label="Zustellprobleme" value={d.failed + d.dead} icon="mail" tone={d.dead > 0 ? "danger" : "neutral"} />
         <StatTile label="Abgeschaltete Bereiche" value={flagsOff} icon="toggle" tone={flagsOff > 0 ? "warning" : "neutral"} />

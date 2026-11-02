@@ -103,13 +103,25 @@ export async function listRequestsForOfficer(filter: AdminFilter, limit = 100) {
       createdAt: privacyRequests.createdAt,
       completedAt: privacyRequests.completedAt,
       exceptionUntil: privacyRequests.exceptionUntil,
-      openTasks: dsql<number>`(select count(*)::int from privacy.erasure_tasks t where t.request_id = ${privacyRequests.id} and t.status <> 'done')`,
-      problemTasks: dsql<number>`(select count(*)::int from privacy.erasure_tasks t where t.request_id = ${privacyRequests.id} and t.status in ('failed','escalated'))`,
+      // In Select-Feldern rendert Drizzle Spalten unqualifiziert – daher explizit qualifiziert
+      openTasks: dsql<number>`(select count(*)::int from privacy.erasure_tasks t where t.request_id = "privacy"."requests"."id" and t.status <> 'done')`,
+      problemTasks: dsql<number>`(select count(*)::int from privacy.erasure_tasks t where t.request_id = "privacy"."requests"."id" and t.status in ('failed','escalated'))`,
     })
     .from(privacyRequests)
     .where(where)
     .orderBy(asc(privacyRequests.dueAt))
-    .limit(limit);
+    .limit(limit)
+    .then((rows) => rows.map((r) => ({ ...r, ...deadlineFlags(r, now) })));
+}
+
+const CLOSED: RequestStatus[] = ["completed", "rejected"];
+
+/** Fristen und Prüftermine (PRI06): überfällig, Ausnahme zur erneuten Prüfung fällig. */
+function deadlineFlags(r: { status: RequestStatus; dueAt: Date; exceptionUntil: Date | null }, now: Date) {
+  return {
+    overdue: !CLOSED.includes(r.status) && r.dueAt.getTime() < now.getTime(),
+    exceptionDue: Boolean(r.exceptionUntil && r.exceptionUntil.getTime() < now.getTime()),
+  };
 }
 
 export async function getRequestForOfficer(id: string) {
@@ -146,8 +158,16 @@ export async function getRequestForOfficer(id: string) {
     .from(erasureTasks)
     .where(eq(erasureTasks.requestId, id))
     .orderBy(asc(erasureTasks.createdAt), asc(erasureTasks.system));
+  const now = new Date();
+  const open = tasks.filter((t) => t.status !== "done").length;
   const sorted = tasks
     .map((t) => ({ ...t, label: taskLabel(req.type, t) }))
     .sort((a, b) => taskOrder(req.type, a) - taskOrder(req.type, b));
-  return { ...req, tasks: sorted };
+  return {
+    ...req,
+    tasks: sorted,
+    ...deadlineFlags(req, now),
+    // Seit über einer Stunde unverändert mit offenen Teilschritten: darf erneut angestossen werden
+    stale: open > 0 && !CLOSED.includes(req.status) && req.updatedAt.getTime() < now.getTime() - 60 * 60 * 1000,
+  };
 }

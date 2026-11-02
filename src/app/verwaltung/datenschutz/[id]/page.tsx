@@ -39,10 +39,7 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
   const problems = req.tasks.filter((t) => t.status === "failed" || t.status === "escalated").length;
   const open = req.tasks.filter((t) => t.status !== "done").length;
   const manual = req.type === "access" || req.type === "rectification" || req.type === "export";
-  const overdue = req.status !== "completed" && req.status !== "rejected" && req.dueAt.getTime() < Date.now();
-  const exceptionDue = req.exceptionUntil && req.exceptionUntil.getTime() < Date.now();
-  // Hängengebliebene Aufträge (seit über einer Stunde unverändert) dürfen ebenfalls neu angestossen werden
-  const stale = open > 0 && req.status !== "completed" && req.updatedAt.getTime() < Date.now() - 60 * 60 * 1000;
+  const { overdue, exceptionDue, stale } = req;
 
   return (
     <div className="flex flex-col gap-10">

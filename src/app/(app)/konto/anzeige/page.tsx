@@ -27,6 +27,7 @@ async function MemberDisplay() {
           title="Anzeige und Bedienung"
           description="Schrift, Farbschema, Bewegung und einfache Ansicht. Jede Änderung siehst du sofort."
           className="pb-0 sm:pb-0"
+          back={viewer.accountSuspended ? { href: "/konto/gesperrt", label: "Zurück zur Übersicht" } : undefined}
         />
         {!viewer.accountSuspended && <AccountNav current="anzeige" />}
       </div>

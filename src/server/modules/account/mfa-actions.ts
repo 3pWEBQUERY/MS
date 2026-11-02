@@ -46,7 +46,7 @@ function securityNotice(accountId: string, tx: Executor) {
 }
 
 /** Schritt 1: neues, noch unbestätigtes Geheimnis anlegen. */
-export async function startMfaSetupAction(_prev: ActionState): Promise<ActionState> {
+export async function startMfaSetupAction(): Promise<ActionState> {
   return runAction(async () => {
     const viewer = await sensitiveViewer();
     if (viewer.mfaEnabled) throw new UserError("Der zweite Faktor ist bereits eingerichtet.");
@@ -59,7 +59,7 @@ export async function startMfaSetupAction(_prev: ActionState): Promise<ActionSta
   });
 }
 
-export async function cancelMfaSetupAction(_prev: ActionState): Promise<ActionState> {
+export async function cancelMfaSetupAction(): Promise<ActionState> {
   return runAction(async () => {
     const viewer = await actionViewer({ allowSuspended: true, allowNoProfile: true });
     await db.delete(mfaFactors).where(and(eq(mfaFactors.accountId, viewer.accountId), isNull(mfaFactors.confirmedAt)));
@@ -113,7 +113,7 @@ export async function confirmMfaAction(_prev: ActionState, formData: FormData): 
   });
 }
 
-export async function regenerateRecoveryCodesAction(_prev: ActionState): Promise<ActionState> {
+export async function regenerateRecoveryCodesAction(): Promise<ActionState> {
   return runAction(async () => {
     const viewer = await sensitiveViewer();
     if (!viewer.mfaEnabled) throw new UserError("Richte zuerst den zweiten Faktor ein.");

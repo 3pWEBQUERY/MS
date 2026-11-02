@@ -42,6 +42,7 @@ async function Data() {
           title="Daten und Konto"
           description="Deine Rechte an deinen Daten: Auskunft, Export und Löschung. Sie gelten unabhängig von Einschränkungen in der Community."
           className="pb-0 sm:pb-0"
+          back={viewer.accountSuspended ? { href: "/konto/gesperrt", label: "Zurück zur Übersicht" } : undefined}
         />
         {!viewer.accountSuspended && <AccountNav current="daten" />}
       </div>

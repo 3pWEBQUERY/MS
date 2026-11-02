@@ -73,6 +73,8 @@ export async function outboxSummary() {
       dead: list.reduce((a, t) => a + t.dead, 0),
     },
     oldestOpen: oldest,
+    /** Queuealter in Millisekunden (NFR16) */
+    queueAgeMs: oldest ? Date.now() - oldest.getTime() : 0,
   };
 }
 

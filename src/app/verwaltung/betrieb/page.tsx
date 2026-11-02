@@ -47,7 +47,7 @@ async function Content() {
     systemStatus(),
   ]);
   const now = new Date();
-  const queueAgeMs = outbox.oldestOpen ? now.getTime() - outbox.oldestOpen.getTime() : 0;
+  const queueAgeMs = outbox.queueAgeMs;
   const disabled = flags.filter((f) => !f.enabled);
   const deadTypes = outbox.types.filter((t) => t.dead > 0);
 

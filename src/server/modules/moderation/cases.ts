@@ -3,7 +3,7 @@ import { and, asc, count, desc, eq, gt, inArray, isNull, lt, ne, or, sql as dsql
 import type { CaseStatus, Priority } from "@/components/admin/labels";
 import { audit, recordDenied } from "../../audit";
 import type { Viewer } from "../../auth/viewer";
-import { decrypt, receiptNumber, sha256 } from "../../crypto";
+import { decrypt, sha256 } from "../../crypto";
 import { db } from "../../db";
 import {
   accounts,
@@ -18,6 +18,7 @@ import {
   sanctions,
 } from "../../db/schema";
 import { actorRoleFor, isUuid, pseudonymsFor, staffWithRoles } from "../admin/common";
+import { PRIORITY_DUE_MS } from "./reports";
 
 /**
  * Fallbearbeitung für Mitarbeitende (SAF03, S52, S53, Kapitel 10).
@@ -27,30 +28,12 @@ import { actorRoleFor, isUuid, pseudonymsFor, staffWithRoles } from "../admin/co
 
 /* ───────────── Fristen und Prioritäten (Kapitel 10) ───────────── */
 
-/** Reaktionsziele je Priorität, vereinfacht in Kalenderzeit (Betriebszeit 09–18 Uhr). */
-export const PRIORITY_WINDOW_MS: Record<Priority, number> = {
-  P0: 30 * 60 * 1000,
-  P1: 2 * 60 * 60 * 1000,
-  P2: 24 * 60 * 60 * 1000,
-  P3: 3 * 24 * 60 * 60 * 1000,
-};
-
-/** Vorschlag für die Erstpriorität aus dem Meldegrund. Die Triage kann sie ändern. */
-export const PRIORITY_FOR_REASON: Record<string, Priority> = {
-  acute_danger: "P0",
-  dangerous_medical: "P1",
-  privacy: "P1",
-  harassment: "P2",
-  spam_fraud: "P2",
-  other: "P3",
-};
+/** Reaktionsziele je Priorität (P0 30 min, P1 2 h, P2 24 h, P3 72 h) – gemeinsame Quelle mit reports.ts. */
+export const PRIORITY_WINDOW_MS: Record<Priority, number> = PRIORITY_DUE_MS;
 
 export function computeDueAt(priority: Priority, from: Date = new Date()): Date {
   return new Date(from.getTime() + PRIORITY_WINDOW_MS[priority]);
 }
-
-/** Fallnummer, z. B. «F-7K4Q-2XPA» */
-export const newCaseNumber = () => receiptNumber("F");
 
 /** Schwere Massnahmen: zweite Prüfung binnen 24 Betriebsstunden (SAF04). */
 export const SECOND_APPROVAL_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -225,6 +208,21 @@ export async function caseCounts(viewer: Viewer) {
     appealsOpen: Number(openAppeals?.c ?? 0),
     appealsOverdue: Number(openAppeals?.overdue ?? 0),
   };
+}
+
+/** Offene P0-Fälle (Leitung: alle, Moderation: zugewiesene) – für die Markierung in der Navigation (K01). */
+export async function openP0Count(viewer: Viewer): Promise<number> {
+  const [r] = await db
+    .select({ c: count() })
+    .from(moderationCases)
+    .where(
+      and(
+        eq(moderationCases.priority, "P0"),
+        inArray(moderationCases.status, OPEN_STATUSES),
+        isLead(viewer) ? undefined : eq(moderationCases.assigneeId, viewer.accountId),
+      ),
+    );
+  return Number(r?.c ?? 0);
 }
 
 /** Moderationsqualität (PRD 15): Anteil fristgerecht bearbeiteter Fälle der letzten 30 Tage. */

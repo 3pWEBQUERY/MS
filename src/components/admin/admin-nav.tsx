@@ -6,7 +6,23 @@ import { SideNavLink } from "@/components/shell/nav-link";
 import { IconButton } from "@/components/ui/button";
 import { Icon, type IconName } from "@/components/ui/icon";
 
-export type AdminNavItem = { href: string; label: string; icon: IconName; exact?: boolean };
+export type AdminNavItem = {
+  href: string;
+  label: string;
+  icon: IconName;
+  exact?: boolean;
+  /** Deutliche Markierung, z. B. offene P0-Fälle (K01: Leitung alarmieren) */
+  alert?: { count: number; label: string };
+};
+
+function AlertBadge({ alert }: { alert: NonNullable<AdminNavItem["alert"]> }) {
+  return (
+    <span className="tabular inline-flex h-6 min-w-6 items-center justify-center gap-1 rounded-[8px] bg-danger px-1.5 text-xs font-bold text-white dark:text-ink-inverse">
+      {alert.count > 99 ? "99+" : alert.count}
+      <span className="sr-only"> {alert.label}</span>
+    </span>
+  );
+}
 
 /** Seitenleisten-Navigation (Desktop). aria-current über SideNavLink. */
 export function AdminNavList({ items }: { items: AdminNavItem[] }) {
@@ -14,7 +30,7 @@ export function AdminNavList({ items }: { items: AdminNavItem[] }) {
     <ul className="flex flex-col gap-1">
       {items.map((i) => (
         <li key={i.href}>
-          <SideNavLink href={i.href} icon={i.icon} exact={i.exact}>
+          <SideNavLink href={i.href} icon={i.icon} exact={i.exact} badge={i.alert && i.alert.count > 0 ? <AlertBadge alert={i.alert} /> : undefined}>
             {i.label}
           </SideNavLink>
         </li>

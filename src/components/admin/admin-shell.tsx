@@ -6,6 +6,7 @@ import { SessionWatch } from "@/components/shell/session-watch";
 import { Icon } from "@/components/ui/icon";
 import { getViewer } from "@/server/auth/viewer";
 import { logoutAction } from "@/server/modules/account/auth-actions";
+import { openP0Count } from "@/server/modules/moderation/cases";
 import { AdminMobileNav, AdminNavList, type AdminNavItem } from "./admin-nav";
 import { ROLE_LABEL, type StaffRoleKey } from "./labels";
 import { sectionsFor } from "./sections";
@@ -19,7 +20,15 @@ async function loadNav(): Promise<{ items: AdminNavItem[]; pseudonym: string; ro
   const viewer = await getViewer();
   // Ohne Rolle oder ohne bestätigte MFA wird keine Navigation gezeigt; die Seite leitet um bzw. antwortet neutral.
   if (!viewer || !viewer.isStaff || !viewer.mfaVerified) return null;
-  const items = sectionsFor(viewer.roles).map((s) => ({ href: s.href, label: s.label, icon: s.icon, exact: s.exact }));
+  const moderation = viewer.roles.includes("moderator") || viewer.roles.includes("moderation_lead");
+  const p0 = moderation ? await openP0Count(viewer) : 0;
+  const items: AdminNavItem[] = sectionsFor(viewer.roles).map((s) => ({
+    href: s.href,
+    label: s.label,
+    icon: s.icon,
+    exact: s.exact,
+    alert: s.href === "/verwaltung/moderation" && p0 > 0 ? { count: p0, label: p0 === 1 ? "offener Fall mit akuter Gefahr" : "offene Fälle mit akuter Gefahr" } : undefined,
+  }));
   return { items, pseudonym: viewer.pseudonym ?? "Mitarbeitende Person", roles: viewer.roles };
 }
 
