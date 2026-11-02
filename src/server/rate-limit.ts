@@ -10,7 +10,7 @@ export async function consume(key: string, limit: number, windowSeconds: number)
   const windowStart = new Date(Math.floor(Date.now() / (windowSeconds * 1000)) * windowSeconds * 1000);
   const rows = await db.execute<{ count: number }>(dsql`
     insert into ops.rate_limit_counters (key, window_start, count)
-    values (${key}, ${windowStart}, 1)
+    values (${key}, ${windowStart.toISOString()}::timestamptz, 1)
     on conflict (key, window_start) do update set count = ops.rate_limit_counters.count + 1
     returning count
   `);
@@ -22,7 +22,7 @@ export async function consume(key: string, limit: number, windowSeconds: number)
 export async function peek(key: string, windowSeconds: number): Promise<number> {
   const windowStart = new Date(Math.floor(Date.now() / (windowSeconds * 1000)) * windowSeconds * 1000);
   const rows = await db.execute<{ count: number }>(dsql`
-    select count from ops.rate_limit_counters where key = ${key} and window_start = ${windowStart}
+    select count from ops.rate_limit_counters where key = ${key} and window_start = ${windowStart.toISOString()}::timestamptz
   `);
   return Number(rows[0]?.count ?? 0);
 }

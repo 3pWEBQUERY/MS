@@ -1,6 +1,7 @@
 import "server-only";
 import { and, desc, eq, gt, isNull, or, sql as dsql } from "drizzle-orm";
 import { headers } from "next/headers";
+import { connection } from "next/server";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { sha256 } from "../crypto";
@@ -72,6 +73,8 @@ const DEFAULT_PREFS: Preferences = {
 export const getViewer = cache(async (): Promise<Viewer | null> => {
   const token = await readSessionToken();
   if (!token) return null;
+  // Sitzungsprüfung vergleicht mit der aktuellen Zeit – nur zur Anfragezeit, nie vorgerendert.
+  await connection();
   const now = new Date();
 
   const [row] = await db

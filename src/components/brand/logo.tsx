@@ -30,8 +30,8 @@ export function Logo({ href = "/", className }: { href?: string; className?: str
       aria-label={`${site.name} – Startseite`}
     >
       <LogoMark />
-      <span className="text-[1.125rem] font-bold tracking-[-0.02em]">
-        MS<span className="font-medium text-ink-2"> Plattform</span>
+      <span className="whitespace-nowrap text-[1.125rem] font-bold tracking-[-0.02em]">
+        MS<span className="font-medium text-ink-2 max-[359px]:sr-only"> Plattform</span>
       </span>
     </Link>
   );

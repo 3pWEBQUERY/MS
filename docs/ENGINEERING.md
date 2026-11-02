@@ -97,6 +97,13 @@ export async function createPostAction(_prev: ActionState, formData: FormData): 
 - Client: `import { db } from "@/server/db"`, Tabellen aus `@/server/db/schema`. Drizzle-Abfragen bevorzugen; `sql` Template für Spezialfälle (Volltext `to_tsvector('german', …) @@ websearch_to_tsquery('german', $q)`).
 - Seiten mit Listen: Cursor-Paginierung, 20 Einträge Standard, höchstens 100; «Mehr laden» als Link mit `?cursor=` (kein Endlos-Scroll).
 
+## Stolpersteine (geprüft)
+
+- `getViewer()` ruft `connection()` auf – Sitzungsprüfungen laufen nie im Vorrendern. Eigene Zeitvergleiche (`new Date()`) in Seiten erst nach `requireViewer()`/`connection()`.
+- `Date`-Objekte in rohen `sql\`…\``-Parametern werden vom DB-Client als ISO-Zeitpunkt gesendet (Korrektur in `src/server/db/index.ts`).
+- Client-Komponenten mit `usePathname()` brauchen bei dynamischen Routen eine `<Suspense>`-Grenze (siehe `src/components/shell/nav-link.tsx`).
+- Im Produktionsmodus ist `DATA_ENCRYPTION_KEY` Pflicht; ohne Schlüssel schlagen verschlüsselnde Aktionen bewusst fehl.
+
 ## Zeit
 
 `src/lib/time.ts`: `localDateString`, `localTimeString`, `utcOffsetMinutes`, `zonedToUtc`, `formatDate`, `formatDateTime`, `formatRelative`, `inQuietHours`. Standardzeitzone `Europe/Zurich`, Zeitzone des Mitglieds in `viewer.prefs.timezone`.

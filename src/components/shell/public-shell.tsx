@@ -20,9 +20,11 @@ async function HeaderAuth() {
   }
   return (
     <div className="flex items-center gap-2">
-      <ButtonLink href="/anmelden" size="sm" variant="ghost" className="hidden sm:inline-flex">
-        Anmelden
-      </ButtonLink>
+      <span className="hidden sm:contents">
+        <ButtonLink href="/anmelden" size="sm" variant="ghost">
+          Anmelden
+        </ButtonLink>
+      </span>
       <ButtonLink href="/registrieren" size="sm" variant="primary">
         Registrieren
       </ButtonLink>

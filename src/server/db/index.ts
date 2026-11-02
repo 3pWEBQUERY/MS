@@ -22,6 +22,18 @@ export const sql =
 if (!env.isProd) globalThis.__msSql = sql;
 
 export const db = drizzle(sql, { schema, casing: "snake_case" });
+
+/*
+ * drizzle setzt die Serialisierer für Zeittypen auf «durchreichen». Dadurch würden
+ * Date-Objekte in rohen sql`…`-Parametern als «Mon Nov 02 2026 …» gesendet. Date-Werte
+ * werden deshalb immer als ISO-8601-Zeitpunkt (UTC) übertragen.
+ */
+const toIso = (v: unknown) => (v instanceof Date ? v.toISOString() : v);
+for (const oid of [1082, 1083, 1114, 1184, 1266]) {
+  const serializers = (sql.options as unknown as { serializers: Record<number, (v: unknown) => unknown> }).serializers;
+  const previous = serializers[oid];
+  serializers[oid] = (v: unknown) => (previous ? previous(toIso(v)) : toIso(v));
+}
 export type DB = typeof db;
 export type Tx = Parameters<Parameters<DB["transaction"]>[0]>[0];
 export type Executor = DB | Tx;
