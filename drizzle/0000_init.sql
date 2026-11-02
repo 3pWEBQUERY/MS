@@ -686,6 +686,7 @@ CREATE TABLE "privacy"."requests" (
 	"identity_method" text NOT NULL,
 	"due_at" timestamp with time zone NOT NULL,
 	"exception_note" text,
+	"exception_until" timestamp with time zone,
 	"handled_by" uuid,
 	"completed_at" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,

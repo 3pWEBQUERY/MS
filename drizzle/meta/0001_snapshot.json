@@ -1,6 +1,6 @@
 {
-  "id": "18645ab8-76a8-4c48-9290-e7c0787233c7",
-  "prevId": "48531492-10f6-423d-9a96-6910a6fa8be6",
+  "id": "9cb571c6-033e-46c8-a34b-148ea7e244d8",
+  "prevId": "a5490df4-da94-4433-84fd-c94a09e3409c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -5591,6 +5591,12 @@
         "exception_note": {
           "name": "exception_note",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exception_until": {
+          "name": "exception_until",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },

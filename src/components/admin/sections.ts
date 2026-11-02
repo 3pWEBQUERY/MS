@@ -18,7 +18,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   { href: "/verwaltung/moderation", label: "Moderation", icon: "flag", roles: ["moderator", "moderation_lead"] },
   { href: "/verwaltung/mitglieder", label: "Mitglieder", icon: "user-cog", roles: ["moderation_lead", "admin"] },
   { href: "/verwaltung/gruppen", label: "Gruppen", icon: "users", roles: ["admin", "moderation_lead"] },
-  { href: "/verwaltung/redaktion", label: "Redaktion", icon: "book", roles: ["editor", "medical_reviewer"] },
+  { href: "/verwaltung/redaktion", label: "Redaktion", icon: "book", roles: ["editor", "medical_reviewer", "admin"] },
   { href: "/verwaltung/verzeichnis", label: "Verzeichnis", icon: "pin", roles: ["editor"] },
   { href: "/verwaltung/medien", label: "Medien", icon: "image", roles: ["editor", "admin"] },
   { href: "/verwaltung/datenschutz", label: "Datenschutz", icon: "shield", roles: ["privacy_officer"] },

@@ -57,7 +57,9 @@ export function PublicHeader() {
           <Suspense fallback={<div className="h-10 w-36 rounded-[10px] bg-sunk" aria-hidden="true" />}>
             <HeaderAuth />
           </Suspense>
-          <PublicMobileMenu />
+          <Suspense fallback={<div className="size-10 lg:hidden" />}>
+            <PublicMobileMenu />
+          </Suspense>
         </div>
       </div>
     </header>

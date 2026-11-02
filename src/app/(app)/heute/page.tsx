@@ -5,7 +5,8 @@ import { Icon, type IconName } from "@/components/ui/icon";
 import { Notice, PageSkeleton, Skeleton } from "@/components/ui/primitives";
 import { RecentEntries } from "@/components/health/recent-entries";
 import { getTodayCheckIn } from "@/server/modules/health/queries";
-import { DEFAULT_MOMENT_CONFIG, resolveMoment, type MomentIntent } from "@/lib/moment";
+import { resolveMoment, type MomentIntent } from "@/lib/moment";
+import { getActiveMomentConfig } from "@/server/modules/content/moment";
 import { requireViewer } from "@/server/auth/viewer";
 import { MeinMoment } from "./mein-moment";
 
@@ -34,8 +35,9 @@ async function Today({ searchParams }: { searchParams: PageProps<"/heute">["sear
   const hour = Number(new Intl.DateTimeFormat("de-CH", { hour: "numeric", hourCycle: "h23", timeZone: viewer.prefs.timezone }).format(new Date()));
   const healthDeclined = viewer.healthDecided && !viewer.healthActive;
   const opts = { healthActive: viewer.healthActive, healthDeclined };
+  const config = await getActiveMomentConfig();
   const targets = Object.fromEntries(
-    (["record", "connect", "learn"] as MomentIntent[]).map((k) => [k, resolveMoment(DEFAULT_MOMENT_CONFIG, k, opts)]),
+    (["record", "connect", "learn"] as MomentIntent[]).map((k) => [k, resolveMoment(config, k, opts)]),
   ) as Record<MomentIntent, ReturnType<typeof resolveMoment>>;
 
   const quick: { href: string; label: string; icon: IconName; hide?: boolean }[] = [

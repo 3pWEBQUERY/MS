@@ -694,7 +694,9 @@ export async function getBookmarksForViewer(
             and(
               inArray(articles.id, articleIds),
               eq(articleVersions.status, "published"),
-              or(isNull(articleVersions.reviewDueAt), sql`${articleVersions.reviewDueAt} > now()`),
+              isNull(articleVersions.withdrawnAt),
+              // CON03/AT08: ohne gültigen Prüftermin kein Titel
+              sql`${articleVersions.reviewDueAt} is not null and ${articleVersions.reviewDueAt} > now()`,
             ),
           )
       : [],
@@ -702,7 +704,14 @@ export async function getBookmarksForViewer(
       ? db
           .select({ id: supportOffers.id, slug: supportOffers.slug, title: supportOffers.title, org: supportOffers.organization })
           .from(supportOffers)
-          .where(and(inArray(supportOffers.id, offerIds), eq(supportOffers.status, "published")))
+          .where(
+            and(
+              inArray(supportOffers.id, offerIds),
+              eq(supportOffers.status, "published"),
+              // CON05: abgelaufene Prüfung → nicht mehr verfügbar
+              sql`${supportOffers.nextReviewAt} > now()`,
+            ),
+          )
       : [],
   ]);
 
