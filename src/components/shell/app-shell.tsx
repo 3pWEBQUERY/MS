@@ -5,6 +5,7 @@ import { Icon } from "@/components/ui/icon";
 import { MAIN_NAV } from "@/lib/site";
 import { getViewer } from "@/server/auth/viewer";
 import { getShellCounts } from "@/server/modules/shell";
+import { DemoBanner } from "./demo-banner";
 import { DisplaySync } from "./display";
 import { BottomNavLink, SideNavLink } from "./nav-link";
 import { SessionWatch } from "./session-watch";
@@ -121,6 +122,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-col">
+        <DemoBanner />
         {/* Kopfzeile – Mobil */}
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-line bg-bg px-4 lg:hidden">
           <Logo href="/heute" />

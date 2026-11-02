@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui/icon";
 import { PUBLIC_NAV, site } from "@/lib/site";
 import { getViewer } from "@/server/auth/viewer";
 import { TopNavLink } from "./nav-link";
+import { DemoBanner } from "./demo-banner";
 import { PublicMobileMenu } from "./public-mobile-menu";
 
 async function HeaderAuth() {
@@ -131,6 +132,7 @@ export function PublicFooter() {
 export function PublicShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
+      <DemoBanner />
       <PublicHeader />
       <main id="inhalt" className="flex-1">
         {children}
