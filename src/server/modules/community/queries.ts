@@ -1,6 +1,6 @@
 import "server-only";
-import { and, asc, desc, eq, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
-import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { and, asc, Column, desc, eq, inArray, is, isNull, or, sql, type SQL } from "drizzle-orm";
+import { getTableConfig, type AnyPgColumn, type PgTable } from "drizzle-orm/pg-core";
 import { ROLE_LABELS } from "@/lib/catalog";
 import type { Viewer } from "../../auth/viewer";
 import { recordDenied } from "../../audit";
@@ -36,8 +36,22 @@ export const isUuid = (v: unknown): v is string => typeof v === "string" && UUID
 
 /* ───────────────────────── Rechte-Bausteine (SQL) ───────────────────────── */
 
+/**
+ * Voll qualifizierte Spaltenreferenz für korrelierte Unterabfragen. Drizzle lässt den
+ * Tabellennamen bei Abfragen ohne Join weg – in einer Unterabfrage würde «account_id»
+ * sonst auf die innere Tabelle zeigen.
+ */
+export function qcol(c: AnyPgColumn): SQL {
+  const t = getTableConfig(c.table as PgTable);
+  return sql.raw(`"${t.schema ?? "public"}"."${t.name}"."${c.name}"`);
+}
+
+const ref = (v: string | AnyPgColumn | SQL): string | SQL =>
+  typeof v === "string" ? v : is(v, Column) ? qcol(v as AnyPgColumn) : (v as SQL);
+
 /** SAF01: aktive Blockierung in beide Richtungen zwischen Viewer und einem Konto. */
-export function blockedWith(viewerId: string, other: AnyPgColumn | SQL): SQL<boolean> {
+export function blockedWith(viewerId: string, otherRef: AnyPgColumn | SQL): SQL<boolean> {
+  const other = ref(otherRef);
   return sql<boolean>`exists (
     select 1 from messaging.blocks b
     where b.lifted_at is null
@@ -51,7 +65,9 @@ export function notBlockedWith(viewerId: string, other: AnyPgColumn | SQL): SQL 
 }
 
 /** COM07: Rechte an Gruppeninhalten entstehen nur aus aktiver Mitgliedschaft. */
-export function activeMemberOf(accountId: string | AnyPgColumn, groupCol: AnyPgColumn | SQL): SQL<boolean> {
+export function activeMemberOf(accountRef: string | AnyPgColumn, groupRef: AnyPgColumn | SQL): SQL<boolean> {
+  const accountId = ref(accountRef);
+  const groupCol = ref(groupRef);
   return sql<boolean>`exists (
     select 1 from community.group_memberships gm
     where gm.group_id = ${groupCol} and gm.account_id = ${accountId} and gm.status = 'active'
@@ -59,7 +75,8 @@ export function activeMemberOf(accountId: string | AnyPgColumn, groupCol: AnyPgC
 }
 
 /** Konten in Löschung oder gelöscht erscheinen nicht mehr als Autor (PRI05). */
-export function authorPresent(authorCol: AnyPgColumn): SQL<boolean> {
+export function authorPresent(authorRef: AnyPgColumn): SQL<boolean> {
+  const authorCol = qcol(authorRef);
   return sql<boolean>`exists (
     select 1 from identity.accounts a
     where a.id = ${authorCol} and a.status not in ('deleted', 'deletion_pending')
@@ -67,7 +84,8 @@ export function authorPresent(authorCol: AnyPgColumn): SQL<boolean> {
 }
 
 /** Aktive Rollen eines Kontos, damit Mitarbeitende als «Team» erkennbar sind (PRD 10 «Kalte Startphase»). */
-export function rolesOf(accountCol: AnyPgColumn): SQL<string[] | null> {
+export function rolesOf(accountRef: AnyPgColumn): SQL<string[] | null> {
+  const accountCol = qcol(accountRef);
   return sql<string[] | null>`(
     select array_agg(distinct ra.role::text) from identity.role_assignments ra
     where ra.account_id = ${accountCol} and ra.revoked_at is null and ra.starts_at <= now()
@@ -285,7 +303,7 @@ export async function loadPostAccess(viewer: ViewerRef, postId: string, executor
       member: activeMemberOf(viewer.accountId, posts.groupId),
       memberRulesVersion: sql<string | null>`(
         select gm.rules_version_accepted from community.group_memberships gm
-        where gm.group_id = ${posts.groupId} and gm.account_id = ${viewer.accountId} and gm.status = 'active'
+        where gm.group_id = ${qcol(posts.groupId)} and gm.account_id = ${viewer.accountId} and gm.status = 'active'
       )`,
       blocked: blockedWith(viewer.accountId, posts.authorId),
       authorPresent: authorPresent(posts.authorId),
@@ -603,7 +621,7 @@ export async function searchMembersForViewer(viewer: ViewerRef, q: string, limit
         sql`${communityProfiles.accountId} <> ${viewer.accountId}`,
         sql`${communityProfiles.pseudonymNormalized} like ${`%${escaped}%`}`,
         notBlockedWith(viewer.accountId, communityProfiles.accountId),
-        sql`exists (select 1 from identity.accounts a where a.id = ${communityProfiles.accountId} and a.status in ('active', 'restricted'))`,
+        sql`exists (select 1 from identity.accounts a where a.id = ${qcol(communityProfiles.accountId)} and a.status in ('active', 'restricted'))`,
       ),
     )
     .orderBy(

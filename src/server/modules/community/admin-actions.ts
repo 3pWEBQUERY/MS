@@ -10,7 +10,7 @@ import { actionStaff, type Viewer } from "../../auth/viewer";
 import { db } from "../../db";
 import { groupMemberships, groups, roleAssignments, topics } from "../../db/schema";
 import { notify } from "../messaging/notify";
-import { isUuid } from "./queries";
+import { isUuid, qcol } from "./queries";
 
 /**
  * S55 Gruppenverwaltung (COM06–COM08). Gruppen werden im MVP ausschliesslich durch
@@ -189,7 +189,7 @@ export async function decideRequestAction(_prev: ActionState, formData: FormData
             eq(groupMemberships.id, membershipId),
             eq(groupMemberships.status, "requested"),
             // Archivierte Gruppen nehmen niemanden mehr auf (COM08).
-            sql`exists (select 1 from community.groups g where g.id = ${groupMemberships.groupId} and g.status = 'active')`,
+            sql`exists (select 1 from community.groups g where g.id = ${qcol(groupMemberships.groupId)} and g.status = 'active')`,
           ),
         )
         .returning({ id: groupMemberships.id, accountId: groupMemberships.accountId, groupId: groupMemberships.groupId, version: groupMemberships.version });

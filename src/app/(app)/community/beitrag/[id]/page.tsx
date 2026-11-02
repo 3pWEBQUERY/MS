@@ -88,12 +88,18 @@ async function PostView({
           <article aria-label="Beitrag" className="flex flex-col gap-5 rounded-[20px] border border-line bg-surface p-5 sm:p-6">
             <div className="flex flex-wrap items-center gap-2">
               {/* COM04: nie als «geprüft» gekennzeichnet – Erfahrung, kein Fachinhalt */}
-              <Badge tone="neutral" icon="message">
-                Persönliche Erfahrung
-              </Badge>
+              {post.author.team ? (
+                <Badge tone="neutral" icon="shield">
+                  Beitrag des Teams
+                </Badge>
+              ) : (
+                <Badge tone="neutral" icon="message">
+                  Persönliche Erfahrung
+                </Badge>
+              )}
               {post.group && (
                 <Badge tone="outline" icon={post.group.type === "closed" ? "lock" : "users"}>
-                  <span className="max-w-[16rem] truncate">Gruppe {post.group.title}</span>
+                  <span className="max-w-[11rem] truncate sm:max-w-[16rem]">Gruppe {post.group.title}</span>
                 </Badge>
               )}
             </div>

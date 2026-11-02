@@ -57,3 +57,19 @@ export async function getActiveMomentConfig(): Promise<MomentConfig> {
     return DEFAULT_MOMENT_CONFIG;
   }
 }
+
+/** Versionen für die Verwaltung (neueste zuerst). */
+export async function listMomentVersions(limit = 50) {
+  return db
+    .select({
+      id: momentRules.id,
+      versionLabel: momentRules.versionLabel,
+      active: momentRules.active,
+      config: momentRules.config,
+      publishedAt: momentRules.publishedAt,
+      createdAt: momentRules.createdAt,
+    })
+    .from(momentRules)
+    .orderBy(desc(momentRules.createdAt))
+    .limit(limit);
+}

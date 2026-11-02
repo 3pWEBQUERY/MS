@@ -126,7 +126,7 @@ export function MeasureForm({
 
   return (
     <form action={action} className="flex flex-col gap-6" onChange={(e) => {
-      const t = e.target as HTMLInputElement;
+      const t = e.target as unknown as HTMLInputElement;
       if (t.name === "kind") setKind(t.value as ActionKind);
     }}>
       <Hidden fields={caseRef} />

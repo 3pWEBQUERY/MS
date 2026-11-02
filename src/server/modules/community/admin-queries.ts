@@ -2,7 +2,7 @@ import "server-only";
 import { and, asc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 import { db } from "../../db";
 import { communityProfiles, groupMemberships, groups, roleAssignments, topics } from "../../db/schema";
-import { isUuid } from "./queries";
+import { isUuid, qcol } from "./queries";
 
 /**
  * S55 Gruppenverwaltung (COM06–COM08). Nur für Seiten unter /verwaltung mit requireStaff.
@@ -20,7 +20,7 @@ export async function listGroupsForAdmin() {
       status: groups.status,
       topic: topics.name,
       moderator: communityProfiles.pseudonym,
-      pending: sql<number>`(select count(*)::int from community.group_memberships gm where gm.group_id = ${groups.id} and gm.status = 'requested')`,
+      pending: sql<number>`(select count(*)::int from community.group_memberships gm where gm.group_id = ${qcol(groups.id)} and gm.status = 'requested')`,
     })
     .from(groups)
     .leftJoin(topics, eq(topics.id, groups.topicId))

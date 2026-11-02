@@ -27,7 +27,7 @@ export function PostCard({
         <Badge>{post.topic.name}</Badge>
         {showGroup && post.group && (
           <Badge tone="outline" icon={post.group.type === "closed" ? "lock" : "users"}>
-            <span className="max-w-[16rem] truncate">Gruppe {post.group.title}</span>
+            <span className="max-w-[11rem] truncate sm:max-w-[16rem]">Gruppe {post.group.title}</span>
           </Badge>
         )}
       </div>

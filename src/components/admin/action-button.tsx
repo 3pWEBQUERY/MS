@@ -8,6 +8,17 @@ import { idle, type ActionState } from "@/lib/action-state";
 
 export type FormAction = (prev: ActionState, formData: FormData) => Promise<ActionState>;
 
+/** Zähler, der nach jedem bestätigten Erfolg steigt – als key für kontrollierte Felder, die geleert werden sollen. */
+export function useSuccessKey(state: ActionState): number {
+  const [gen, setGen] = useState(0);
+  const [seen, setSeen] = useState(state);
+  if (seen !== state) {
+    setSeen(state);
+    if (state.status === "success") setGen((g) => g + 1);
+  }
+  return gen;
+}
+
 /** Versteckte Felder (nur IDs und Versionen, keine sensiblen Werte). */
 export function Hidden({ fields }: { fields: Record<string, string | number> }) {
   return (
