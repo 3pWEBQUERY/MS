@@ -51,10 +51,10 @@
   --focus: #b8400f;
 
   /* Datenvisualisierung */
-  --chart-energy: #b8400f;
-  --chart-mood: #24508f;
-  --chart-fatigue: #1d5c57;
-  --chart-symptom: #6b4c9a;
+  --chart-energy: #c2410c;
+  --chart-mood: #2f5fb3;
+  --chart-fatigue: #7a4bb5;
+  --chart-symptom: #0f766e;
 }
 
 :root[data-theme="dark"] {
@@ -86,9 +86,9 @@
   --info-soft: #17243a;
   --focus: #f2814b;
   --chart-energy: #f2814b;
-  --chart-mood: #8ab4f0;
-  --chart-fatigue: #6cc1b8;
-  --chart-symptom: #b79be0;
+  --chart-mood: #7fa8f0;
+  --chart-fatigue: #c3a2f0;
+  --chart-symptom: #4fc4b3;
 }
 
 @theme inline {

@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Icon, type IconName } from "@/components/ui/icon";
-import { PageSkeleton } from "@/components/ui/primitives";
+import { Notice, PageSkeleton, Skeleton } from "@/components/ui/primitives";
+import { RecentEntries } from "@/components/health/recent-entries";
+import { getTodayCheckIn } from "@/server/modules/health/queries";
 import { DEFAULT_MOMENT_CONFIG, resolveMoment, type MomentIntent } from "@/lib/moment";
 import { requireViewer } from "@/server/auth/viewer";
 import { MeinMoment } from "./mein-moment";
@@ -10,10 +12,10 @@ import { MeinMoment } from "./mein-moment";
 export const metadata: Metadata = { title: "Heute" };
 
 /** S18 Dashboard Heute (HOM01–HOM05): ohne Daten voll nutzbar, keine Warnpunkte, keine Streaks. */
-export default function TodayPage() {
+export default function TodayPage({ searchParams }: PageProps<"/heute">) {
   return (
     <Suspense fallback={<PageSkeleton rows={3} />}>
-      <Today />
+      <Today searchParams={searchParams} />
     </Suspense>
   );
 }
@@ -24,8 +26,11 @@ function greeting(hour: number) {
   return "Guten Abend";
 }
 
-async function Today() {
+async function Today({ searchParams }: { searchParams: PageProps<"/heute">["searchParams"] }) {
   const viewer = await requireViewer();
+  const sp = await searchParams;
+  const savedCheckIn = sp.gespeichert === "checkin";
+  const today = viewer.healthActive ? await getTodayCheckIn(viewer) : null;
   const hour = Number(new Intl.DateTimeFormat("de-CH", { hour: "numeric", hourCycle: "h23", timeZone: viewer.prefs.timezone }).format(new Date()));
   const healthDeclined = viewer.healthDecided && !viewer.healthActive;
   const opts = { healthActive: viewer.healthActive, healthDeclined };
@@ -34,7 +39,12 @@ async function Today() {
   ) as Record<MomentIntent, ReturnType<typeof resolveMoment>>;
 
   const quick: { href: string; label: string; icon: IconName; hide?: boolean }[] = [
-    { href: viewer.healthActive ? "/mein-ms/check-in" : "/mein-ms", label: "Check-in", icon: "battery", hide: healthDeclined },
+    {
+      href: today ? today.href : "/mein-ms",
+      label: today?.exists ? "Check-in von heute" : "Check-in",
+      icon: "battery",
+      hide: healthDeclined,
+    },
     { href: viewer.healthActive ? "/mein-ms/eintrag/neu" : "/mein-ms", label: "Neuer Eintrag", icon: "plus", hide: healthDeclined },
     { href: "/community/gruppen", label: "Gruppen", icon: "users" },
     { href: "/wissen", label: "Wissen", icon: "book" },
@@ -51,6 +61,12 @@ async function Today() {
           {greeting(hour)}, {viewer.pseudonym}
         </h1>
       </header>
+
+      {savedCheckIn && (
+        <Notice tone="success" role="status" title="Dein Check-in ist gespeichert.">
+          Nur du siehst ihn. Du kannst ihn jederzeit in Mein MS ändern oder löschen.
+        </Notice>
+      )}
 
       <MeinMoment
         targets={targets}
@@ -77,6 +93,10 @@ async function Today() {
             ))}
         </ul>
       </section>
+
+      <Suspense fallback={<Skeleton className="h-48 w-full rounded-[20px]" />}>
+        <RecentEntries viewer={viewer} />
+      </Suspense>
     </div>
   );
 }
