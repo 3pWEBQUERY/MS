@@ -36,6 +36,8 @@ export const privacyRequests = privacy.table(
     identityMethod: text("identity_method").notNull(),
     dueAt: ts("due_at").notNull(),
     exceptionNote: text("exception_note"),
+    /** Begründete Ausnahmen sind befristet und werden regelmässig geprüft (PRI06) */
+    exceptionUntil: ts("exception_until"),
     handledBy: uuid("handled_by").references(() => accounts.id),
     completedAt: ts("completed_at"),
     createdAt: createdAt(),

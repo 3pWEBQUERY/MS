@@ -6,6 +6,7 @@ import { z } from "zod";
 import { actionViewer } from "../../auth/viewer";
 import { db } from "../../db";
 import { bookmarks } from "../../db/schema";
+import { canViewPost, isUuid, loadPostAccess } from "./queries";
 
 const input = z.object({
   targetType: z.enum(["post", "article", "offer"]),
@@ -26,6 +27,9 @@ export async function toggleBookmarkAction(targetType: string, targetId: string,
     return { saved: !save, error: "Bitte melde dich an, um Inhalte zu speichern." };
   }
   if (save) {
+    // HOM04: nur zugängliche Beiträge speichern (Gruppenmitgliedschaft, Blockierung, Status).
+    if (parsed.data.targetType === "post" && !canViewPost(viewer, await loadPostAccess(viewer, parsed.data.targetId)))
+      return { saved: false, error: "Dieser Beitrag kann nicht gespeichert werden." };
     await db
       .insert(bookmarks)
       .values({ accountId: viewer.accountId, targetType: parsed.data.targetType, targetId: parsed.data.targetId })
@@ -43,4 +47,18 @@ export async function toggleBookmarkAction(targetType: string, targetId: string,
   }
   refresh();
   return { saved: save };
+}
+
+/** S27: privaten Verweis entfernen – auch wenn das Ziel nicht mehr zugänglich ist (HOM04). */
+export async function removeBookmarkAction(formData: FormData): Promise<void> {
+  const id = formData.get("bookmarkId");
+  if (!isUuid(id)) return;
+  let viewer;
+  try {
+    viewer = await actionViewer();
+  } catch {
+    return;
+  }
+  await db.delete(bookmarks).where(and(eq(bookmarks.id, id), eq(bookmarks.accountId, viewer.accountId)));
+  refresh();
 }

@@ -69,6 +69,16 @@ import {
   Image as ImageIcon,
   Server,
   ToggleLeft,
+  LayoutDashboard,
+  ScrollText,
+  Gavel,
+  UserCog,
+  Hourglass,
+  ShieldAlert,
+  ListChecks,
+  Smartphone,
+  Monitor,
+  Tablet,
   type LucideProps,
 } from "lucide-react";
 
@@ -147,6 +157,16 @@ const ICONS = {
   image: ImageIcon,
   server: Server,
   toggle: ToggleLeft,
+  dashboard: LayoutDashboard,
+  audit: ScrollText,
+  gavel: Gavel,
+  "user-cog": UserCog,
+  hourglass: Hourglass,
+  "shield-alert": ShieldAlert,
+  "list-checks": ListChecks,
+  smartphone: Smartphone,
+  monitor: Monitor,
+  tablet: Tablet,
 } as const;
 
 export type IconName = keyof typeof ICONS;
