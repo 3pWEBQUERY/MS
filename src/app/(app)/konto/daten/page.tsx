@@ -4,14 +4,15 @@ import { Suspense } from "react";
 import { AccountNav } from "@/components/account/account-nav";
 import { ActionButton } from "@/components/account/action-button";
 import { ExportStatusBadge } from "@/components/account/export-status";
+import { RequestStatusBadge } from "@/components/account/request-status";
 import { ReauthNotice } from "@/components/account/reauth-notice";
 import { Icon } from "@/components/ui/icon";
-import { Badge, Card, Notice, PageHeader, PageSkeleton, SectionHeader, Table } from "@/components/ui/primitives";
+import { Card, Notice, PageHeader, PageSkeleton, SectionHeader, Table } from "@/components/ui/primitives";
 import { formatDate, formatDateTime } from "@/lib/time";
 import { hasRecentAuth, requireViewer } from "@/server/auth/viewer";
 import { requestAccessAction } from "@/server/modules/privacy/actions";
 import { listOwnExports } from "@/server/modules/privacy/export";
-import { listOwnRequests, REQUEST_STATUS_LABEL, REQUEST_TYPE_LABEL } from "@/server/modules/privacy/requests";
+import { listOwnRequests, REQUEST_TYPE_LABEL } from "@/server/modules/privacy/requests";
 import { storageConfigured } from "@/server/storage";
 import { StartExportForm } from "./start-export-form";
 
@@ -169,9 +170,7 @@ async function Data() {
                   <td className="tabular font-mono">{r.receiptNumber}</td>
                   <td>{REQUEST_TYPE_LABEL[r.type]}</td>
                   <td>
-                    <Badge tone={r.status === "completed" ? "success" : r.status === "rejected" ? "neutral" : "info"}>
-                      {REQUEST_STATUS_LABEL[r.status]}
-                    </Badge>
+                    <RequestStatusBadge status={r.status} />
                   </td>
                   <td className="whitespace-nowrap">{formatDate(r.createdAt, tz)}</td>
                 </tr>
