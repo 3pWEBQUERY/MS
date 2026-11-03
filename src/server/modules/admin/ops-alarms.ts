@@ -1,7 +1,9 @@
 import "server-only";
-import { sql as dsql } from "drizzle-orm";
+import { inArray, sql as dsql } from "drizzle-orm";
+import { missingOrganisationFields } from "@/lib/organisation";
 import { errorRatePercent } from "@/lib/request-counter";
 import { db } from "../../db";
+import { pages } from "../../db/schema";
 
 /**
  * Betriebsalarme (NFR16, NFR19): gemeinsame Prüfung für Worker («[alarm]»-Logzeilen), S60 und
@@ -51,6 +53,17 @@ export async function currentAlarms(): Promise<AlarmCheck[]> {
   if (rate !== null) out.push({ code: "http_5xx_rate", value: rate });
   // NFR16/NFR07: Sicherung veraltet (stündlicher Plan + Puffer) oder letzter Lauf gescheitert.
   // Ohne je protokollierten Lauf (z. B. lokale Entwicklung) kein Alarm.
+  // S50/PRI01: Rechtstexte mit fehlenden Angaben der Trägerschaft – nur ausserhalb der Demo
+  // Eigener try-Block: diese Prüfung darf die übrigen Alarme nie verhindern.
+  if (process.env.DEMO_MODE !== "true") {
+    try {
+      const legal = await db.select({ body: pages.body }).from(pages).where(inArray(pages.slug, ["impressum", "datenschutz", "bedingungen"]));
+      const missing = missingOrganisationFields(legal.map((p) => p.body));
+      if (missing.length > 0) out.push({ code: "legal_placeholders", value: missing.length });
+    } catch {
+      out.push({ code: "legal_check_failed", value: 1 });
+    }
+  }
   if (row.backup_runs > 0) {
     if (row.backup_age_min < 0 || row.backup_age_min > BACKUP_STALE_MINUTES) out.push({ code: "backup_stale", value: Math.max(row.backup_age_min, 0) });
     if (row.backup_last_failed) out.push({ code: "backup_failed", value: 1 });

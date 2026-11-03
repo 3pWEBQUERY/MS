@@ -25,5 +25,6 @@ export const ALARM_LABEL: Record<string, string> = {
   http_5xx_rate: "Fehlerquote der Web-App über 2 % (5 Minuten)",
   backup_stale: "Letzte erfolgreiche Sicherung älter als 2 Stunden (Minuten)",
   backup_failed: "Letzter Sicherungslauf fehlgeschlagen",
+  legal_placeholders: "Rechtstexte mit fehlenden Angaben der Trägerschaft (Anzahl Felder, ORG_*)",
   worker_inactive: "Hintergrundarbeiter ohne Lebenszeichen",
 };

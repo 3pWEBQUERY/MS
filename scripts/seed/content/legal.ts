@@ -61,8 +61,8 @@ Die Community ist kein Notfalldienst. Bei akuter Gefahr ruf den Sanitätsnotruf 
 Schon die Mitgliedschaft auf einer Plattform für Menschen mit MS lässt Rückschlüsse auf deine Gesundheit zu. Wir behandeln deshalb auch Kontodaten mit besonderer Sorgfalt.
 
 ## Verantwortliche Stelle
-[Name und Adresse der Trägerschaft – vor Pilotstart festzulegen]
-Kontakt für Datenschutzanliegen: über das Kontaktformular, Kategorie «Datenschutz und meine Rechte», oder per E-Mail an die Datenschutzkontaktstelle [Adresse folgt].
+{{org.name}}, {{org.street}}, {{org.zipCity}}, Schweiz
+Kontakt für Datenschutzanliegen: über das Kontaktformular, Kategorie «Datenschutz und meine Rechte», oder per E-Mail an die Datenschutzkontaktstelle {{org.privacyEmail}}.
 
 ## Welche Daten wir bearbeiten und wozu
 - Konto: E-Mail-Adresse, Passwort (nur als sicherer Hash), Anmeldezeiten – um dir einen sicheren Zugang zu ermöglichen.
@@ -76,10 +76,10 @@ Kontakt für Datenschutzanliegen: über das Kontaktformular, Kategorie «Datensc
 
 ## Wer Daten erhält
 Mitarbeitende sehen nur, was ihre Aufgabe erfordert. Die Moderation sieht gemeldete Inhalte, aber kein Tagebuch. Für den Betrieb setzen wir Dienstleister ein, etwa für Hosting, Datenbank, Objektablage und E-Mail-Versand. Sie bearbeiten Daten nur in unserem Auftrag.
-[Liste der Dienstleister mit Sitz und Datenstandort – vor Pilotstart zu ergänzen]
+{{org.processors}}
 
 ## In welchen Ländern
-Ziel ist eine primäre Datenhaltung einschliesslich Backups in der Schweiz. Ob Daten in andere Länder bekanntgegeben werden, etwa durch Fernzugriffe von Dienstleistern, wird vor dem Pilotstart geprüft und hier offengelegt.
+Ziel ist eine primäre Datenhaltung einschliesslich Backups in der Schweiz. Aktueller Datenstandort und Länder, in die Daten bekanntgegeben werden (etwa durch Fernzugriffe von Dienstleistern): {{org.dataLocations}}
 
 ## Wie lange wir Daten aufbewahren
 Die folgenden Fristen sind vorgeschlagene betriebliche Obergrenzen und werden vor dem Pilotstart geprüft.
@@ -152,19 +152,19 @@ Wenn sich diese Bedingungen wesentlich ändern, informieren wir dich und zeigen 
     body: `${DRAFT_NOTE}
 
 ## Betreiberin
-[Name der Trägerschaft]
-[Rechtsform]
-[Strasse und Hausnummer]
-[Postleitzahl und Ort], Schweiz
+{{org.name}}
+{{org.legalForm}}
+{{org.street}}
+{{org.zipCity}}, Schweiz
 
 ## Kontakt
 Bitte nutze das Kontaktformular. Es ist kein Notfallkanal – bei akuter Gefahr ruf den Sanitätsnotruf 144 an.
 
 ## Verantwortlich für den Inhalt
-- Produktverantwortung: [Name folgt]
-- Medizinische Redaktionsleitung: [Name folgt]
-- Moderationsleitung: [Name folgt]
-- Datenschutzkontaktstelle: [Name folgt]
+- Produktverantwortung: {{org.productOwner}}
+- Medizinische Redaktionsleitung: {{org.medicalLead}}
+- Moderationsleitung: {{org.moderationLead}}
+- Datenschutzkontaktstelle: {{org.privacyContact}}
 
 ## Hinweis zu Inhalten
 Die Wissensartikel enthalten allgemeine Informationen und ersetzen keine ärztliche oder therapeutische Beratung. Beiträge in der Community geben die persönliche Sicht der Mitglieder wieder und sind nicht fachlich geprüft.

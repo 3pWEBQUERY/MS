@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { EmptyState, PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { fillOrganisation } from "@/lib/organisation";
 import { formatDate } from "@/lib/time";
 import { getLegalPage, type LegalSlug } from "@/server/modules/content/legal";
 import { PageContainer } from "./page-container";
@@ -42,7 +43,8 @@ async function LegalPageContent({ slug, eyebrow, after }: { slug: LegalSlug; eye
           {/* Ruhige Lesespalte (.prose-ms), Rückfragen als Randspalte */}
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-20">
             <div className="flex min-w-0 flex-col gap-12">
-              <RichText text={page.body} />
+              {/* Angaben der Trägerschaft aus den Umgebungsvariablen (src/lib/organisation.ts) */}
+              <RichText text={fillOrganisation(page.body)} />
               {after}
             </div>
             <aside aria-label="Fragen zu diesem Text" className="flex flex-col gap-3 border-t border-ink pt-5 lg:sticky lg:top-28 lg:self-start">
