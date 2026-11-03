@@ -21,6 +21,7 @@ Prüfung jeder Anforderungs-ID der PRD (`docs/PRD.md`, Kapitel in `docs/prd/`) g
 - `npm run check:lines` – keine Datei über 600 Zeilen
 - `.github/workflows/ci.yml` – Pipeline mit Typen, Lint, Tests, Zeilenregel, Audit und Build
 - `docs/RUNBOOKS.md` – Betriebsabläufe für Störungen (R1–R9, R9 Schlüsselrotation mit `scripts/rotate-data-key.ts`)
+- `npm run drill:restore` – Restore-Übung mit Löschjournal auf Kopien (NFR08, AT09)
 - `npm run drill:worker` – Wiederanlauf-Übung des Arbeiters (Absturz, Wiederaufnahme, geordnetes Herunterfahren, Backoff; NFR19)
 - `npm run help:serve` – eigenständiger Hilfe-Dienst ohne Next.js (NFR20, Railway-Service `hilfe`)
 - `.github/workflows/uptime.yml` – externer Verfügbarkeitsprüfer alle 5 Minuten (NFR06)

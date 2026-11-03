@@ -21,7 +21,8 @@
     "help:serve": "tsx src/static-help/server.ts",
     "drill:worker": "tsx scripts/drills/worker-restart.ts",
     "backup:run": "tsx scripts/backup/run.ts",
-    "backup:restore": "tsx scripts/backup/restore.ts"
+    "backup:restore": "tsx scripts/backup/restore.ts",
+    "drill:restore": "tsx --conditions=react-server scripts/drills/restore.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1161.0",
