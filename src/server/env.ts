@@ -13,11 +13,13 @@ function read(name: string, fallback?: string): string {
 }
 
 const isProd = process.env.NODE_ENV === "production";
+/** Beim Build wird nicht auf die Datenbank zugegriffen; ein Platzhalter genügt dort. */
+const isBuild = process.env.NEXT_PHASE === "phase-production-build";
 
 export const env = {
   isProd,
   appUrl: read("APP_URL", process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "http://localhost:3000"),
-  databaseUrl: () => read("DATABASE_URL", "postgres://postgres@localhost:5432/ms"),
+  databaseUrl: () => read("DATABASE_URL", isProd && !isBuild ? undefined : "postgres://postgres@localhost:5432/ms"),
   /** 32 Byte, base64. Lokal wird ein abgeleiteter Entwicklungsschlüssel verwendet. */
   dataKey: () => read("DATA_ENCRYPTION_KEY", isProd ? undefined : "ZGV2LW9ubHktZGF0YS1rZXktbm90LWZvci1wcm9kISE="),
   bucket: {

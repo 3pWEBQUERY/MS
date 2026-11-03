@@ -77,11 +77,23 @@ async function runPeriodic(lastRun: Map<string, number>) {
 async function main() {
   console.log("[worker] gestartet");
   const lastRun = new Map<string, number>();
+  let failures = 0;
   while (!stopping) {
-    const batch = await claimBatch();
-    for (const ev of batch) await processOne(ev);
-    await runPeriodic(lastRun);
-    if (batch.length === 0) await new Promise((r) => setTimeout(r, POLL_MS));
+    try {
+      const batch = await claimBatch();
+      for (const ev of batch) await processOne(ev);
+      await runPeriodic(lastRun);
+      if (failures > 0) console.log("[worker] Datenbank wieder erreichbar");
+      failures = 0;
+      if (batch.length === 0) await new Promise((r) => setTimeout(r, POLL_MS));
+    } catch (err) {
+      // Vorübergehende Störung (z. B. Datenbank startet noch): nicht abstürzen, mit Backoff wiederholen (NFR19).
+      failures += 1;
+      const waitMs = Math.min(60_000, 1000 * 2 ** Math.min(failures, 6));
+      const code = (err as { cause?: { code?: string }; code?: string })?.cause?.code ?? (err as { code?: string })?.code ?? "error";
+      console.error(`[worker] Durchlauf fehlgeschlagen (${code}), neuer Versuch in ${Math.round(waitMs / 1000)} s`);
+      await new Promise((r) => setTimeout(r, waitMs));
+    }
   }
   await sql.end({ timeout: 5 });
   console.log("[worker] beendet");
