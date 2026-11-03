@@ -127,6 +127,7 @@ export function PageHeader({
   actions,
   back,
   size = "md",
+  flush = false,
   className,
 }: {
   eyebrow?: ReactNode;
@@ -136,10 +137,12 @@ export function PageHeader({
   back?: { href: string; label: string };
   /** «lg» für Einstiegsseiten (Wissen, Hilfe, Artikel) */
   size?: "md" | "lg";
+  /** ohne untere Haarlinie – wenn der erste Abschnitt selbst mit einer Linie beginnt */
+  flush?: boolean;
   className?: string;
 }) {
   return (
-    <header className={cn("mb-8 flex flex-col gap-5 border-b border-line pb-8 sm:mb-10 sm:pb-10", className)}>
+    <header className={cn("flex flex-col gap-5", flush ? "pb-8 sm:pb-10" : "mb-8 border-b border-line pb-8 sm:mb-10 sm:pb-10", className)}>
       {back && <BackLink href={back.href}>{back.label}</BackLink>}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex max-w-3xl flex-col gap-4">
@@ -207,14 +210,26 @@ export function EmptyState({
   title,
   children,
   action,
+  variant = "card",
   className,
 }: {
   icon?: IconName;
   title: ReactNode;
   children?: ReactNode;
   action?: ReactNode;
+  /** «plain»: zwischen Haarlinien, ohne Kachel – für leere Listen im Editorial-Raster */
+  variant?: "card" | "plain";
   className?: string;
 }) {
+  if (variant === "plain") {
+    return (
+      <div className={cn("flex flex-col items-start gap-3 border-y border-line py-8", className)}>
+        <p className="display-sm">{title}</p>
+        {children && <div className="max-w-xl text-base text-ink-2">{children}</div>}
+        {action}
+      </div>
+    );
+  }
   return (
     <div
       className={cn(

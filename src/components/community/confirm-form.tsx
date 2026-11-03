@@ -51,7 +51,7 @@ export function ConfirmForm({
   }, idle);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col items-start gap-2">
       <Button
         ref={trigger}
         variant={triggerVariant}

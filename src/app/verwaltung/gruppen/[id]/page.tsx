@@ -193,7 +193,7 @@ async function Content({
         )}
 
         {isAdmin && (
-          <section aria-labelledby="archive" className="flex flex-col gap-3 border-t border-ink pt-5">
+          <section aria-labelledby="archive" className="flex flex-col items-start gap-3 border-t border-ink pt-5">
             <h2 id="archive" className="text-xl font-[650] text-ink">
               {archived ? "Gruppe wieder aktivieren" : "Gruppe archivieren"}
             </h2>

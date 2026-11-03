@@ -116,8 +116,15 @@ async function Security({ searchParams }: { searchParams: PageProps<"/konto/sich
           </div>
           <ol className="grid border-t border-ink lg:grid-cols-2">
             <li className="flex flex-col gap-5 border-b border-line py-8 lg:border-b-0 lg:border-r lg:pr-10">
-              <p className="flex items-baseline gap-3 font-display text-[1.5rem] leading-tight tracking-[-0.015em] text-ink">
-                <span className="font-mono text-sm tracking-[0.08em] text-accent-ink">1</span> · QR-Code scannen
+              {/* Zugänglicher Name bleibt «1 · QR-Code scannen»; die Ziffer steht als Mono-Auszeichnung über dem Titel */}
+              <p className="flex flex-col gap-2 font-display text-[1.5rem] leading-tight tracking-[-0.015em] text-ink">
+                <span aria-hidden="true" className="font-mono text-[0.8125rem] font-medium tracking-[0.12em] text-accent-ink">
+                  01
+                </span>
+                <span>
+                  <span className="sr-only">1 · </span>
+                  QR-Code scannen
+                </span>
               </p>
               <div className="w-fit rounded-[20px] border border-line bg-surface p-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -141,8 +148,15 @@ async function Security({ searchParams }: { searchParams: PageProps<"/konto/sich
               </div>
             </li>
             <li className="flex flex-col gap-5 py-8 lg:pl-10">
-              <p className="flex items-baseline gap-3 font-display text-[1.5rem] leading-tight tracking-[-0.015em] text-ink">
-                <span className="font-mono text-sm tracking-[0.08em] text-accent-ink">2</span> · Code bestätigen
+              {/* Zugänglicher Name bleibt «2 · Code bestätigen»; die Ziffer steht als Mono-Auszeichnung über dem Titel */}
+              <p className="flex flex-col gap-2 font-display text-[1.5rem] leading-tight tracking-[-0.015em] text-ink">
+                <span aria-hidden="true" className="font-mono text-[0.8125rem] font-medium tracking-[0.12em] text-accent-ink">
+                  02
+                </span>
+                <span>
+                  <span className="sr-only">2 · </span>
+                  Code bestätigen
+                </span>
               </p>
               {recent ? <MfaConfirmForm /> : <ReauthNotice next="/konto/sicherheit" />}
             </li>

@@ -84,7 +84,7 @@ Fraunces (Display-Serif, nur ≥ 24px), Atkinson Hyperlegible Next (Text, UI) un
 |---|---|
 | `button.tsx` | `Button`, `ButtonLink`, `IconButton`, `buttonClass(variant,size)` – Varianten `primary accent secondary ghost danger quiet-danger`, Grössen `sm md lg` |
 | `form.tsx` (client) | `Field` (Label, Hinweis, Fehler via aria-describedby; Render-Prop), `Input`, `Textarea`, `Select`, `CountedTextarea` (Zeichenzähler + Entfernen), `Checkbox`, `RadioCards`, `ScalePicker` (Skala ohne Vorauswahl, «nicht erfasst»), `Switch`, `SubmitButton` (Pending), `FormMessage` (Live-Region für ActionState), `UnsavedChangesGuard`, `OperationId` (idempotente Vorgangskennung) |
-| `primitives.tsx` | `IndexList` + `IndexRow` (Haarlinien-Zeilen mit Ziffer und Pfeil – **erste Wahl für Listen von Links**), `Card` (tone surface/sunk/accent/verified/ink → `ink` = tiefe Fläche), `CardLink`, `Badge`, `Notice`, `PageHeader`, `SectionHeader`, `BackLink`, `EmptyState`, `Skeleton`, `PageSkeleton`, `KeyValue`, `Table`, `Monogram`, `SegmentNav`, `ExternalLink`, `Divider`, `PlainText` (Text ohne HTML, Links erkennbar) |
+| `primitives.tsx` | `PageHeader` (`size="lg"`, `flush`), `EmptyState` (`variant="plain"`), `IndexList` + `IndexRow` (Haarlinien-Zeilen mit Ziffer und Pfeil – **erste Wahl für Listen von Links**), `Card` (tone surface/sunk/accent/verified/ink → `ink` = tiefe Fläche), `CardLink`, `Badge`, `Notice`, `PageHeader`, `SectionHeader`, `BackLink`, `EmptyState`, `Skeleton`, `PageSkeleton`, `KeyValue`, `Table`, `Monogram`, `SegmentNav`, `ExternalLink`, `Divider`, `PlainText` (Text ohne HTML, Links erkennbar) |
 | `dialog.tsx` (client) | `Dialog` (native `<dialog>`, Fokusverwaltung) |
 | `icon.tsx` | `Icon name=…` (lucide, siehe Liste in der Datei; bei Bedarf dort ergänzen) |
 

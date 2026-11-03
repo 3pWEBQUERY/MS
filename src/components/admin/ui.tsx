@@ -79,7 +79,7 @@ export function StatTile({
 }) {
   const body = (
     <>
-      <span className="flex min-h-[2.75rem] items-start justify-between gap-2">
+      <span className="flex items-start justify-between gap-2 min-[360px]:min-h-[2.75rem]">
         <span className="flex min-w-0 items-start gap-2 text-sm font-semibold leading-snug text-ink-2">
           {icon && <Icon name={icon} className="mt-0.5 size-4 shrink-0 text-ink-3" />}
           <span className="min-w-0 hyphens-auto">{label}</span>
@@ -116,7 +116,7 @@ export function StatGrid({ children, className, cols = 4 }: { children: ReactNod
   const lg = { 2: "lg:grid-cols-2", 3: "lg:grid-cols-3", 4: "lg:grid-cols-4" }[cols];
   return (
     <div className={cn("overflow-hidden border-b border-t border-b-line border-t-ink", className)}>
-      <div className={cn("-ml-px -mt-px grid grid-cols-2", lg)}>{children}</div>
+      <div className={cn("-ml-px -mt-px grid grid-cols-1 min-[360px]:grid-cols-2", lg)}>{children}</div>
     </div>
   );
 }

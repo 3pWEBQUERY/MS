@@ -109,12 +109,7 @@ export function OnboardingForm({ initialGoal }: { initialGoal?: string }) {
           ))}
         </ol>
         <p className="eyebrow">
-          <span className="index" aria-hidden="true">
-            {two(step + 1)}
-          </span>
-          <span>
-            Schritt {step + 1} von {STEPS.length} · {current.eyebrow}
-          </span>
+          Schritt {step + 1} von {STEPS.length} · {current.eyebrow}
         </p>
         <h1 ref={headingRef} tabIndex={-1} className="display-md outline-none">
           {current.lead} <em>{current.accent}</em>

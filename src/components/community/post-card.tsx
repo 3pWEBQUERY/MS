@@ -26,12 +26,18 @@ export function PostCard({
   const H = headingLevel;
   const heading = post.title ?? post.excerpt.slice(0, 90) + (post.excerpt.length > 90 ? " …" : "");
   return (
-    <article className="grid gap-x-10 gap-y-3 py-7 sm:py-8 md:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]">
+    <article
+      className={cn(
+        "grid gap-x-10 gap-y-3 py-7 sm:py-8",
+        // Zweispaltig nur im breiten Feed; im Gruppenraum (schmale Spalte) steht die Rubrik über dem Titel.
+        showGroup && "md:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]",
+      )}
+    >
       {/* Rubrik: Thema und Zielgruppe – Mono, ruhig, ohne Badges */}
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1.5 md:flex-col md:pt-2">
+      <div className={cn("flex flex-wrap items-baseline gap-x-3 gap-y-1.5", showGroup && "md:flex-col md:pt-2")}>
         <span className="font-mono text-[0.8125rem] font-medium uppercase tracking-[0.12em] text-accent-ink">{post.topic.name}</span>
         {showGroup && post.group && (
-          <span className="inline-flex min-w-0 max-w-full items-start gap-1.5 font-mono text-[0.8125rem] leading-snug text-ink-2">
+          <span className="inline-flex min-w-0 max-w-full items-start gap-1.5 text-sm leading-snug text-ink-2">
             <Icon name={post.group.type === "closed" ? "lock" : "users"} className="mt-px size-4 shrink-0" />
             <span className="min-w-0 break-words">Gruppe {post.group.title}</span>
           </span>

@@ -85,7 +85,7 @@ async function Content() {
                       )}
                       </div>
                       <div className="flex min-w-0 flex-col gap-3">
-                      <ul className="flex flex-col divide-y divide-line border-y border-line">
+                      <ul className="flex flex-col divide-y divide-line [&>li:first-child]:pt-0">
                         {m.assignments.map((a) => (
                           <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
                             <div className="flex flex-col">

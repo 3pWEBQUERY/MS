@@ -57,8 +57,8 @@ async function VerifyContent({ searchParams }: { searchParams: PageProps<"/email
   const viewer = await getViewer();
   return (
     <>
-      {/* Ruhiges Zeichen statt Icon-Kachel: Mono-Auszeichnung mit Symbol (dekorativ) */}
-      <p aria-hidden="true" className="mb-6 flex items-center gap-3 border-t border-ink pt-4 text-accent-ink">
+      {/* Ruhiges Zeichen statt Icon-Kachel (dekorativ) */}
+      <p aria-hidden="true" className="mb-5 text-accent-ink">
         <Icon name="mail" className="size-6" />
       </p>
       <AuthHeading title="Schau in dein Postfach">
