@@ -66,8 +66,34 @@ async function upsertAccount(
     if (input.roles?.length) {
       await db.insert(s.mfaFactors).values({ accountId: id, secretEncrypted: encrypt(DEMO_TOTP_SECRET), confirmedAt: now });
     }
+  } else if (input.email.endsWith(DEMO_DOMAIN)) {
+    await resetDemoCredentials(db, id, input.email, Boolean(input.roles?.length), passwordHash);
   }
   return id;
+}
+
+const DEMO_DOMAIN = "@demo.ms-plattform.ch";
+
+/**
+ * Bestehende Demo-Konten bei jedem Seed auf die aktuellen Zugangsdaten setzen: Passwort aus
+ * SEED_PASSWORD, für Mitarbeitende genau ein bestätigter TOTP-Faktor aus SEED_TOTP_SECRET,
+ * Fehlversuchszähler geleert. Sonst behalten Konten aus einem früheren Seed (z. B. vor dem Setzen
+ * der Variablen) alte Werte und die Anmeldung scheitert am zweiten Faktor.
+ * Betrifft ausschliesslich fiktive Konten der Demo-Domain; gelöschte Konten bleiben gelöscht.
+ */
+async function resetDemoCredentials(db: SeedDb, id: string, email: string, staff: boolean, passwordHash: string) {
+  const changed = await db
+    .update(s.accounts)
+    .set({ passwordHash, ...(staff ? { mfaEnabled: true } : {}) })
+    .where(sql`${s.accounts.id} = ${id} and ${s.accounts.status} <> 'deleted'`)
+    .returning({ id: s.accounts.id });
+  if (changed.length === 0) return;
+  if (staff) {
+    await db.delete(s.mfaFactors).where(eq(s.mfaFactors.accountId, id));
+    await db.insert(s.mfaFactors).values({ accountId: id, secretEncrypted: encrypt(DEMO_TOTP_SECRET), confirmedAt: new Date() });
+  }
+  const emailKey = createHash("sha256").update(email.toLowerCase()).digest("hex");
+  await db.execute(sql`delete from ops.rate_limit_counters where key in (${`login-fail:${emailKey}`}, ${`mfa-fail:${id}`})`);
 }
 
 export async function seedCore(db: SeedDb): Promise<SeedContext> {
