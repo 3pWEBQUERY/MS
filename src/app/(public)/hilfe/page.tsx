@@ -119,7 +119,7 @@ async function HelpContent({ searchParams }: { searchParams: PageProps<"/hilfe">
                   <span aria-hidden="true" className="tabular w-6 shrink-0 font-mono text-sm text-ink-3 group-hover:text-accent-ink">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="flex-1 text-lg font-medium text-ink underline decoration-transparent decoration-1 underline-offset-[0.25em] transition-colors duration-150 group-hover:decoration-current">
+                  <span className="min-w-0 flex-1 text-lg font-medium hyphens-auto [overflow-wrap:anywhere] text-ink underline decoration-transparent decoration-1 underline-offset-[0.25em] transition-colors duration-150 group-hover:decoration-current">
                     {t.name}
                   </span>
                   <Icon name="arrow-right" className="nudge size-5 shrink-0 text-ink-3 group-hover:text-ink" />

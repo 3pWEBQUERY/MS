@@ -48,7 +48,7 @@ export function WhoSeesWhat({ compact = false, tone = "paper" }: { compact?: boo
         <li
           key={i.title}
           className={cn(
-            "grid grid-cols-1 gap-x-8 gap-y-2 border-b py-5 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:py-6",
+            "grid grid-cols-1 gap-x-8 gap-y-2 border-b py-5 sm:py-6 md:grid-cols-[minmax(0,12rem)_minmax(0,1fr)]",
             deep ? "border-deep-line" : "border-line",
           )}
         >
@@ -58,7 +58,7 @@ export function WhoSeesWhat({ compact = false, tone = "paper" }: { compact?: boo
               {i.title}
             </p>
           </div>
-          <div className="flex min-w-0 flex-col gap-1.5 sm:pt-1">
+          <div className="flex min-w-0 flex-col gap-1.5 [overflow-wrap:anywhere] md:pt-1">
             <p className={cn("font-mono text-[0.8125rem] leading-snug", deep ? "text-deep-accent" : "text-accent-ink")}>
               Sichtbar für: {i.who}
             </p>

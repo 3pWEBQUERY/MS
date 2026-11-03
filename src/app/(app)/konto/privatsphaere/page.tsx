@@ -142,8 +142,8 @@ async function Privacy() {
               const meta = PURPOSE[entry.purpose];
               return (
                 <li key={entry.purpose} className="flex flex-col gap-4 border-b border-line py-7">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-                    <h3 className="font-display text-[1.5rem] leading-tight tracking-[-0.015em] text-ink">{meta.title}</h3>
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-6">
+                    <h3 className="min-w-0 font-display text-[1.5rem] leading-tight tracking-[-0.015em] text-ink">{meta.title}</h3>
                     <span className="shrink-0">
                       <Status entry={entry} />
                     </span>

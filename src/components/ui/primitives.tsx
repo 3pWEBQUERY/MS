@@ -354,7 +354,7 @@ export function SegmentNav({
   className?: string;
 }) {
   return (
-    <nav aria-label={label} className={cn("relative overflow-x-auto border-b border-line", className)}>
+    <nav aria-label={label} className={cn("relative min-w-0 max-w-full overflow-x-auto border-b border-line", className)}>
       <ul className="flex w-max gap-6">
         {items.map((i) => (
           <li key={i.href}>
