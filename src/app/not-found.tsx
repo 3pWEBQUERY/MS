@@ -12,7 +12,7 @@ export default function NotFound() {
       <main id="inhalt" className="flex flex-1 items-center justify-center px-4 pb-20">
         <div className="flex max-w-lg flex-col items-start gap-6">
           <p className="tabular font-mono text-sm font-medium text-ink-3">404</p>
-          <h1 className="text-4xl font-[650] tracking-[-0.03em]">Diese Seite ist nicht verfügbar.</h1>
+          <h1 className="display-md">Diese Seite ist nicht verfügbar.</h1>
           <p className="text-lg text-ink-2">
             Der Inhalt existiert nicht, wurde entfernt oder ist für dein Konto nicht zugänglich.
           </p>

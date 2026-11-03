@@ -84,12 +84,12 @@ export async function createMember(opts: { health?: boolean; roles?: StaffRole[]
   return { id, email, pseudonym };
 }
 
-/** Bestätigungslink der Registrierung aus der Outbox (Payload verschlüsselt, wie der Worker ihn liest). */
-export async function verificationLink(email: string): Promise<string> {
+/** Link einer Konto-E-Mail aus der Outbox (Payload verschlüsselt, wie der Worker ihn liest). */
+export async function verificationLink(email: string, type = "email.verification"): Promise<string> {
   const rows = await sql<{ payload: { link: string; to: string } }[]>`
-    select payload from ops.outbox_events where type = 'email.verification' order by created_at desc limit 50`;
+    select payload from ops.outbox_events where type = ${type} order by created_at desc limit 50`;
   for (const r of rows) if (decrypt(r.payload.to) === email) return decrypt(r.payload.link);
-  throw new Error("Kein Bestätigungslink in der Outbox gefunden");
+  throw new Error(`Kein Link vom Typ ${type} in der Outbox gefunden`);
 }
 
 export async function setFlag(key: string, enabled: boolean) {
