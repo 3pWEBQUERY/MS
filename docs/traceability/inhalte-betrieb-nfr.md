@@ -1,0 +1,134 @@
+# Rückverfolgbarkeit: Öffentlicher Bereich, Wissen, Hilfe, Suche, Redaktion, Betrieb, NFR, Architektur, Analytics
+
+Stand: 3. November 2026. Geprüft gegen `docs/PRD.md` Kapitel 02 (Wissen/Hilfe/Betrieb), 04 (Informationsarchitektur öffentlich), 05 (S01, S44–S51, S56–S61), 06 (US21, US22, US25, US26), 07 (F03), 08 (CON01–CON08, SAF06, HOM08), 09, 13, 14, 15, 16 (AT08, AT10, QA06, QA10), 17, 18.
+
+Status: **erfüllt** = im Code nachweisbar mit allen Abnahmesätzen · **teilweise** = umgesetzt, aber ein Teil braucht Betrieb, Messung oder Entscheidung · **offen – Entscheidung** = bewusst nicht gebaut, mit Entscheidungs-ID.
+
+## Module, Informationsarchitektur und Screens
+
+| ID | Anforderung (kurz) | Umsetzung (Pfade) | Status | Nachweis/Bemerkung |
+|---|---|---|---|---|
+| 02 Wissen | Öffentliche Bibliothek, Themen, Suche, geprüfte Artikel, Kurzfassung, Quellen, Prüfdaten | `src/app/(public)/wissen/**`, `src/server/modules/content/articles.ts` | erfüllt | Kein KI-Assistent, keine individuellen Antworten. |
+| 02 Hilfe | Verzeichnis, Themen- und Kantonsfilter, geprüfte Detailseiten, Sicherheitsseite | `src/app/(public)/hilfe/**`, `src/app/(public)/sicherheit/page.tsx`, `src/server/modules/content/offers.ts` | erfüllt | Keine Terminvermittlung, keine Live-Krisenberatung. |
+| 02 Betrieb | Redaktion, Rechte, Audit, Export/Löschung | `src/app/verwaltung/{redaktion,verzeichnis,medien,audit,betrieb}/**` | erfüllt | Datenschutzaufträge S58 im Bereich Konto/Datenschutz. |
+| 04 IA öffentlich | Startseite, Wissen, Verzeichnis, Sicherheit, Kontakt, Impressum, Datenschutz, Regeln; geschützter Link → Login → Ziel | `src/app/(public)/*`, `src/components/shell/public-shell.tsx`, `src/proxy.ts` (`?next=`) | erfüllt | Fehlermeldung bei fremden Objekten neutral (`notFound()`). |
+| S01 | Startseite: Nutzen, Grenzen, Wissen öffnen, registrieren; keine sensiblen Vorschauen | `src/app/(public)/page.tsx` | erfüllt | **Behoben**: unzutreffende Aussage «Daten in der Schweiz gespeichert» entfernt (Hosting Amsterdam, D04); unbelegte Zahlen («≤ 2 Klicks», «Konto in zwei Minuten», «unter einer Minute») durch belegbare Aussagen ersetzt. |
+| S44 | Wissen Übersicht: Themen, Kurzbeschreibungen, Suche, Einstieg | `src/app/(public)/wissen/page.tsx`, `…/thema/[slug]/page.tsx` | erfüllt | Einstieg «Neu mit MS», Themen nur mit sichtbaren Artikeln. |
+| S45 | Suche getrennt nach Wissen, Hilfe, Community, Mitglieder; Filter, Leerzustand | `src/app/(public)/suche/page.tsx`, `src/server/modules/content/search.ts` | erfüllt | Gäste nur Wissen/Hilfe; Community/Mitglieder über Community-Modul mit Rechtefilter. |
+| S46 | Artikel: Kurzfassung, Volltext, Autor, Prüfung, Quellen, Datum, speichern | `src/app/(public)/wissen/[slug]/page.tsx` | erfüllt | «Speichern» führt Gäste zum Login (`BookmarkSlot`). |
+| S47 | Hilfe Übersicht: Thema und Kanton, keine Standortfreigabe | `src/app/(public)/hilfe/page.tsx` | erfüllt | GET-Formular, keine Geolocation (Permissions-Policy `geolocation=()`). |
+| S48 | Angebot: Zuständigkeit, Sprache, Kostenhinweis, Zugang, geprüfter externer Link | `src/app/(public)/hilfe/[slug]/page.tsx` | erfüllt | Abgelaufen → keine Kontaktdaten, Alternativen (F03). |
+| S49 | Sicherheit: Grenzen, fachlich freigegebene Hilfewege | `src/app/(public)/sicherheit/page.tsx`, `src/server/modules/content/safety.ts` | teilweise | Technisch vollständig (ohne Login, statischer Rückfall). Fachliche Verifikation der Kontakte durch Krisenfachperson steht aus (D03); Seed als «Demo» gekennzeichnet. |
+| S50 | Regeln, Impressum, Bedingungen, Datenschutz, Kontakt | `src/app/(public)/{regeln,impressum,bedingungen,datenschutz,barrierefreiheit}/page.tsx`, `src/components/content/legal-page.tsx`, `scripts/seed/content/legal.ts` | teilweise | Texte sind Entwürfe (D01). **Ergänzt**: Datenschutzinformation nennt optionale Nutzungsstatistik und 30-Tage-Frist. |
+| S51 | Kontakt und Fehler melden; Hinweis keine medizinischen Unterlagen | `src/app/(public)/kontakt/page.tsx`, `src/components/content/contact-form.tsx`, `src/server/modules/content/actions.ts` | erfüllt | Siehe CON06. |
+| S56 | Redaktion: Versionen, Prüfauftrag, Rückgabe, Freigabe, Publikation | `src/app/verwaltung/redaktion/**`, `src/server/modules/content/editorial-*.ts` | erfüllt | Siehe CON02/CON03. |
+| S57 | Verzeichnisverwaltung: prüfen, Änderungsflag, Ablaufdatum, Publikation | `src/app/verwaltung/verzeichnis/**`, `src/server/modules/content/directory-*.ts` | erfüllt | **Ergänzt**: Hinweis und Sperre bei fehlender Fachprüfung (CON05). |
+| S59 (Teil) | Rollenänderung, Zugriffsprotokoll, Sonderzugriff, MFA | `src/app/verwaltung/audit/**`, `src/server/modules/admin/{role-actions,roles,audit-chain}.ts` | erfüllt | Keine Selbstvergabe, Sonderzugriff mit zweiter Person und ≤ 60 min, Hash-Kette prüfbar. Datenschutzteile im Bereich Konto/Datenschutz. |
+| S60 | Feature-Schalter, Zustellprobleme, technische Statusanzeigen | `src/app/verwaltung/betrieb/page.tsx`, `…/einfuehrung/page.tsx`, `…/nutzung/page.tsx`, `src/server/modules/admin/{ops,ops-alarms,rollout,flags-actions}.ts` | erfüllt | **Ergänzt**: aktive Alarme, Arbeiter-Lebenszeichen, Unterseiten «Einführung und Stoppkriterien» und «Nutzungsstatistik». |
+| S61 | Sitzung abgelaufen, neutraler 404, Wartung, Offline-Rückweg | `src/app/(public)/{sitzung-abgelaufen,wartung}/page.tsx`, `src/app/not-found.tsx`, `src/app/error.tsx` | erfüllt | Teilbetrieb-Hinweise in den Mitgliederbereichen (andere Bereiche). |
+
+## User Stories und Flow
+
+| ID | Anforderung (kurz) | Umsetzung (Pfade) | Status | Nachweis/Bemerkung |
+|---|---|---|---|---|
+| US21 | Artikel nennt Autor, fachlich verantwortliche Prüfung, Datum, Quellen | `src/app/(public)/wissen/[slug]/page.tsx` (Seitenleiste «Fachliche Prüfung») | erfüllt | Prüfstelle, Fachgebiet, Prüfdatum, nächster Prüftermin, Version. |
+| US22 | Thema/Kanton ohne Standortzugriff; Detail nennt Zuständigkeit und Prüftermin | `src/app/(public)/hilfe/**` | erfüllt | |
+| US25 | Medizinische Änderung vor Neuveröffentlichung geprüft; alte Freigabe gilt nicht | `src/server/modules/content/editorial-actions.ts` | erfüllt | Neue Version startet als Entwurf; freigegebene Versionen gesperrt. **Behoben**: Fachprüfung liess sich umgehen, indem eine Folgeversion als «nicht medizinisch» markiert und von einer Redaktionsperson freigegeben wurde – jetzt nur noch durch die medizinische Prüfung. |
+| US26 | Defekter Chat abschaltbar, öffentliche Hilfe bleibt erreichbar | `src/server/flags.ts`, `src/app/verwaltung/betrieb/page.tsx`, `src/app/(public)/sicherheit/page.tsx` | erfüllt | Schalter `chat` serverseitig; S49 ohne Sitzung. |
+| F03 | S44/S47 → S45 → S46/S48; Speichern fordert Login; keine Treffer; abgelaufen; Fehler melden; externe Links | Seiten oben, `src/server/modules/content/contact.ts` (`resolveContactRef`) | erfüllt | Referenz nur als ID öffentlich bekannter Inhalte, nie Tagebuchdaten; `ExternalLink` ohne Parameter. |
+
+## Funktionale Anforderungen
+
+| ID | Anforderung (kurz) | Umsetzung (Pfade) | Status | Nachweis/Bemerkung |
+|---|---|---|---|---|
+| CON01 | Öffentlich nach Thema/Suchbegriff; Kurzfassung, Volltext, Autorenschaft, Prüfung, Quellen, Publikations- und Prüfdatum; medizinisch nur mit Freigabe; Community nie als geprüft | `articles.ts` (`articleVisibleSql`, `stillValid`), `editorial-actions.ts` (`publishVersionAction`, `submitForReviewAction` verlangt Quelle) | erfüllt | `text-verified` nur für Wissen (DESIGN). |
+| CON02 | Zustände Entwurf … archiviert; keine Eigenprüfung; Änderung nach Freigabe → neue Version; nur freigegebene Version publizierbar | `editorial-actions.ts`, `editorial-queries.ts` (`isVersionAuthor`), DB-Trigger in `drizzle/0001_rls_and_integrity.sql` | erfüllt | Mitautorenschaft über Audit-Aktionen ausgeschlossen. |
+| CON03 | Prüftermin ≤ 12 Monate; nach Ablauf zurückgezogen, nicht empfohlen, im Arbeitsvorrat; Sofortrückzug; Quellenrechte | `reviewVersionAction` (Datumsgrenze), `src/worker/handlers/content.ts` (`content-withdraw-overdue-articles`), `src/app/verwaltung/redaktion/page.tsx` (Ansicht «fällig»), `source_references.rights_note` | erfüllt | Zusätzlich Prüfung zur Anzeigezeit, da Cache minutenweise. |
+| CON04 | Thema/Kanton ohne Standort; Detailfelder; keine Bewertung/Termine; Links ohne Parameter | `offers.ts`, `hilfe/[slug]/page.tsx` | erfüllt | |
+| CON05 | Prüfung vor Publikation, ≤ 6 Monate; Linkprüfung ergänzend; Ausblenden; Hinweis über S51 → Prüfauftrag; passende Fachprüfung | `directory-actions.ts`, `content/actions.ts` (Hinweis setzt `change_flag`), `worker/handlers/content.ts` (`content-expire-offers`, **neu** `content-link-check`), `content/link-check.ts`, `content/shared.ts` (`requiredExpertMethods`) | erfüllt | **Ergänzt**: (1) Publikation von Angeboten mit Themen Recht/Finanzen bzw. Therapie nur mit gültiger «Fachprüfung Sozialversicherungen und Recht» bzw. «Fachprüfung Medizin». (2) Tägliche automatische Linkprüfung (nur öffentliche https-Hosts, SSRF-Schutz); 404/410/DNS-Fehler erzeugen einen Änderungshinweis, nie eine automatische Publikation. |
+| CON06 | Kategorie, ≤ 2 000 Zeichen, optionale Antwortadresse, keine Anhänge, Hinweise; Spambegrenzung ohne visuelle Aufgaben; Referenz möglich | `contact-form.tsx`, `content/actions.ts`, `content/contact.ts` | erfüllt | Mindest-Ausfüllzeit, Honeypot, Rate-Limit; Anliegen verschlüsselt. |
+| CON07 | Getrennte Bereiche; Community nur für Mitglieder; Rechte vor Anzahl/Ausschnitt; keine Suchbegriffe in Analytics | `content/search.ts`, `suche/page.tsx` | erfüllt | Analytics kennt kein Suchereignis (`src/lib/analytics.ts`). Autovervollständigung gibt es nicht. |
+| CON08 | ≥ 20 Artikel, ≥ 30 Angebote, 6 Gruppen; jede Kategorie ≥ 1 Angebot; leere Regionen → schweizweit; Verantwortliche benannt | `scripts/seed/content/*` (26 Artikel, 40 Angebote), `hilfe/page.tsx` (regional/schweizweit), **neu** `src/server/modules/admin/rollout.ts` + `/verwaltung/betrieb/einfuehrung` | teilweise | Bestand und Prüfansicht vorhanden; Prüfungen sind als Demo gekennzeichnet und durch benannte Fachpersonen zu ersetzen (D08). |
+| SAF06 | Öffentliche Hilfeseite von jeder Hauptansicht, aktuelle geprüfte Wege, Moderationszeiten; keine 24/7-Zusage, kein Notruf, kein Login; monatliche Verifikation | `sicherheit/page.tsx`, Shell-Links, `directory-actions.ts` (`verifySafetyContactAction`, `setSafetyActiveAction`), Worker-Alarm | teilweise | **Ergänzt**: Aktivierung nur, wenn die letzte Verifikation fachlich war (Krisenintervention oder Medizin, PRD 09 «Fachverantwortung bei kritischen Kontaktwegen»). Fachliche Freigabe der Inhalte und Moderationszeiten: D03. |
+| HOM08 | Community-Schreiben, Chat, Gesundheits-Schreiben einzeln abschaltbar; serverseitig; S61; Hilfe unabhängig | `src/server/flags.ts`, `flags-actions.ts`, `betrieb/page.tsx` | erfüllt | Zusätzlich Schalter `registration` als Rollout-Rückfall (PRD 17). |
+
+## Datenmodell (PRD 09)
+
+| ID | Anforderung (kurz) | Umsetzung (Pfade) | Status | Nachweis/Bemerkung |
+|---|---|---|---|---|
+| Article/ArticleVersion | Slug, Thema, Text, Kurzfassung, Autor, Status, Quellen, Freigabe, Prüftermin; nur freigegebene aktuelle Version öffentlich | `src/server/db/schema/content.ts` | erfüllt | `published_version_id` + Status + Prüftermin. |
+| EditorialReview | Version, Prüfperson, Fachgebiet, Entscheid, Zeit, Kommentar; keine Eigenfreigabe | `editorial_reviews`, DB-Trigger | erfüllt | |
+| SourceReference | Titel, Herausgeber, URL, Datum, Rechtehinweis; keine erfundenen Quellen | `source_references`, Seed mit realen Herausgebern und Abrufdatum | erfüllt | Seed-Quellen sind Verweise ohne übernommenen Text. |
+| SupportOffer | Organisation, Thema, Kantone, Sprache, Kontakt, Kostenhinweis, URL, Status | `support_offers` | erfüllt | |
+| VerificationRecord | Angebot oder Hilfeseite, Prüfer, Verfahren, Zeit, nächster Termin; Fachverantwortung bei kritischen Kontaktwegen | `verification_records` | erfüllt | Fachverantwortung jetzt erzwungen (siehe SAF06, CON05). |
+| FeatureConfig/OutboxEvent | Nur Betrieb; atomare Ereignisablage mit fachlicher Änderung | `ops.feature_flags`, `ops.outbox_events`, `src/server/outbox.ts` | erfüllt | Schalter versioniert (`version`), Änderung auditiert. Keine Mehrversionen-Freigabe einer Gesamtkonfiguration – Einzelschalter genügen dem MVP. |
+| Zustandsautomat Artikel | Entwurf → Prüfung → freigegeben → publiziert; neue Version bei Änderung; Rückzug sofort | `editorial-actions.ts` (Statusbedingungen in jedem `where`) | erfüllt | Jede Statusänderung mit Akteur, Vorgängerzustand, Rolle und Audit. |
+
+## Nichtfunktionale Anforderungen (PRD 13)
+
+| ID | Anforderung (kurz) | Umsetzung (Pfade) | Status | Nachweis/Bemerkung |
+|---|---|---|---|---|
+| NFR01 | 320–1 920 px, Hoch/Quer | Designsystem, `docs/DESIGN.md` | teilweise | Responsive Layouts; Screenmatrix-Test (QA09) noch nicht dokumentiert. |
+| NFR02 | Aktuelle und vorherige Hauptversion der Browser | – | offen – Entscheidung | Versionsliste und Test vor Release (Release-Prozess, D07). |
+| NFR03 | LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1 | Server-Rendering, Cache Components, keine Dritt-Skripte | teilweise | Kein Labortest dokumentiert; Felddaten bewusst nicht erhoben (nur zulässig und freiwillig). |
+| NFR04 | p95 Lesen ≤ 500 ms, Schreiben ≤ 800 ms | – | offen – Entscheidung | Lasttest nach Messprofil steht aus (QA10); Railway-Metriken als Quelle. |
+| NFR05 | Chat p95 ≤ 3 s | `src/app/api/v1/conversations/[id]/stream/route.ts` (SSE) | teilweise | Technik vorhanden, Messung unter Planlast fehlt. |
+| NFR06 | 99,5 % je Monat, externer Prüfer | `/api/v1/health`, **neu** `/api/v1/health/worker`, `docs/RUNBOOKS.md` | teilweise | Externer Prüfer ist einzurichten (Runbook «Alarmierung»). |
+| NFR07 | RPO ≤ 1 h | `docs/RUNBOOKS.md` R4 | offen – Entscheidung | Railway-Volume-Backups sind höchstens täglich; stündliche Sicherung/PITR braucht Zusatzjob oder anderen Anbieter (D04/D07). |
+| NFR08 | Wiederanlauf ≤ 4 h, quartalsweiser Restore inkl. Löschjournal | `scripts/apply-deletion-journal.ts`, `docs/RUNBOOKS.md` R4/R6 | teilweise | Ablauf dokumentiert; Restore-Test noch nicht durchgeführt. |
+| NFR09 | Verschlüsselung, verwaltete Schlüssel, getrennte Berechtigungen | TLS durch Railway, `src/server/crypto.ts` (AES-256-GCM), privater Bucket, `docs/db-roles.sql` | teilweise | Schlüssel als Umgebungsvariable, kein KMS; Backup-Verschlüsselung durch Anbieter nachzuweisen (D04). |
+| NFR10 | Keine Schlüssel in Browser, Repository, Log, Export | `.env.example` ohne Werte, `preserve()` in `.railway/railway.ts`, `log-safety` | teilweise | Secret-Scan: GitHub Secret Scanning im Repository aktivieren; Rotationsschritte in Runbook R5. |
+| NFR11 | Argon2id | `src/server/auth/password.ts` (19 MiB, t=2) | erfüllt | Parameter nach OWASP-Mindestwert; fachliche Dokumentation \[Q11\]. |
+| NFR12 | CSRF, XSS, Injection, SSRF, Rechte | Server Actions (Origin-Prüfung durch Next.js), `sameOrigin` in Route Handlern (`src/app/api/v1/_lib/http.ts`), CSP in `next.config.ts`, nur Text-Rendering, parametrisierte SQL, `link-check.ts` | teilweise | Externer Pentest vor Öffnung (QA10). CSP erlaubt `'unsafe-inline'` für Skripte (Next.js-Inline-Bootstrap); Nonce-CSP wäre strenger. |
+| NFR13 | Festgelegte Versionen, Schwachstellenprüfung pro Build | `package-lock.json`, **neu** `.github/workflows/ci.yml` (`npm audit --omit=dev --audit-level=high`) | erfüllt | Lokal: 0 Schwachstellen. |
+| NFR14 | Keine Duplikate, atomare Rechtewechsel | Outbox `dedupe_key`, `onConflictDoNothing`, Versionsspalten | erfüllt | Analytics ebenfalls dedupliziert (`ref, day, dedupe`). |
+| NFR15 | Keine sensiblen Inhalte in Logs/Telemetrie; automatisierte verbotene-Felder-Prüfung | **neu** `src/lib/log-safety.ts` (`redactLogText`), **neu** `src/lib/log-safety.test.ts` (prüft alle `console.*`-Aufrufe in `src/`), `src/server/action.ts`, `src/worker/index.ts` | erfüllt | **Behoben**: rohe `err.message` in Action- und Worker-Logs konnten Eingabewerte enthalten (z. B. Postgres «invalid input syntax … "<Wert>"») – jetzt bereinigt. Test läuft in CI. |
+| NFR16 | Fehlerquote, Latenz, Queuealter, Backup- und Zustellstatus; Alarm > 2 % 5xx über 5 min oder veraltetes Backup | **neu** `src/worker/handlers/ops.ts` (Lebenszeichen, `[alarm]`-Logzeilen), **neu** `src/server/modules/admin/ops-alarms.ts`, **neu** `/api/v1/health/worker`, S60 | teilweise | Queuealter, Fehlerwarteschlange, Zustellung, Datenschutzaufträge, Hilfeweg-Verifikation alarmieren automatisch. 5xx-Quote und Backup-Alter kommen aus Railway und sind dort als Alarm einzurichten (Runbook). |
+| NFR17 | Versionierte Verträge, Migrationen, Rollen- und Betriebsdokumentation | `src/app/api/v1/**`, `drizzle/`, `docs/ENGINEERING.md`, **neu** `docs/RUNBOOKS.md`, **neu** CI | erfüllt | |
+| NFR18 | Entwicklung, Test, Produktion getrennt; keine echten Gesundheitsdaten im Test | `SEED_DEMO`/`SEED_ONLY_IF_DEMO` in `scripts/seed.ts`, fiktive Seeds | teilweise | Railway hat derzeit eine Umgebung; getrennte Produktionsumgebung vor echten Daten anlegen. |
+| NFR19 | Deduplizierte Jobs, begrenzte Wiederholung, Fehlerwarteschlange, Alarm nach ausgeschöpften Versuchen | `src/worker/index.ts` (6 Versuche, Backoff, `dead`), **neu** Alarmzeile `[alarm] code=outbox_dead_letter` | teilweise | Kill-/Restart-Test noch nicht protokolliert. |
+| NFR20 | Öffentliche Hilfe unabhängig bereitstellbar | `sicherheit/page.tsx` ohne Sitzung, statischer Rückfall in `safety.ts` | teilweise | Bei Ausfall des Web-Service selbst gibt es keine getrennte Auslieferung (z. B. statische Kopie auf eigenem Host); Teilabschaltung/Wiederanlauf nicht geprobt. |
+
+## Architektur (PRD 14)
+
+| ID | Anforderung (kurz) | Umsetzung (Pfade) | Status | Nachweis/Bemerkung |
+|---|---|---|---|---|
+| 14 Bausteine | Modularer Monolith, Web, API, Module, Postgres, Worker, Objektablage, Zustellung | `src/app`, `src/server/modules/*`, `src/worker`, `.railway/railway.ts` | teilweise | Schweizer Datenregion nicht erfüllt (Amsterdam, D04). |
+| 14 Datenfluss | Rechteprüfung nahe am Datenzugriff; Outbox in derselben Transaktion; Worker prüft erneut | `src/server/auth/viewer.ts`, `src/server/outbox.ts`, Worker-Handler | erfüllt | |
+| 14 API-Vertrag | Vorgangskennungen, Versionen, Cursor 20/100, Fehlermeldung mit Korrelations-ID | **neu** `src/proxy.ts` (`X-Request-Id`), `src/app/api/v1/_lib/http.ts`, `media`/`health`/`analytics`-Routen (`correlationId`), `runAction` | teilweise | Server Actions und die eigenen Routen liefern Korrelations-IDs; Routen `exports`/`conversations` (andere Bereiche) noch ohne `correlationId` im Fehlertext. |
+| 14 Suche | Postgres-Volltext, Rechte vor Rang/Anzahl/Ausschnitt, kein externer Dienst | `content/search.ts`, Community-Suche | erfüllt | |
+| 14 Deployment | Versionierte Infrastruktur, Pipeline (Format, Typen, Sicherheit, Tests, Build), nur fiktive Testdaten, Feature-Schalter | `.railway/railway.ts`, **neu** `.github/workflows/ci.yml` | teilweise | «Wait for CI» in Railway aktivieren. `check:lines` schlägt wegen `docs/PRD.md` und `drizzle/0000_init.sql` an (Ausnahmeliste festlegen). |
+| 14 Betriebsbereitschaft | Runbooks für Login-Ausfall, Nachrichten, Export/Löschung, Backup, Datenabfluss, Wiederanlauf; Alarmempfänger benannt | **neu** `docs/RUNBOOKS.md` (R1–R8) | teilweise | Personen, Vertretung und Kontakte sind Platzhalter – Benennung durch Trägerschaft (D03/D07). |
+
+## Analytics (PRD 15)
+
+| ID | Anforderung (kurz) | Umsetzung (Pfade) | Status | Nachweis/Bemerkung |
+|---|---|---|---|---|
+| 15 Messprinzip | Optional, standardmässig aus, getrennt vom Monitoring; keine Replays, Werbe-IDs, Suchtexte, Pseudonyme, Inhalte, Symptomwerte | **neu** Schema `analytics` (`src/server/db/schema/analytics.ts`), `src/server/modules/analytics/track.ts`, Einwilligung `analytics` (S12, Bereich Konto) | erfüllt | Ohne gültige Einwilligung (aktuelle Textfassung, aktives Konto) wird nichts gespeichert – auch kein Bezug. |
+| 15 Ereignisplan | Nur onboarding_completed, moment_path_selected, useful_action_completed, core_flow_failed, preference_changed mit erlaubten Parametern | **neu** `src/lib/analytics.ts` (`parseAnalyticsEvent`, Tests), Erfassung: `profile-actions.ts`, `heute/mein-moment.tsx`, `wissen/[slug]` + `hilfe/[slug]` (`UsefulActionSlot`), `community/actions.ts` (Beitritt), `health/checkin-actions.ts`, `privacy-actions.ts`/`settings-actions.ts`, `runAction(…, { flow })` | teilweise | Zusatzfelder werden abgelehnt, nicht gekürzt. Browser darf nur Weg, Artikel/Angebot geöffnet und Netzwerkfehler melden. `entry_saved` derzeit nur beim Check-in, `core_flow_failed` für F01, F02, F04; weitere Abläufe können `runAction(…, { flow })` setzen. Da die Einwilligung erst nach der Einführung in S12 erteilt wird, entsteht `onboarding_completed` nur, wenn die Einwilligung vorher vorliegt – Einwilligungszeitpunkt im Einstieg ist eine Pilotentscheidung (D06). |
+| 15 Analysebezug | Zufällig, separat geschützt, ≤ 30 Tage; keine Verknüpfung mit Tagebuch/Moderation | `analytics.subjects` (`ref` zufällig, `expires_at` = +30 Tage), eigenes Schema mit eigenen Grants (`docs/db-roles.sql`) | erfüllt | Ereignisse tragen nur `ref` und Kalendertag (keine Uhrzeit). |
+| 15 Kohorten | Vier-Wochen-Kohorten innerhalb der Frist | **neu** `src/worker/handlers/analytics.ts` (`computeCohortDays`, Tag 28–29) | erfüllt | Zähler ohne Bezug in `analytics.cohort_days`. |
+| 15 Widerruf | Stoppt neue Events, entfernt rückführbare Rohdaten | `track.ts` (Prüfung bei jedem Ereignis), `privacy-actions.ts` (sofortige Löschung, Bereich Konto), Worker `analytics-retention` (alle 10 min: Ablauf, Widerruf, neue Textfassung, Löschung des Kontos) | erfüllt | |
+| 15 Aggregate | Ausgabe erst ab zehn Personen, kleine Gruppen und Kombinationen unterdrückt | **neu** `src/server/modules/analytics/aggregates.ts`, `/verwaltung/betrieb/nutzung` | erfüllt | Je Ereignis nur eine Dimension; Anteile nur, wenn Basis und Zähler ≥ 10. |
+| 15 Betriebsmonitoring | Nur technische Fehler, Latenz, Auftragsstatus | S60, `ops-alarms.ts` | erfüllt | |
+| 15 Pilotbericht | Basis, Einwilligungsquote, fehlende Daten, Selbstselektion | `/verwaltung/betrieb/nutzung` (Personen mit Einwilligung) | teilweise | Bericht selbst ist Produktaufgabe (D06). |
+
+## Qualitätssicherung, Einführung, Risiken
+
+| ID | Anforderung (kurz) | Umsetzung (Pfade) | Status | Nachweis/Bemerkung |
+|---|---|---|---|---|
+| AT08 | Geänderte medizinische Version unpubliziert bis Fremdprüfung; abgelaufener Prüftermin → weg aus Suche und Empfehlungen; gespeicherter Verweis ohne überfälligen Text | `editorial-actions.ts`, `search.ts` (`review_due_at > now()`), `articles.ts` (`getVisibleArticleRefs`), Worker-Rückzug | erfüllt | |
+| AT10 | Tastatur/Screenreader, 400 % Zoom; bei Chatabschaltung S49 ohne Anmeldung | `sicherheit/page.tsx`, Schalter `chat` | teilweise | Technischer Teil erfüllt; Tastatur-/Screenreader-/Zoomtest ist Nutzertest (QA09). |
+| QA06 | Vieraugenprüfung, Ablauf, Korrektur, Link- und Suchprüfung | Unit-Tests `src/server/modules/content/content.test.ts` (Ablauf, Fachprüfungsregeln, Linkprüfung, Suchnormalisierung), DB-Trigger | teilweise | Integrationstests gegen Datenbank (Vieraugen, Rückzug) fehlen noch. |
+| QA10 | Last, Sicherheit, Restore, Alarm, Rollback, Störung | `docs/RUNBOOKS.md`, CI, Alarme | teilweise | Last-, Restore- und Pentest-Protokolle stehen aus. |
+| 17 Rollout | Mitarbeitendentest → Einladung → Pilot → Öffnen; Feature-Schalter; Pilotgruppe nur mit Moderation | **neu** `/verwaltung/betrieb/einfuehrung` (`src/server/modules/admin/rollout.ts`) | teilweise | Einladungs-Codes gibt es nicht; «begrenzte Einladung» erfolgt über den Schalter `registration` und den Einladungsweg (D06). |
+| 17 Stoppkriterien | Pause bei unberechtigtem Zugriff, unzuverlässiger Kontaktfreigabe, Löschfehler, überlasteter Moderation, falschem Hilfeweg | `stopSignals()` in `rollout.ts`, Runbooks R3/R5/R7 | teilweise | «Unzuverlässige Kontaktfreigabe» hat kein technisches Signal (Erkennung über Meldungen/QA05). |
+| 18 Risiken | Nur dokumentieren | – | dokumentiert | R04 (falscher Hilfeweg) und R08 (veraltetes Wissen) technisch gemildert durch Fachverifikation/Linkprüfung/Auto-Rückzug; R11 betrifft Hosting (Amsterdam) und Backup-RPO (NFR07); Restrisiken je Gate neu bewerten. |
+
+## Offene Entscheidungen in diesem Bereich
+
+- **D01** Rechtstexte S50 sind Entwürfe; Meldepflichten bei Datenabfluss.
+- **D03** Krisenfachliche Verifikation der Hilfewege, Moderationszeiten, Alarmempfänger und Vertretung.
+- **D04/D07** Schweizer Datenregion; stündliche Sicherung bzw. Point-in-Time-Recovery (NFR07); getrennte Produktionsumgebung (NFR18).
+- **D06** Zeitpunkt der Analytics-Einwilligung im Einstieg, Einladungsweg, Pilotbericht.
+- **D08** Benannte medizinische Redaktion und Prüfpersonen; Ersatz der Demo-Prüfungen im Startbestand.

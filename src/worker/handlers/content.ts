@@ -1,7 +1,23 @@
 import { sql as dsql } from "drizzle-orm";
 import { audit } from "@/server/audit";
 import { db } from "@/server/db";
+import { isCheckableUrl, linkProblem } from "@/server/modules/content/link-check";
 import type { PeriodicTask } from "../types";
+
+/** Eine Adresse prüfen: HEAD, bei 405 GET; ohne Cookies, ohne Parameter, mit kurzer Zeitgrenze. */
+async function probe(url: string): Promise<{ status?: number; error?: string }> {
+  for (const method of ["HEAD", "GET"] as const) {
+    try {
+      const res = await fetch(url, { method, redirect: "follow", signal: AbortSignal.timeout(10_000), headers: { "User-Agent": "MS-Plattform-Linkpruefung" } });
+      if (method === "HEAD" && (res.status === 405 || res.status === 403)) continue;
+      return { status: res.status };
+    } catch (err) {
+      const code = (err as { cause?: { code?: string } })?.cause?.code;
+      return { error: code === "ENOTFOUND" ? "dns" : "network" };
+    }
+  }
+  return {};
+}
 
 /**
  * Redaktionelle Fristen (CON03, CON05, SAF06).
@@ -40,6 +56,28 @@ export const contentTasks: PeriodicTask[] = [
         await audit({ actorId: null, actorRole: "system", action: "offer.expired", objectType: "support_offer", objectId: r.id });
       }
       if (rows.length) console.log(`[worker] content: ${rows.length} Angebote wegen abgelaufener Prüfung ausgeblendet`);
+    },
+  },
+  {
+    // CON05: Automatische Linkprüfung ist ergänzend – eindeutige Fehler erzeugen einen Prüfauftrag (Änderungshinweis).
+    name: "content-link-check",
+    everyMs: 24 * 60 * 60 * 1000,
+    run: async () => {
+      const offers = (await db.execute(dsql`
+        select id, url from content.support_offers where status = 'published' and change_flag = false`)) as unknown as { id: string; url: string }[];
+      let flagged = 0;
+      for (const o of offers) {
+        if (!isCheckableUrl(o.url)) continue;
+        const problem = linkProblem(await probe(o.url));
+        if (!problem) continue;
+        await db.execute(dsql`
+          update content.support_offers
+          set change_flag = true, change_note = ${`Automatische Linkprüfung: ${problem}`}, updated_at = now()
+          where id = ${o.id} and change_flag = false`);
+        await audit({ actorId: null, actorRole: "system", action: "offer.link_check_failed", objectType: "support_offer", objectId: o.id });
+        flagged += 1;
+      }
+      if (flagged) console.warn(`[worker] content: ${flagged} Angebote mit fehlerhaftem Link zur Prüfung markiert`);
     },
   },
   {

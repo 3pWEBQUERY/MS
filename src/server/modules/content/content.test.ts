@@ -4,6 +4,7 @@ import { stillValid } from "./articles";
 import { sanitizeFilename, sniffImageType } from "./media";
 import { isInternalPath, parseMomentConfig } from "./moment";
 import { DEFAULT_MOMENT_CONFIG } from "@/lib/moment";
+import { isCheckableUrl, linkProblem } from "./link-check";
 import { normalizeQuery } from "./search";
 import { missingExpertMethods, requiredExpertMethods } from "./shared";
 
@@ -72,5 +73,27 @@ describe("Fachprüfung für Leistungsangaben (CON05)", () => {
     expect(missingExpertMethods(["recht"], ["website"])).toEqual(["expert_social"]);
     expect(missingExpertMethods(["recht", "therapie"], ["expert_social", "website"])).toEqual(["expert_medical"]);
     expect(missingExpertMethods(["recht"], ["expert_social"])).toEqual([]);
+  });
+});
+
+describe("Automatische Linkprüfung (CON05, NFR12)", () => {
+  it("prüft nur öffentliche https-Adressen", () => {
+    expect(isCheckableUrl("https://www.proinfirmis.ch/angebot")).toBe(true);
+    expect(isCheckableUrl("http://www.proinfirmis.ch")).toBe(false);
+    expect(isCheckableUrl("https://localhost/x")).toBe(false);
+    expect(isCheckableUrl("https://postgres.railway.internal")).toBe(false);
+    expect(isCheckableUrl("https://192.168.1.1")).toBe(false);
+    expect(isCheckableUrl("https://8.8.8.8")).toBe(true);
+    expect(isCheckableUrl("https://user:pw@example.ch")).toBe(false);
+    expect(isCheckableUrl("https://example.ch:8443")).toBe(false);
+    expect(isCheckableUrl("kein link")).toBe(false);
+  });
+
+  it("meldet nur eindeutige Fehler", () => {
+    expect(linkProblem({ status: 404 })).toContain("404");
+    expect(linkProblem({ error: "dns" })).toBe("Adresse nicht auflösbar");
+    expect(linkProblem({ status: 503 })).toBeNull();
+    expect(linkProblem({ error: "timeout" })).toBeNull();
+    expect(linkProblem({ status: 200 })).toBeNull();
   });
 });
