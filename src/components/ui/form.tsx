@@ -181,7 +181,8 @@ export function Checkbox({
             strokeWidth={2.5}
           />
         </span>
-        <span className="flex flex-col gap-0.5">
+        {/* Reflow (A02): lange Wörter brechen bei 320px/150 % Schrift um */}
+        <span className="flex min-w-0 flex-col gap-0.5 [overflow-wrap:anywhere]">
           <span className="text-base text-ink">{label}</span>
           {description && <span className="text-sm text-ink-2">{description}</span>}
         </span>
@@ -370,7 +371,7 @@ export function Switch({
   const id = useId();
   return (
     <label htmlFor={props.id ?? id} className="flex cursor-pointer items-start justify-between gap-6 py-1">
-      <span className="flex flex-col gap-0.5">
+      <span className="flex min-w-0 flex-col gap-0.5 [overflow-wrap:anywhere]">
         <span className="font-semibold text-ink">{label}</span>
         {description && <span className="text-sm text-ink-2">{description}</span>}
       </span>

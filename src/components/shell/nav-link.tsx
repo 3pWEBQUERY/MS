@@ -54,13 +54,13 @@ function BottomNavLinkInner({ href, icon, children }: { href: string; icon: Icon
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[12px] text-center text-xs font-semibold leading-tight break-words hyphens-auto transition-colors",
+        "flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[12px] text-center text-xs font-semibold leading-tight [overflow-wrap:anywhere] hyphens-auto transition-colors",
         active ? "text-ink" : "text-ink-2 hover:text-ink",
       )}
     >
       <span
         className={cn(
-          "flex h-8 w-14 items-center justify-center rounded-full transition-colors",
+          "flex h-8 w-full max-w-14 items-center justify-center rounded-full transition-colors",
           active ? "bg-accent-soft text-accent-ink" : "",
         )}
       >
@@ -118,7 +118,7 @@ export function BottomNavLink(props: BottomProps) {
     <Suspense
       fallback={
         <Link href={props.href} className="flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[12px] text-center text-xs font-semibold leading-tight break-words hyphens-auto text-ink-2">
-          <span className="flex h-8 w-14 items-center justify-center rounded-full">
+          <span className="flex h-8 w-full max-w-14 items-center justify-center rounded-full">
             <Icon name={props.icon} className="size-5" />
           </span>
           {props.children}

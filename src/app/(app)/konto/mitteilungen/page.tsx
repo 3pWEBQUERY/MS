@@ -29,7 +29,8 @@ async function NotificationSettings() {
         title="Benachrichtigungen"
         description="Wähle, worüber du informiert werden möchtest. Hinweise nennen nie Inhalte, Namen oder Gesundheitsangaben."
       />
-      <div className="flex max-w-2xl flex-col gap-10">
+      {/* Textspalten der Schalter dürfen schrumpfen und lange Wörter umbrechen (Reflow A02) */}
+      <div className="flex max-w-2xl flex-col gap-10 [&_label>span:first-child]:min-w-0 [&_label>span:first-child]:[overflow-wrap:anywhere]">
         <NotificationPrefsForm
           prefs={prefs}
           minDate={localDateString(new Date(), prefs.timezone)}

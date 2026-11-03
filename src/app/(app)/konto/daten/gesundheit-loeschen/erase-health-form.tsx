@@ -18,7 +18,11 @@ export function EraseHealthForm() {
         error={state.fieldErrors?.confirm}
       />
       <div>
-        <SubmitButton variant="danger" size="lg" pendingText="Wird gelöscht …" icon={<Icon name="trash" className="size-5" />}>
+        <SubmitButton
+          variant="danger"
+          size="lg"
+          className="max-sm:w-full max-sm:px-4 max-sm:[overflow-wrap:anywhere]"
+          pendingText="Wird gelöscht …" icon={<Icon name="trash" className="size-5" />}>
           Gesundheitsdaten löschen
         </SubmitButton>
       </div>

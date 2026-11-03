@@ -126,7 +126,8 @@ export function DisplaySettings({ mode, initial }: { mode: "guest" | "member"; i
               />
             </div>
           </div>
-          <div className={row}>
+          {/* Textspalte des Schalters darf schrumpfen und lange Wörter umbrechen (Reflow A02) */}
+          <div className={`${row} [&_label>span:first-child]:min-w-0 [&_label>span:first-child]:[overflow-wrap:anywhere]`}>
             {num("04")}
             <Switch
               name="simple"

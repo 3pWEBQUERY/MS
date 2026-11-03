@@ -9,7 +9,7 @@ import { Icon } from "@/components/ui/icon";
  */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+    <div className="grid min-h-dvh grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       <div className="flex flex-col">
         <header className="flex h-[76px] items-center justify-between px-4 sm:px-8 lg:px-12">
           <Logo />

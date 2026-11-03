@@ -54,7 +54,8 @@ export function RegisterForm({ inviteRequired = false }: { inviteRequired?: bool
         hint="Mindestens 15 Zeichen. Ein Satz aus mehreren Wörtern ist sicher und gut zu merken."
         showCounter
       />
-      <div className="flex flex-col divide-y divide-line border-y border-line [&>*]:py-4">
+      {/* Lange Wörter dürfen bei 320 px und grosser Schrift umbrechen (Reflow A02) */}
+      <div className="flex flex-col divide-y divide-line border-y border-line [&>*]:py-4 [&_label>span:last-child]:min-w-0 [&_label>span:last-child]:[overflow-wrap:anywhere]">
         <Checkbox
           name="audience"
           label="Ich bin mindestens 18 Jahre alt und lebe selbst mit MS."
