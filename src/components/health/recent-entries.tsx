@@ -13,13 +13,18 @@ export async function RecentEntries({ viewer, limit = 4 }: { viewer: Viewer; lim
   if (!viewer.healthActive) return null;
   const entries = await listRecentEntries(viewer, Math.min(Math.max(limit, 3), 5));
   return (
-    <section aria-labelledby="recent-entries-title" className="flex flex-col gap-4">
+    <section aria-labelledby="recent-entries-title" className="flex flex-col gap-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 id="recent-entries-title" className="text-xl font-[650] text-ink">
-          Deine letzten Einträge
-        </h2>
+        <div className="flex flex-col gap-1.5">
+          <span className="font-mono text-[0.8125rem] tracking-[0.12em] text-accent-ink" aria-hidden="true">
+            02
+          </span>
+          <h2 id="recent-entries-title" className="display-sm">
+            Deine letzten Einträge
+          </h2>
+        </div>
         {entries.length > 0 && (
-          <Link href="/mein-ms" className="text-base font-medium text-ink-2 underline underline-offset-4 hover:text-ink">
+          <Link href="/mein-ms" className="link-quiet text-base font-semibold text-ink">
             Alle in Mein MS
           </Link>
         )}
@@ -27,7 +32,7 @@ export async function RecentEntries({ viewer, limit = 4 }: { viewer: Viewer; lim
       {entries.length > 0 ? (
         <EntryList entries={entries} compact />
       ) : (
-        <p className="rounded-[20px] border border-dashed border-line-2 bg-surface p-5 text-base text-ink-2">
+        <p className="border-y border-line py-6 text-base text-ink-2">
           Hier erscheinen deine eigenen Einträge, sobald du etwas festhältst – wann und ob, entscheidest du.{" "}
           <Link href="/mein-ms" className="font-medium text-ink underline underline-offset-4">
             Zu Mein MS

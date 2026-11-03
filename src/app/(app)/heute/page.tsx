@@ -79,13 +79,13 @@ async function Today({ searchParams }: { searchParams: PageProps<"/heute">["sear
   ];
 
   return (
-    <div className="flex flex-col gap-10">
-      <header className="flex flex-col gap-2">
-        <p className="text-base text-ink-2" data-optional>
+    <div className="flex flex-col gap-12">
+      <header className="flex flex-col gap-4">
+        <p className="eyebrow" data-optional>
           {new Intl.DateTimeFormat("de-CH", { weekday: "long", day: "numeric", month: "long", timeZone: tz }).format(now)}
         </p>
-        <h1 className="text-3xl font-[650] tracking-[-0.025em] sm:text-[2.5rem]">
-          {greeting(hour)}, {viewer.pseudonym}
+        <h1 className="display-lg">
+          {greeting(hour)}, <em>{viewer.pseudonym}</em>
         </h1>
       </header>
 
@@ -100,20 +100,24 @@ async function Today({ searchParams }: { searchParams: PageProps<"/heute">["sear
       <MeinMoment targets={targets} emptyNotes={emptyNotes} />
 
       <section aria-labelledby="quick">
-        <h2 id="quick" className="mb-4 text-xl font-[650]">
+        <h2 id="quick" className="eyebrow mb-4">
           Schnellzugriff
         </h2>
-        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+        <ul className="grid grid-cols-2 border-t border-ink sm:grid-cols-3 lg:grid-cols-5">
           {quick
             .filter((q) => !q.hide)
             .map((q) => (
-              <li key={q.label}>
+              <li key={q.label} className="border-b border-line lg:border-b-0 lg:border-r lg:last:border-r-0">
                 <Link
                   href={q.href}
-                  className="flex h-full min-h-24 flex-col justify-between gap-3 rounded-[20px] border border-line bg-surface p-4 transition-colors hover:border-line-2 hover:bg-raised"
+                  data-focus-inset
+                  className="group flex h-full min-h-24 flex-col justify-between gap-4 px-1 py-4 transition-colors duration-150 hover:bg-raised lg:px-4"
                 >
-                  <Icon name={q.icon} className="size-6 text-ink" />
-                  <span className="break-words font-semibold text-ink">{q.label}</span>
+                  <span className="flex items-center justify-between">
+                    <Icon name={q.icon} className="size-5 text-accent-ink" />
+                    <Icon name="arrow-right" className="nudge size-4 text-ink-3 group-hover:text-ink" />
+                  </span>
+                  <span className="break-words text-lg font-semibold leading-snug text-ink">{q.label}</span>
                 </Link>
               </li>
             ))}

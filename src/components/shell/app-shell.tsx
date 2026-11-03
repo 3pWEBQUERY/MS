@@ -48,7 +48,7 @@ async function ShellUser({ placement }: { placement: "sidebar" | "topbar" }) {
         }}
       />
       <SessionWatch />
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-0.5">
         <SideNavLink
           href="/community/gespraeche"
           icon="chat"
@@ -105,12 +105,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[272px_minmax(0,1fr)]">
       {/* Seitenleiste – Desktop */}
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-surface px-4 py-5 lg:flex">
-        <div className="px-1 pb-6">
+      <aside className="sticky top-0 hidden h-dvh flex-col overflow-y-auto border-r border-line bg-bg px-4 py-6 lg:flex">
+        <div className="px-1 pb-8">
           <Logo href="/heute" />
         </div>
         <nav aria-label="Hauptnavigation" className="flex flex-1 flex-col">
-          <ul className="flex flex-col gap-1">
+          <p className="eyebrow mb-2 px-3 !text-[0.75rem]" aria-hidden="true">Bereiche</p>
+          <ul className="flex flex-col gap-0.5">
             {MAIN_NAV.map((n) => (
               <li key={n.href}>
                 <SideNavLink href={n.href} icon={n.icon as NavIcon}>
@@ -119,7 +120,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </li>
             ))}
           </ul>
-          <div className="my-5 border-t border-line" />
+          <p className="eyebrow mb-2 mt-8 px-3 !text-[0.75rem]" aria-hidden="true">Persönlich</p>
           <Suspense fallback={<div className="flex flex-col gap-1" aria-hidden="true">{[0, 1, 2].map((i) => <div key={i} className="h-12 rounded-[12px] bg-sunk/60" />)}</div>}>
             <ShellUser placement="sidebar" />
           </Suspense>
@@ -156,7 +157,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main id="inhalt" className="mx-auto w-full max-w-[1120px] flex-1 px-4 pb-32 pt-8 sm:px-6 lg:px-12 lg:pb-16 lg:pt-12">
+        <main id="inhalt" className="mx-auto w-full max-w-[1120px] flex-1 px-4 pb-32 pt-8 sm:px-6 lg:px-14 lg:pb-20 lg:pt-14">
           {children}
         </main>
       </div>
@@ -164,7 +165,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Untere Navigation – Mobil */}
       <nav
         aria-label="Hauptnavigation"
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface px-2 pb-[max(env(safe-area-inset-bottom),8px)] pt-1.5 lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg px-2 pb-[max(env(safe-area-inset-bottom),8px)] pt-1.5 lg:hidden"
       >
         <ul className="mx-auto flex max-w-lg">
           {MAIN_NAV.map((n) => (

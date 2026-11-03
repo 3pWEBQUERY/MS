@@ -29,27 +29,29 @@ export function MeinMoment({
   };
 
   return (
-    <section aria-labelledby="moment-title" className="rounded-[28px] border border-line bg-surface p-2">
-      <div className="flex flex-col gap-5 rounded-[20px] bg-sunk p-5 sm:p-7">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="flex flex-col gap-1.5">
-            <p className="text-sm font-semibold uppercase tracking-[0.08em] text-ink-2">Mein Moment</p>
-            <h2 id="moment-title" className="text-2xl font-[650] tracking-[-0.02em] sm:text-3xl">
-              Was brauchst du gerade?
+    <section aria-labelledby="moment-title" className="rounded-[28px] bg-deep text-on-deep">
+      <div className="flex flex-col gap-8 p-6 sm:p-10">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-col gap-4">
+            <p className="eyebrow !text-on-deep-2">
+              <span className="index !text-deep-accent">01</span> Mein Moment
+            </p>
+            <h2 id="moment-title" className="display-md !text-on-deep [&_em]:!text-deep-accent">
+              Was brauchst du <em>gerade?</em>
             </h2>
           </div>
           {intent && (
             <button
               type="button"
               onClick={reset}
-              className="inline-flex h-11 items-center gap-1.5 rounded-[11px] px-3 text-sm font-semibold text-ink-2 hover:bg-surface hover:text-ink"
+              className="inline-flex h-11 items-center gap-1.5 rounded-[11px] px-3 text-sm font-semibold text-on-deep-2 hover:bg-on-deep/10 hover:text-on-deep"
             >
               <Icon name="undo" className="size-4" />
               Auswahl zurücksetzen
             </button>
           )}
         </div>
-        <div role="group" aria-label="Absicht wählen" className="grid gap-2 sm:grid-cols-3">
+        <div role="group" aria-label="Absicht wählen" className="grid gap-2 sm:grid-cols-3 sm:gap-3">
           {MOMENT_INTENTS.map((i, index) => {
             const active = intent === i.key;
             return (
@@ -64,12 +66,17 @@ export function MeinMoment({
                   if (!active) sendAnalytics({ name: "moment_path_selected", params: { path: i.key } });
                 }}
                 className={cn(
-                  "flex min-h-20 flex-col items-start justify-center gap-0.5 rounded-[12px] border px-4 py-3 text-left transition-colors",
-                  active ? "border-ink bg-ink text-ink-inverse" : "border-line bg-surface text-ink hover:border-line-2",
+                  "group flex min-h-28 flex-col items-start justify-between gap-4 rounded-[20px] border px-5 py-4 text-left transition-colors duration-150",
+                  active ? "border-on-deep bg-on-deep text-deep" : "border-deep-line text-on-deep hover:border-on-deep-2",
                 )}
               >
-                <span className="text-base font-semibold">{i.label}</span>
-                <span className={cn("text-sm", active ? "opacity-80" : "text-ink-2")}>{i.description}</span>
+                <span className={cn("font-mono text-xs tracking-[0.12em]", active ? "text-deep/70" : "text-on-deep-2")}>
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="flex flex-col gap-1">
+                  <span className="font-display text-[1.5rem] leading-tight tracking-[-0.015em]">{i.label}</span>
+                  <span className={cn("text-sm", active ? "text-deep/75" : "text-on-deep-2")}>{i.description}</span>
+                </span>
               </button>
             );
           })}
@@ -77,27 +84,23 @@ export function MeinMoment({
       </div>
       <div aria-live="polite">
         {intent && (
-          <div className="px-3 pb-3 pt-4 sm:px-5 sm:pb-5">
+          <div className="border-t border-deep-line px-6 pb-4 pt-2 sm:px-10 sm:pb-6">
             {list.length === 0 ? (
-              <p className="px-2 py-3 text-base text-ink-2">{emptyNotes[intent]}</p>
+              <p className="py-5 text-base text-on-deep-2">{emptyNotes[intent]}</p>
             ) : (
-              <ul className="grid gap-2 sm:grid-cols-3" aria-label={`Vorschläge: ${MOMENT_INTENTS.find((i) => i.key === intent)?.label}`}>
+              <ul aria-label={`Vorschläge: ${MOMENT_INTENTS.find((i) => i.key === intent)?.label}`}>
                 {list.map((t) => (
-                  <li key={t.href + t.label}>
-                    <Link
-                      href={t.href}
-                      className="group flex h-full min-h-14 items-start gap-3 rounded-[16px] border border-line p-4 transition-colors hover:border-line-2 hover:bg-raised"
-                    >
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-accent-soft text-accent-ink">
-                        <Icon name={t.icon} className="size-5" />
-                      </span>
-                      <span className="flex min-w-0 flex-col gap-0.5">
-                        <span className="break-words font-semibold text-ink">{t.label}</span>
+                  <li key={t.href + t.label} className="border-b border-deep-line last:border-b-0">
+                    <Link href={t.href} data-focus-inset className="group flex items-center gap-4 py-4 sm:gap-6 sm:py-5">
+                      <Icon name={t.icon} className="size-5 shrink-0 text-deep-accent" />
+                      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span className="break-words text-lg font-semibold text-on-deep">{t.label}</span>
                         {/* Optionale Erläuterung – in der einfachen Ansicht ausgeblendet (HOM06) */}
-                        <span className="text-sm text-ink-2" data-optional>
+                        <span className="text-sm text-on-deep-2" data-optional>
                           {t.description}
                         </span>
                       </span>
+                      <Icon name="arrow-right" className="nudge size-5 shrink-0 text-on-deep-2 group-hover:text-on-deep" />
                     </Link>
                   </li>
                 ))}

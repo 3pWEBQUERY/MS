@@ -18,7 +18,7 @@ export function Card({
     sunk: "border border-transparent bg-sunk",
     accent: "border border-transparent bg-accent-soft",
     verified: "border border-transparent bg-verified-soft",
-    ink: "border border-transparent bg-ink text-ink-inverse",
+    ink: "border border-transparent bg-deep text-on-deep",
   };
   return <div className={cn("rounded-[20px]", tones[tone], padded && "p-5 sm:p-6", className)} {...props} />;
 }
@@ -70,7 +70,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-[8px] px-2.5 text-sm font-semibold",
+        "inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-[8px] px-2.5 text-[0.875rem] font-semibold tracking-[-0.005em]",
         toneClass[tone],
         className,
       )}
@@ -136,13 +136,13 @@ export function PageHeader({
   className?: string;
 }) {
   return (
-    <header className={cn("flex flex-col gap-4 pb-8 sm:pb-10", className)}>
+    <header className={cn("mb-8 flex flex-col gap-5 border-b border-line pb-8 sm:mb-10 sm:pb-10", className)}>
       {back && <BackLink href={back.href}>{back.label}</BackLink>}
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex max-w-3xl flex-col gap-3">
-          {eyebrow && <p className="text-sm font-semibold uppercase tracking-[0.08em] text-ink-2">{eyebrow}</p>}
-          <h1 className="text-3xl font-[650] tracking-[-0.025em] text-ink break-words hyphens-auto sm:text-[2.5rem] sm:leading-[1.08]">{title}</h1>
-          {description && <div className="text-lg text-ink-2">{description}</div>}
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex max-w-3xl flex-col gap-4">
+          {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+          <h1 className="display-md">{title}</h1>
+          {description && <div className="max-w-2xl text-lg leading-relaxed text-ink-2">{description}</div>}
         </div>
         {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
       </div>
@@ -156,6 +156,7 @@ export function SectionHeader({
   action,
   as: As = "h2",
   id,
+  index,
   className,
 }: {
   title: ReactNode;
@@ -163,15 +164,22 @@ export function SectionHeader({
   action?: ReactNode;
   as?: "h2" | "h3";
   id?: string;
+  /** Optionale Ziffer «01» vor dem Titel (Editorial-Raster) */
+  index?: string;
   className?: string;
 }) {
   return (
-    <div className={cn("mb-4 flex items-end justify-between gap-4", className)}>
-      <div className="flex flex-col gap-1">
-        <As id={id} className={cn("font-[650] text-ink", As === "h2" ? "text-xl" : "text-lg")}>
+    <div className={cn("mb-5 flex flex-wrap items-end justify-between gap-x-6 gap-y-3", className)}>
+      <div className="flex min-w-0 flex-col gap-1.5">
+        {index && (
+          <span className="font-mono text-[0.8125rem] font-medium tracking-[0.12em] text-accent-ink" aria-hidden="true">
+            {index}
+          </span>
+        )}
+        <As id={id} className={cn(As === "h2" ? "display-sm" : "text-lg font-[650] text-ink")}>
           {title}
         </As>
-        {description && <p className="text-base text-ink-2">{description}</p>}
+        {description && <p className="max-w-2xl text-base text-ink-2">{description}</p>}
       </div>
       {action}
     </div>
@@ -207,7 +215,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-start gap-4 rounded-[20px] border border-dashed border-line-2 bg-surface p-6 sm:p-8",
+        "flex flex-col items-start gap-4 rounded-[20px] border border-line bg-surface p-6 sm:p-8",
         className,
       )}
     >
@@ -215,7 +223,7 @@ export function EmptyState({
         <Icon name={icon} className="size-6" />
       </span>
       <div className="flex max-w-xl flex-col gap-1.5">
-        <p className="text-lg font-semibold text-ink">{title}</p>
+        <p className="display-sm">{title}</p>
         {children && <div className="text-base text-ink-2">{children}</div>}
       </div>
       {action}
@@ -276,7 +284,7 @@ export function Table({ className, scrollLabel = "Tabelle", ...props }: Componen
     >
       <table
         className={cn(
-          "w-full border-collapse text-left text-base [&_td]:border-t [&_td]:border-line [&_td]:px-4 [&_td]:py-3 [&_th]:bg-raised [&_th]:px-4 [&_th]:py-3 [&_th]:text-sm [&_th]:font-semibold [&_th]:text-ink-2",
+          "w-full border-collapse text-left text-base [&_td]:border-t [&_td]:border-line [&_td]:px-4 [&_td]:py-3 [&_th]:bg-raised [&_th]:px-4 [&_th]:py-3 [&_th]:font-mono [&_th]:text-xs [&_th]:font-medium [&_th]:uppercase [&_th]:tracking-[0.1em] [&_th]:text-ink-2",
           className,
         )}
         {...props}
@@ -328,22 +336,20 @@ export function SegmentNav({
   className?: string;
 }) {
   return (
-    <nav aria-label={label} className={cn("relative -mx-1 overflow-x-auto px-1", className)}>
-      <ul className="flex w-max gap-1 rounded-[14px] bg-sunk p-1">
+    <nav aria-label={label} className={cn("relative overflow-x-auto border-b border-line", className)}>
+      <ul className="flex w-max gap-6">
         {items.map((i) => (
           <li key={i.href}>
             <Link
               href={i.href}
               aria-current={i.active ? "page" : undefined}
               className={cn(
-                "inline-flex h-10 items-center gap-2 rounded-[10px] px-4 text-sm font-semibold transition-colors",
-                i.active ? "bg-surface text-ink" : "text-ink-2 hover:text-ink",
+                "-mb-px inline-flex h-12 items-center gap-2 border-b-2 text-base font-semibold transition-colors duration-150",
+                i.active ? "border-ink text-ink" : "border-transparent text-ink-2 hover:border-line-2 hover:text-ink",
               )}
             >
               {i.label}
-              {i.count !== undefined && (
-                <span className="tabular rounded-[6px] bg-sunk px-1.5 text-xs text-ink-2">{i.count}</span>
-              )}
+              {i.count !== undefined && <span className="tabular font-mono text-sm font-medium text-ink-3">{i.count}</span>}
             </Link>
           </li>
         ))}
@@ -396,5 +402,55 @@ export function PlainText({ text, className }: { text: string; className?: strin
         ),
       )}
     </div>
+  );
+}
+
+/* ───────────────────────── Index-Liste (Editorial-Raster statt Kartenraster) ─────────────────────────
+ * Zeilen mit Haarlinien, optionaler Ziffer und Pfeil. Ganze Zeile ist Link (≥ 44px hoch).
+ */
+export function IndexList({ className, children }: { className?: string; children: ReactNode }) {
+  return <ul className={cn("border-t border-line", className)}>{children}</ul>;
+}
+
+export function IndexRow({
+  href,
+  index,
+  title,
+  meta,
+  children,
+  aside,
+}: {
+  href: string;
+  index?: string;
+  title: ReactNode;
+  meta?: ReactNode;
+  children?: ReactNode;
+  aside?: ReactNode;
+}) {
+  return (
+    <li className="border-b border-line">
+      <Link
+        href={href}
+        className="group grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-6 gap-y-2 py-5 transition-colors duration-150 sm:grid-cols-[3rem_minmax(0,1fr)_auto] sm:py-6"
+        data-focus-inset
+      >
+        {index && (
+          <span aria-hidden="true" className="hidden pt-1 font-mono text-sm font-medium tracking-[0.08em] text-ink-3 group-hover:text-accent-ink sm:block">
+            {index}
+          </span>
+        )}
+        <span className={cn("flex min-w-0 flex-col gap-1.5", !index && "sm:col-span-2")}>
+          <span className="text-lg font-semibold leading-snug text-ink underline decoration-transparent decoration-1 underline-offset-[0.25em] transition-colors duration-150 group-hover:decoration-current">
+            {title}
+          </span>
+          {children && <span className="max-w-2xl text-base text-ink-2">{children}</span>}
+          {meta && <span className="text-sm text-ink-3">{meta}</span>}
+        </span>
+        <span className="flex items-center gap-3 pt-1">
+          {aside}
+          <Icon name="arrow-right" className="nudge size-5 shrink-0 text-ink-3 group-hover:text-ink" />
+        </span>
+      </Link>
+    </li>
   );
 }

@@ -36,8 +36,8 @@ async function HeaderAuth() {
 export function PublicHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-bg">
-      <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-8">
+      <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-10">
           <Logo />
           <nav aria-label="Hauptbereiche" className="hidden lg:block">
             <ul className="flex items-center gap-1">
@@ -100,34 +100,39 @@ export function PublicFooter() {
     },
   ];
   return (
-    <footer className="border-t border-line bg-surface">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.4fr_repeat(3,1fr)] lg:px-8">
-        <div className="flex max-w-sm flex-col gap-4">
-          <Logo />
-          <p className="text-base text-ink-2">{site.description}</p>
-          <p className="text-sm text-ink-2">
-            Kein Notfalldienst. Bei akuter Gefahr: Sanitätsnotruf <strong className="text-ink">144</strong>.
-          </p>
+    <footer className="bg-deep text-on-deep">
+      <div className="mx-auto max-w-7xl px-4 pb-10 pt-16 sm:px-6 lg:px-8 lg:pt-24">
+        <p className="display-lg max-w-4xl !text-on-deep [&_em]:!text-deep-accent">
+          Ruhig. Freiwillig. <em>In deinem Tempo.</em>
+        </p>
+        <div className="mt-16 grid gap-10 border-t border-deep-line pt-10 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
+          <div className="flex max-w-sm flex-col gap-4">
+            <p className="text-base text-on-deep-2">{site.description}</p>
+            <p className="text-sm text-on-deep-2">
+              Kein Notfalldienst. Bei akuter Gefahr: Sanitätsnotruf <strong className="text-on-deep">144</strong>.
+            </p>
+          </div>
+          {groups.map((g) => (
+            <nav key={g.title} aria-label={g.title} className="flex flex-col gap-3">
+              <p className="font-mono text-xs font-medium uppercase tracking-[0.14em] text-on-deep-2">{g.title}</p>
+              <ul className="flex flex-col gap-1">
+                {g.links.map(([href, label]) => (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      className="inline-flex min-h-9 items-center text-base text-on-deep underline decoration-transparent underline-offset-[0.25em] transition-colors duration-150 hover:decoration-current"
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
         </div>
-        {groups.map((g) => (
-          <nav key={g.title} aria-label={g.title} className="flex flex-col gap-3">
-            <p className="text-sm font-semibold uppercase tracking-[0.08em] text-ink-2">{g.title}</p>
-            <ul className="flex flex-col gap-1">
-              {g.links.map(([href, label]) => (
-                <li key={href}>
-                  <Link href={href} className="inline-flex min-h-9 items-center text-base text-ink hover:underline">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ))}
-      </div>
-      <div className="border-t border-line">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-sm text-ink-2 sm:flex-row sm:justify-between sm:px-6 lg:px-8">
+        <div className="mt-14 flex flex-col gap-2 border-t border-deep-line pt-6 font-mono text-xs uppercase tracking-[0.1em] text-on-deep-2 sm:flex-row sm:justify-between">
           <p>© 2026 {site.name} · Deutschschweiz</p>
-          <p>Keine Werbung. Kein Datenverkauf. Keine Tracker.</p>
+          <p>Keine Werbung · Kein Datenverkauf · Keine Tracker</p>
         </div>
       </div>
     </footer>

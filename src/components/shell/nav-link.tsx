@@ -32,8 +32,10 @@ function SideNavLinkInner({
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "group flex h-12 items-center gap-3 rounded-[12px] px-3 text-base font-semibold transition-colors duration-150",
-        active ? "bg-ink text-ink-inverse" : "text-ink-2 hover:bg-sunk hover:text-ink",
+        "group relative flex h-12 items-center gap-3 rounded-[12px] px-3 text-base font-semibold transition-colors duration-150",
+        active
+          ? "bg-sunk text-ink before:absolute before:inset-y-3 before:left-0 before:w-[3px] before:rounded-full before:bg-accent"
+          : "text-ink-2 hover:bg-sunk/60 hover:text-ink",
       )}
     >
       <Icon name={icon} className="size-5 shrink-0" />
@@ -59,7 +61,7 @@ function BottomNavLinkInner({ href, icon, children }: { href: string; icon: Icon
       <span
         className={cn(
           "flex h-8 w-14 items-center justify-center rounded-full transition-colors",
-          active ? "bg-ink text-ink-inverse" : "",
+          active ? "bg-accent-soft text-accent-ink" : "",
         )}
       >
         <Icon name={icon} className="size-5" />
@@ -78,8 +80,8 @@ function TopNavLinkInner({ href, children }: { href: string; children: ReactNode
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "inline-flex h-10 items-center rounded-[10px] px-3.5 text-base font-semibold transition-colors",
-        active ? "bg-sunk text-ink" : "text-ink-2 hover:text-ink",
+        "inline-flex h-10 items-center rounded-[10px] px-3 text-[0.9375rem] font-semibold underline decoration-2 underline-offset-[10px] transition-colors duration-150",
+        active ? "text-ink decoration-accent" : "text-ink-2 decoration-transparent hover:text-ink hover:decoration-line-2",
       )}
     >
       {children}
@@ -133,7 +135,7 @@ export function TopNavLink(props: TopProps) {
   return (
     <Suspense
       fallback={
-        <Link href={props.href} className="inline-flex h-10 items-center rounded-[10px] px-3.5 text-base font-semibold text-ink-2 hover:text-ink">
+        <Link href={props.href} className="inline-flex h-10 items-center rounded-[10px] px-3 text-[0.9375rem] font-semibold text-ink-2 hover:text-ink">
           {props.children}
         </Link>
       }

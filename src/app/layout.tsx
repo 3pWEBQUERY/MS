@@ -26,6 +26,19 @@ const atkinsonMono = localFont({
   display: "optional",
 });
 
+/**
+ * Fraunces (SIL OFL, src/app/fonts/FRAUNCES-OFL.txt) – variable Display-Serif mit optischer Grösse.
+ * Nur für grosse Überschriften (.display-*); vorgeladen, «optional» wie Atkinson (kein CLS).
+ */
+const fraunces = localFont({
+  src: [
+    { path: "./fonts/fraunces-latin.woff2", weight: "300 700", style: "normal" },
+    { path: "./fonts/fraunces-latin-italic.woff2", weight: "300 700", style: "italic" },
+  ],
+  variable: "--font-fraunces",
+  display: "optional",
+});
+
 export const metadata: Metadata = {
   title: { default: `${site.name} – Leben mit MS in der Schweiz`, template: `%s · ${site.name}` },
   description: site.description,
@@ -38,14 +51,14 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5f4f0" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f1012" },
+    { media: "(prefers-color-scheme: light)", color: "#f3f0e9" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e0f11" },
   ],
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="de-CH" className={`${atkinson.variable} ${atkinsonMono.variable}`} suppressHydrationWarning>
+    <html lang="de-CH" className={`${atkinson.variable} ${atkinsonMono.variable} ${fraunces.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: displayBootScript }} />
       </head>
