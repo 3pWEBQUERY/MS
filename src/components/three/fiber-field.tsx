@@ -193,8 +193,20 @@ function createScene({ renderer, width, height }: SceneApi, colors: SceneColors)
   };
 }
 
-export function FiberField({ className }: { className?: string }) {
+/** Auf der tiefen Fläche (bg-deep) helle Bahnen und Glut-Impulse aus den deep-Tokens. */
+function deepColors(c: SceneColors): SceneColors {
+  const s = getComputedStyle(document.documentElement);
+  const v = (name: string, fallback: string) => new THREE.Color((s.getPropertyValue(name).trim() || fallback) as THREE.ColorRepresentation);
+  return { ...c, ink: v("--on-deep", "#f3f0e9"), muted: v("--on-deep-2", "#b9b4a8"), accent: v("--deep-accent", "#f0a27a") };
+}
+
+function createDeepScene(api: SceneApi, colors: SceneColors) {
+  const ctrl = createScene(api, deepColors(colors));
+  return { ...ctrl, setColors: (c: SceneColors) => ctrl.setColors(deepColors(c)) };
+}
+
+export function FiberField({ className, tone = "paper" }: { className?: string; tone?: "paper" | "deep" }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  useThreeScene(ref, createScene);
+  useThreeScene(ref, tone === "deep" ? createDeepScene : createScene);
   return <canvas ref={ref} aria-hidden="true" role="presentation" className={className} />;
 }
