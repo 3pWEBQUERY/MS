@@ -3,6 +3,7 @@
 # Lauf benachrichtigt über die GitHub-Benachrichtigungen des Repositorys.
 # Übergangslösung bis zum neutralen Uptime-Anbieter im Minutentakt (Runbook «Alarmierung»).
 # Adressen über Repository-Variablen überschreibbar: MS_WEB_URL, MS_HILFE_URL.
+# Hinweis: Zeitpläne laufen nur auf dem Standard-Branch; vorher manuell starten (workflow_dispatch).
 name: Uptime
 
 on:
