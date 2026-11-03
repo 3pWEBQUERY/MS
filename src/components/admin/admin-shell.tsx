@@ -50,9 +50,7 @@ function LogoutButton({ compact }: { compact?: boolean }) {
   );
 }
 
-async function SidebarNav() {
-  const nav = await loadNav();
-  if (!nav) return null;
+function SidebarExtras({ nav }: { nav: NonNullable<Awaited<ReturnType<typeof loadNav>>> }) {
   return (
     <>
       <SessionWatch />
@@ -75,9 +73,7 @@ async function SidebarNav() {
   );
 }
 
-async function MobileNav() {
-  const nav = await loadNav();
-  if (!nav) return null;
+function MobileExtras({ nav }: { nav: NonNullable<Awaited<ReturnType<typeof loadNav>>> }) {
   return (
     <div className="flex items-center gap-1">
       <Link
@@ -91,6 +87,43 @@ async function MobileNav() {
       <AdminMobileNav items={nav.items} />
     </div>
   );
+}
+
+/**
+ * Seitenleiste (Desktop) und Kopfzeile (Mobil) entstehen aus EINER Suspense-Grenze und
+ * einer Datenabfrage. So ist die Streaming-Reihenfolge deterministisch (keine
+ * Hydration-Abweichung durch parallel aufgelöste Grenzen).
+ */
+function Chrome({ nav }: { nav: Awaited<ReturnType<typeof loadNav>> | undefined }) {
+  return (
+    <>
+      <aside className="sticky top-0 hidden h-dvh flex-col overflow-y-auto border-r border-line bg-surface px-4 py-5 lg:flex">
+        <div className="px-1 pb-6">
+          <Brand />
+        </div>
+        <nav aria-label="Verwaltungsbereiche" className="flex flex-1 flex-col">
+          {nav === undefined ? (
+            <div className="flex flex-col gap-1" aria-hidden="true">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="h-12 rounded-[12px] bg-sunk/60" />
+              ))}
+            </div>
+          ) : nav ? (
+            <SidebarExtras nav={nav} />
+          ) : null}
+        </nav>
+      </aside>
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-line bg-bg px-4 lg:hidden">
+        <Brand />
+        {nav === undefined ? <div className="size-10" /> : nav ? <MobileExtras nav={nav} /> : null}
+      </header>
+    </>
+  );
+}
+
+async function LoadedChrome() {
+  const nav = await loadNav();
+  return <Chrome nav={nav} />;
 }
 
 async function Display() {
@@ -123,35 +156,14 @@ function Brand() {
 export function AdminShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
-      <aside className="sticky top-0 hidden h-dvh flex-col overflow-y-auto border-r border-line bg-surface px-4 py-5 lg:flex">
-        <div className="px-1 pb-6">
-          <Brand />
-        </div>
-        <nav aria-label="Verwaltungsbereiche" className="flex flex-1 flex-col">
-          <Suspense
-            fallback={
-              <div className="flex flex-col gap-1" aria-hidden="true">
-                {[0, 1, 2, 3].map((i) => (
-                  <div key={i} className="h-12 rounded-[12px] bg-sunk/60" />
-                ))}
-              </div>
-            }
-          >
-            <SidebarNav />
-          </Suspense>
-        </nav>
-      </aside>
+      <Suspense fallback={<Chrome nav={undefined} />}>
+        <LoadedChrome />
+      </Suspense>
 
       <div className="flex min-w-0 flex-col">
         <Suspense fallback={null}>
           <Display />
         </Suspense>
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-line bg-bg px-4 lg:hidden">
-          <Brand />
-          <Suspense fallback={<div className="size-10" />}>
-            <MobileNav />
-          </Suspense>
-        </header>
         <div className="border-b border-line bg-sunk px-4 py-2.5 sm:px-6 lg:px-12">
           <p className="flex items-center gap-2 text-sm font-medium text-ink-2">
             <Icon name="lock" className="size-4 shrink-0" />
