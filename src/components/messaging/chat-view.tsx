@@ -229,7 +229,7 @@ export function ChatView({
           {groups.map((g) => (
             <section key={g.day} aria-label={g.label} className="flex flex-col gap-4">
               {/* Tagestrenner als Haarlinie mit Mono-Datum */}
-              <p className="flex items-center gap-4 font-display font-extrabold text-[0.75rem] uppercase tracking-[0.12em] text-ink-2">
+              <p className="flex items-center gap-4 font-display font-semibold text-[0.75rem] uppercase tracking-[0.12em] text-ink-2">
                 <span aria-hidden="true" className="h-px flex-1 bg-line" />
                 <span className="text-center">{g.label}</span>
                 <span aria-hidden="true" className="h-px flex-1 bg-line" />

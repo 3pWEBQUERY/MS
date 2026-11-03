@@ -4,7 +4,7 @@
 
 ## Haltung – was diese Oberfläche ausmacht
 
-- **Typografie trägt das Design.** Titel und Versalien-Beschriftungen in Nunito (kräftig, 700–800), mit genau einem kursiven Akzentwort (`<em>`) in Glut. Fliesstext bleibt Atkinson Hyperlegible.
+- **Typografie trägt das Design.** Titel und Versalien-Beschriftungen in Lexend (SemiBold, 600–650), mit genau einem Akzentwort (`<em>`) in Glut – aufrecht, Lexend hat keinen Kursivschnitt. Fliesstext bleibt Atkinson Hyperlegible.
 - **Raster statt Kästchen.** Inhalte stehen in Haarlinien-Listen (`IndexList`/`IndexRow`, `border-t border-line`), mit Mono-Ziffern «01». Karten nur dort, wo eine Fläche als Ganzes klickbar ist oder Formulare gruppiert.
 - **Rhythmus über Flächen.** Papier (`bg`) als Grund, eine tiefe Fläche (`bg-deep`) als Bühne für den wichtigsten Moment einer Seite (höchstens eine pro Seite), `surface` für ruhige Gegenabschnitte.
 - **Signatur:** das Three.js-Faserfeld (`FiberField`) – nur auf Einstiegsseiten, nie hinter Text, der gelesen werden muss.
@@ -54,7 +54,7 @@ Dark Mode funktioniert automatisch über die Tokens (`data-theme="dark"`). Nie f
 
 ## Typografie
 
-Nunito (Titelschrift: alle Überschriften `display-*`/`font-display` und Versalien-Beschriftungen `.eyebrow`, Gewicht 700–800), Atkinson Hyperlegible Next (Fliesstext, UI) und Atkinson Hyperlegible Mono (nur Ziffern, Uhrzeiten, Belegnummern – nie für Versalien).
+Lexend (Titelschrift: alle Überschriften `display-*`/`font-display` und Versalien-Beschriftungen `.eyebrow`, Gewicht 600–650), Atkinson Hyperlegible Next (Fliesstext, UI) und Atkinson Hyperlegible Mono (nur Ziffern, Uhrzeiten, Belegnummern – nie für Versalien).
 
 | Klasse | Einsatz |
 |---|---|
@@ -64,8 +64,8 @@ Nunito (Titelschrift: alle Überschriften `display-*`/`font-display` und Versali
 | `display-sm` | Abschnittstitel (`SectionHeader` h2), Titel leerer Zustände |
 | `font-display text-[1.5rem…2rem]` | Titel in Index-Zeilen/Spalten |
 
-- **Akzentwort:** `<h1 className="display-md">Verständlich <em>erklärt.</em></h1>` – höchstens ein `<em>` pro Titel, kursiv in Glut.
-- **Eyebrow:** `<p className="eyebrow"><span className="index">01</span> Thema</p>` (Nunito ExtraBold, Versalien; Index optional). Eigene Versalien-Labels: `font-display font-extrabold uppercase tracking-[0.12em]`.
+- **Akzentwort:** `<h1 className="display-md">Verständlich <em>erklärt.</em></h1>` – höchstens ein `<em>` pro Titel, in Glut (aufrecht).
+- **Eyebrow:** `<p className="eyebrow"><span className="index">01</span> Thema</p>` (Lexend SemiBold, Versalien; Index optional). Eigene Versalien-Labels: `font-display font-semibold uppercase tracking-[0.12em]`.
 - **Ziffern:** `font-mono text-sm text-accent-ink` für «01», `tabular` für Werte.
 - Fliesstext `text-base` (17px), sekundär `text-ink-2`, Hilfetexte `text-sm text-ink-2`; Führungstext `text-lg`/`text-xl text-ink-2`.
 - Links im Text: `link-quiet` (Unterstreichung wird beim Überfahren kräftig).
@@ -106,6 +106,6 @@ de-CH, Du-Ansprache, Schweizer Schreibweise (**ss statt ß**: «Grösse», «sch
 | Muster | Referenz |
 |---|---|
 | Hero mit Faserfeld, nummerierte Einstiegsspalten, tiefe Bereichs-Liste, Definitions-Raster | `src/app/(public)/page.tsx` |
-| Begrüssung in Nunito mit kursivem Namen, tiefe Bühne mit invertierter Auswahl, Schnellzugriff als Haarlinien-Leiste | `src/app/(app)/heute/` |
+| Begrüssung in Lexend mit Namen in Glut, tiefe Bühne mit invertierter Auswahl, Schnellzugriff als Haarlinien-Leiste | `src/app/(app)/heute/` |
 | Tagebuch-Raster (Datum als Serif-Ziffer) | `src/components/health/entry-list.tsx` |
 | Unterstrich-Tabs | `SegmentNav` |

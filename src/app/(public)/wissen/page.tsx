@@ -143,7 +143,7 @@ async function KnowledgeContent() {
                   <span className="max-w-xl text-base text-ink-2">{t.description}</span>
                 </div>
                 <span className="flex items-center gap-4 pt-2">
-                  <span className="tabular whitespace-nowrap font-display font-extrabold text-xs uppercase tracking-[0.1em] text-ink-2">
+                  <span className="tabular whitespace-nowrap font-display font-semibold text-xs uppercase tracking-[0.1em] text-ink-2">
                     {t.articleCount} Artikel
                   </span>
                   <Icon name="arrow-right" className="nudge size-5 shrink-0 text-ink-3 group-hover:text-ink" />

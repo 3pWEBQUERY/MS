@@ -31,7 +31,7 @@ export function EntryList({ entries, compact = false }: { entries: EntrySummary[
           >
             <span aria-hidden="true" className="flex flex-col items-start leading-none">
               <span className="font-display text-[2.25rem] tracking-[-0.03em] text-ink sm:text-[2.75rem]">{part(e.localDate, { day: "numeric" })}</span>
-              <span className="mt-1.5 font-display font-extrabold text-[0.75rem] uppercase tracking-[0.1em] text-ink-3">
+              <span className="mt-1.5 font-display font-semibold text-[0.75rem] uppercase tracking-[0.1em] text-ink-3">
                 {part(e.localDate, { weekday: "short" })} · {part(e.localDate, { month: "short" })}
               </span>
             </span>

@@ -48,7 +48,7 @@ async function ArticleContent({ params }: { params: PageProps<"/wissen/[slug]">[
           <BackLink href={`/wissen/thema/${article.topicSlug}`}>{article.topicName}</BackLink>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <VerifiedBadge label={article.isMedical ? "Fachlich geprüft" : "Redaktionell geprüft"} />
-            <span className="inline-flex items-center gap-1.5 font-display font-extrabold text-xs uppercase tracking-[0.12em] text-ink-2">
+            <span className="inline-flex items-center gap-1.5 font-display font-semibold text-xs uppercase tracking-[0.12em] text-ink-2">
               <Icon name="clock" className="size-4" />
               <span className="tabular">{article.readingMinutes} Min. Lesezeit</span>
             </span>
@@ -161,7 +161,7 @@ async function ArticleContent({ params }: { params: PageProps<"/wissen/[slug]">[
                   ] as [string, ReactNode][]
                 ).map(([k, v]) => (
                   <div key={k} className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0">
-                    <dt className="font-display font-extrabold text-xs uppercase tracking-[0.1em] text-ink-2">{k}</dt>
+                    <dt className="font-display font-semibold text-xs uppercase tracking-[0.1em] text-ink-2">{k}</dt>
                     <dd className="text-base text-ink">{v}</dd>
                   </div>
                 ))}

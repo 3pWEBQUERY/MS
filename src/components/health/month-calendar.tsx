@@ -85,7 +85,7 @@ export function MonthCalendar({
           <thead>
             <tr>
               {WEEKDAYS.map(([short, long]) => (
-                <th key={short} scope="col" className="pb-1 font-display text-xs font-extrabold uppercase tracking-[0.1em] text-ink-2">
+                <th key={short} scope="col" className="pb-1 font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-2">
                   <abbr title={long} className="no-underline">
                     {short}
                   </abbr>

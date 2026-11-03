@@ -27,16 +27,14 @@ const atkinsonMono = localFont({
 });
 
 /**
- * Nunito (SIL OFL, src/app/fonts/NUNITO-OFL.txt) – variable Titelschrift für Überschriften
- * (.display-*, font-display) und Versalien-Beschriftungen (.eyebrow). Vorgeladen, «optional»
- * wie Atkinson (kein CLS). Fliesstext bleibt Atkinson Hyperlegible.
+ * Lexend (SIL OFL, src/app/fonts/LEXEND-OFL.txt) – variable Titelschrift (100–900), entwickelt für
+ * flüssigeres Lesen. Für Überschriften (.display-*, font-display) und Versalien-Beschriftungen
+ * (.eyebrow). Kein Kursivschnitt: Akzentwörter werden über Farbe hervorgehoben. Vorgeladen,
+ * «optional» wie Atkinson (kein CLS). Fliesstext bleibt Atkinson Hyperlegible.
  */
-const nunito = localFont({
-  src: [
-    { path: "./fonts/nunito-latin.woff2", weight: "200 1000", style: "normal" },
-    { path: "./fonts/nunito-latin-italic.woff2", weight: "200 1000", style: "italic" },
-  ],
-  variable: "--font-nunito",
+const lexend = localFont({
+  src: [{ path: "./fonts/lexend-latin.woff2", weight: "100 900", style: "normal" }],
+  variable: "--font-lexend",
   display: "optional",
 });
 
@@ -59,7 +57,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="de-CH" className={`${atkinson.variable} ${atkinsonMono.variable} ${nunito.variable}`} suppressHydrationWarning>
+    <html lang="de-CH" className={`${atkinson.variable} ${atkinsonMono.variable} ${lexend.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: displayBootScript }} />
       </head>

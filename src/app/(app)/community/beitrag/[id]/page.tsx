@@ -92,7 +92,7 @@ async function PostView({
             {/* Byline und Kennzeichnung als ruhige Meta-Zeile – COM04: nie als «geprüft» gekennzeichnet */}
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <span className="inline-flex items-center gap-1.5 font-display font-extrabold text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2">
+                <span className="inline-flex items-center gap-1.5 font-display font-semibold text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2">
                   <Icon name={post.author.team ? "shield" : "message"} className="size-4" />
                   {post.author.team ? "Beitrag des Teams" : "Persönliche Erfahrung"}
                 </span>

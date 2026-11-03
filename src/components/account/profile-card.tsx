@@ -30,7 +30,7 @@ export function MemberProfileCard({
         <Monogram name={name} size="lg" />
         <div className="flex min-w-0 flex-col gap-0.5">
           <Heading className="break-words font-display text-[1.625rem] leading-tight tracking-[-0.015em] text-ink">{name}</Heading>
-          <span className="font-display font-extrabold text-xs uppercase tracking-[0.12em] text-ink-2">Mitglied</span>
+          <span className="font-display font-semibold text-xs uppercase tracking-[0.12em] text-ink-2">Mitglied</span>
         </div>
       </div>
       <dl className="flex flex-col border-t border-line">

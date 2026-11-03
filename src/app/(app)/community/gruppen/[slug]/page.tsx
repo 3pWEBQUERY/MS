@@ -66,7 +66,7 @@ async function Group({
           <Icon name={group.type === "closed" ? "lock" : "users"} className="size-4 text-ink-2" />
           {groupTypeLabel(group.type)}
         </span>
-        {group.topic && <span className="font-display font-extrabold text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2">{group.topic}</span>}
+        {group.topic && <span className="font-display font-semibold text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2">{group.topic}</span>}
         {group.archived && (
           <Badge tone="warning" icon="archive">
             Archiviert

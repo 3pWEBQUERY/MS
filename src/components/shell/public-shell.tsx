@@ -114,7 +114,7 @@ export function PublicFooter() {
           </div>
           {groups.map((g) => (
             <nav key={g.title} aria-label={g.title} className="flex flex-col gap-3">
-              <p className="font-display text-xs font-extrabold uppercase tracking-[0.14em] text-on-deep-2">{g.title}</p>
+              <p className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-on-deep-2">{g.title}</p>
               <ul className="flex flex-col gap-1">
                 {g.links.map(([href, label]) => (
                   <li key={href}>
@@ -130,7 +130,7 @@ export function PublicFooter() {
             </nav>
           ))}
         </div>
-        <div className="mt-14 flex flex-col gap-2 border-t border-deep-line pt-6 font-display font-extrabold text-xs uppercase tracking-[0.1em] text-on-deep-2 sm:flex-row sm:justify-between">
+        <div className="mt-14 flex flex-col gap-2 border-t border-deep-line pt-6 font-display font-semibold text-xs uppercase tracking-[0.1em] text-on-deep-2 sm:flex-row sm:justify-between">
           <p>© 2026 {site.name} · Deutschschweiz</p>
           <p>Keine Werbung · Kein Datenverkauf · Keine Tracker</p>
         </div>

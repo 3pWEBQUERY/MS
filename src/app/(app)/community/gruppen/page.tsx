@@ -90,7 +90,7 @@ async function Groups() {
                         {groupTypeLabel(g.type)}
                       </p>
                       {g.topic && (
-                        <p className="font-display font-extrabold text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2">{g.topic}</p>
+                        <p className="font-display font-semibold text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2">{g.topic}</p>
                       )}
                     </div>
                     <MembershipBadge status={g.membership} />

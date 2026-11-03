@@ -56,7 +56,7 @@ export function ReportForm({
         {state.data.acute === true && <AcuteNotice />}
         {/* Die eine tiefe Fläche: Belegnummer als ruhiger, verlässlicher Moment (SAF02) */}
         <div className="flex flex-col gap-4 rounded-[28px] bg-deep p-6 text-on-deep sm:p-10">
-          <p className="font-display text-[0.8125rem] font-extrabold uppercase tracking-[0.12em] text-on-deep-2">Belegnummer</p>
+          <p className="font-display text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-on-deep-2">Belegnummer</p>
           <p className="break-all font-mono text-[1.75rem] font-medium leading-tight tracking-[0.04em] text-on-deep sm:text-[2.25rem]">
             {state.data.receipt}
           </p>

@@ -120,7 +120,7 @@ function Panel({
 
   return (
     <div className="flex flex-col gap-2 border-b border-line py-5">
-      <p className="font-display text-xs font-extrabold uppercase tracking-[0.12em] text-ink-2">{title}</p>
+      <p className="font-display text-xs font-semibold uppercase tracking-[0.12em] text-ink-2">{title}</p>
       <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full font-mono" role="presentation">
         {[min, mid, max].map((v) => (
           <g key={v}>

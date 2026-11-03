@@ -134,8 +134,8 @@
 
   --font-sans: var(--font-atkinson), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-atkinson-mono), ui-monospace, monospace;
-  /* Titelschrift Nunito für Überschriften und Versalien; Fliesstext bleibt Atkinson (Lesbarkeit, PRD 12) */
-  --font-display: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
+  /* Titelschrift Lexend für Überschriften und Versalien; Fliesstext bleibt Atkinson (Lesbarkeit, PRD 12) */
+  --font-display: var(--font-lexend), ui-sans-serif, system-ui, sans-serif;
 
   /* Radien – konzentrisches System */
   --radius-xs: 6px; /* Tags innerhalb kleiner Elemente, Checkbox */
@@ -182,6 +182,11 @@ html[data-text-scale="150"] {
 }
 
 @layer base {
+  /* Kein Kunstkursiv für die Titelschrift (Lexend hat keinen Kursivschnitt) */
+  .font-display {
+    font-synthesis: none;
+  }
+
   *,
   ::before,
   ::after {
@@ -212,9 +217,9 @@ html[data-text-scale="150"] {
     letter-spacing: -0.018em;
     text-wrap: balance;
   }
-  /* Titel in Nunito: kräftig (Bold), Utilities wie font-extrabold überschreiben */
+  /* Titel in Lexend: kräftig (SemiBold), Utilities wie font-extrabold überschreiben */
   .font-display {
-    font-weight: 700;
+    font-weight: 600;
   }
 
   p {
@@ -308,7 +313,7 @@ html[data-simple="true"] [data-optional] {
   .display-md,
   .display-sm {
     font-family: var(--font-display);
-    font-weight: 800;
+    font-weight: 650;
     color: var(--ink);
     text-wrap: balance;
     overflow-wrap: break-word;
@@ -333,11 +338,11 @@ html[data-simple="true"] [data-optional] {
     font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
     line-height: 1.15;
     letter-spacing: -0.015em;
-    font-weight: 750;
+    font-weight: 600;
   }
+  /* Lexend hat keinen Kursivschnitt: Akzentwort aufrecht, nur über Glut hervorgehoben (kein Kunstkursiv) */
   :is(.display-xl, .display-lg, .display-md, .display-sm) em {
-    font-style: italic;
-    font-weight: 800;
+    font-style: normal;
     color: var(--accent-ink);
   }
 
@@ -348,9 +353,9 @@ html[data-simple="true"] [data-optional] {
     gap: 0.75rem;
     font-family: var(--font-display);
     font-size: 0.8125rem;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.4;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--ink-2);
   }
@@ -389,7 +394,7 @@ html[data-simple="true"] [data-optional] {
   }
   .prose-ms h2 {
     font-family: var(--font-display);
-    font-weight: 750;
+    font-weight: 600;
     font-size: 1.75rem;
     line-height: 1.2;
     letter-spacing: -0.015em;

@@ -150,7 +150,7 @@ function Brand() {
       <span className="flex flex-col gap-0.5 leading-tight">
         <span className="text-[1.0625rem] font-bold tracking-[-0.02em]">MS Plattform</span>
         <span className="sr-only"> </span>
-        <span className="font-display text-[0.6875rem] font-extrabold uppercase tracking-[0.14em] text-accent-ink">Verwaltung</span>
+        <span className="font-display text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-accent-ink">Verwaltung</span>
         <span className="sr-only"> – Übersicht</span>
       </span>
     </Link>
