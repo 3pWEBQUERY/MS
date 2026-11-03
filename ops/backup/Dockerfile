@@ -19,4 +19,6 @@ COPY tsconfig.json ./
 COPY scripts/backup ./scripts/backup
 
 USER node
-CMD ["npx", "tsx", "scripts/backup/run.ts"]
+# tsx direkt statt npx: keine npm-Hinweise im Log, die wie Fehler aussehen (Log-Alarme)
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
+CMD ["node_modules/.bin/tsx", "scripts/backup/run.ts"]
