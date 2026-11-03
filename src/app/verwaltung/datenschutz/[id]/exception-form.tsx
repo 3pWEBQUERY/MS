@@ -1,13 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
 import { CountedTextarea, Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
-import { idle } from "@/lib/action-state";
 import { setExceptionAction } from "@/server/modules/privacy/admin-actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 /** PRI06: Ausnahme mit Begründung, Ticket und Enddatum (höchstens ein Jahr). */
 export function ExceptionForm({ requestId, hasException }: { requestId: string; hasException: boolean }) {
-  const [state, action] = useActionState(setExceptionAction, idle);
+  const [state, action] = useHealthAction(setExceptionAction);
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
       <input type="hidden" name="requestId" value={requestId} />

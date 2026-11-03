@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
 import { PasswordField } from "@/components/auth/password-field";
 import { Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
-import { idle, type ActionState } from "@/lib/action-state";
+import { type ActionState } from "@/lib/action-state";
 import { changeEmailAction, changePasswordAction } from "@/server/modules/account/settings-actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 function ReauthLink({ state }: { state: ActionState }) {
   if (state.data?.auth !== "reauth") return null;
@@ -18,7 +18,7 @@ function ReauthLink({ state }: { state: ActionState }) {
 
 /** ACC07: neue Adresse wird vor dem Austausch bestätigt; Rückmeldung neutral. */
 export function ChangeEmailForm() {
-  const [state, action] = useActionState(changeEmailAction, idle);
+  const [state, action] = useHealthAction(changeEmailAction);
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
       <FormMessage state={state} />
@@ -52,7 +52,7 @@ export function ChangeEmailForm() {
 }
 
 export function ChangePasswordForm() {
-  const [state, action] = useActionState(changePasswordAction, idle);
+  const [state, action] = useHealthAction(changePasswordAction);
   return (
     <form action={action} noValidate className="flex flex-col gap-5" key={state.status === "success" ? state.message : "form"}>
       <FormMessage state={state} />

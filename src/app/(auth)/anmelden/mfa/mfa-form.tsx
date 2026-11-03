@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
-import { idle } from "@/lib/action-state";
 import { mfaVerifyAction } from "@/server/modules/account/auth-actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 export function MfaForm({ next }: { next: string }) {
-  const [state, action] = useActionState(mfaVerifyAction, idle);
+  const [state, action] = useHealthAction(mfaVerifyAction);
   const [mode, setMode] = useState<"totp" | "recovery">("totp");
   return (
     <form action={action} className="flex flex-col gap-6" noValidate>

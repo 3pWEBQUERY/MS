@@ -1,13 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
 import { PasswordField } from "@/components/auth/password-field";
 import { FormMessage, SubmitButton } from "@/components/ui/form";
-import { idle } from "@/lib/action-state";
 import { resetPasswordAction } from "@/server/modules/account/auth-actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 export function ResetForm({ token }: { token: string }) {
-  const [state, action] = useActionState(resetPasswordAction, idle);
+  const [state, action] = useHealthAction(resetPasswordAction);
   return (
     <form action={action} className="flex flex-col gap-6" noValidate>
       <input type="hidden" name="token" value={token} />

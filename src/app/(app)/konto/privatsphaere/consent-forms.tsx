@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox, FormMessage, SubmitButton } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
 import { idle, type ActionState } from "@/lib/action-state";
 import { setAnalyticsConsentAction, setHealthConsentAction } from "@/server/modules/account/privacy-actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 const WITHDRAW_EFFECTS = [
   "Neue Check-ins und Tagebucheinträge sind ab sofort gesperrt.",
@@ -23,7 +24,7 @@ const GRANT_EFFECTS = [
 
 /** PRI01/PRI02: Folgen werden vor der Bestätigung erklärt; nichts ist vorausgewählt. */
 export function HealthConsentForm({ active }: { active: boolean }) {
-  const [state, action] = useActionState(setHealthConsentAction, idle);
+  const [state, action] = useHealthAction(setHealthConsentAction);
   // Zustand beim Öffnen merken: nach bestätigtem Erfolg schliesst sich die Bestätigung
   const [openedWith, setOpenedWith] = useState<ActionState | null>(null);
   const open = openedWith !== null && (state === openedWith || state.status === "error");
@@ -80,7 +81,7 @@ export function HealthConsentForm({ active }: { active: boolean }) {
 }
 
 export function AnalyticsConsentForm({ active }: { active: boolean }) {
-  const [state, action] = useActionState(setAnalyticsConsentAction, idle);
+  const [state, action] = useHealthAction(setAnalyticsConsentAction);
   return (
     <form action={action} className="flex flex-col items-start gap-3">
       <input type="hidden" name="decision" value={active ? "withdrawn" : "granted"} />

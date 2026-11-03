@@ -1,9 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
 import { Checkbox, Field, FormMessage, Input, RadioCards, SubmitButton } from "@/components/ui/form";
-import { idle } from "@/lib/action-state";
 import { decideMfaRecoveryAction } from "@/server/modules/privacy/mfa-recovery-actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 /**
  * ACC05: kontrollierte Wiederherstellung des zweiten Faktors. Prüfverfahren als kontrollierter
@@ -18,7 +17,7 @@ export function MfaRecoveryForm({
   step: "verify" | "reset";
   checks: { value: string; label: string }[];
 }) {
-  const [state, action] = useActionState(decideMfaRecoveryAction, idle);
+  const [state, action] = useHealthAction(decideMfaRecoveryAction);
   const fe = state.fieldErrors ?? {};
   return (
     <form action={action} noValidate className="flex flex-col gap-5">

@@ -16,6 +16,7 @@ export type StartInventory = {
   articles: number;
   medicalWithoutReview: number;
   offers: number;
+  offersWithoutExpert: number;
   groups: number;
   groupsWithoutModerator: number;
   topicsWithoutOffer: string[];
@@ -41,7 +42,13 @@ export async function startInventory(): Promise<StartInventory> {
       (select count(distinct account_id)::int from identity.role_assignments
         where role = 'medical_reviewer' and revoked_at is null and (ends_at is null or ends_at > now())) as reviewers,
       (select count(*)::int from content.safety_contacts where active) as safety_active,
-      (select count(*)::int from content.safety_contacts where active and verified_by ilike 'demo%') as safety_demo`)) as unknown as {
+      (select count(*)::int from content.safety_contacts where active and verified_by ilike 'demo%') as safety_demo,
+      (select count(*)::int from content.support_offers o
+        where o.status = 'published' and o.next_review_at > now()
+          and ((o.topic_slugs && array['recht', 'finanzen'] and not exists (select 1 from content.verification_records r
+                 where r.target_type = 'offer' and r.target_id = o.id and r.method = 'expert_social' and r.next_due_at > now()))
+            or ('therapie' = any(o.topic_slugs) and not exists (select 1 from content.verification_records r
+                 where r.target_type = 'offer' and r.target_id = o.id and r.method = 'expert_medical' and r.next_due_at > now())))) as offers_without_expert`)) as unknown as {
     articles: number;
     medical_without_review: number;
     offers: number;
@@ -51,6 +58,7 @@ export async function startInventory(): Promise<StartInventory> {
     reviewers: number;
     safety_active: number;
     safety_demo: number;
+    offers_without_expert: number;
   }[];
 
   const covered = (await db.execute(dsql`
@@ -62,6 +70,7 @@ export async function startInventory(): Promise<StartInventory> {
     articles: row?.articles ?? 0,
     medicalWithoutReview: row?.medical_without_review ?? 0,
     offers: row?.offers ?? 0,
+    offersWithoutExpert: row?.offers_without_expert ?? 0,
     groups: row?.groups ?? 0,
     groupsWithoutModerator: row?.groups_without_moderator ?? 0,
     topicsWithoutOffer: HELP_TOPICS.filter(([slug]) => !coveredSet.has(slug)).map(([, name]) => name),

@@ -1,0 +1,42 @@
+# Pipeline (PRD 14 «Deployment», NFR13, NFR17): Typen, Format/Lint, fachliche Tests,
+# Dateigrösse, Abhängigkeitsprüfung und Build. Railway deployt erst nach erfolgreichem Lauf
+# («Wait for CI» im Service aktivieren). Der Build greift nie auf eine Datenbank zu.
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typen
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Fachliche Tests (inkl. verbotene-Felder-Prüfung für Logs, NFR15)
+        run: npm test
+      - name: Höchstens 600 Zeilen je Datei
+        run: npm run check:lines
+      - name: Abhängigkeiten mit bekannten Schwachstellen (NFR13)
+        run: npm audit --omit=dev --audit-level=high
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"

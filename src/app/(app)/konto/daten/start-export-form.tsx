@@ -1,15 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
 import { FormMessage, OperationId, SubmitButton } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
-import { idle } from "@/lib/action-state";
 import { startExportAction } from "@/server/modules/privacy/actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 /** Export starten (PRI03): idempotent über die Vorgangskennung, Erfolg erst nach Serverbestätigung. */
 export function StartExportForm({ disabled }: { disabled?: boolean }) {
-  const [state, action] = useActionState(startExportAction, idle);
+  const [state, action] = useHealthAction(startExportAction);
   return (
     <form action={action} className="flex flex-col items-start gap-3">
       <OperationId />

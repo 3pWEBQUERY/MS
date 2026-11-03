@@ -49,6 +49,12 @@ async function Content() {
     { label: "Medizinische Artikel ohne Fremdprüfung", value: String(inv.medicalWithoutReview), ok: inv.medicalWithoutReview === 0, hint: "muss 0 sein (CON01)" },
     { label: "Geprüfte Schweizer Hilfsangebote", value: String(inv.offers), ok: inv.offers >= START_INVENTORY_MIN.offers, hint: `mindestens ${START_INVENTORY_MIN.offers}` },
     {
+      label: "Angebote ohne passende Fachprüfung",
+      value: String(inv.offersWithoutExpert),
+      ok: inv.offersWithoutExpert === 0,
+      hint: "Recht/Finanzen bzw. Therapie (CON05)",
+    },
+    {
       label: "Finder-Themen ohne Angebot",
       value: inv.topicsWithoutOffer.length ? inv.topicsWithoutOffer.join(", ") : "keine",
       ok: inv.topicsWithoutOffer.length === 0,

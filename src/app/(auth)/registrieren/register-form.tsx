@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
 import { PasswordField } from "@/components/auth/password-field";
 import { Checkbox, Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
-import { idle } from "@/lib/action-state";
 import { registerAction } from "@/server/modules/account/auth-actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 export function RegisterForm() {
-  const [state, action] = useActionState(registerAction, idle);
+  const [state, action] = useHealthAction(registerAction);
   const fe = state.fieldErrors ?? {};
   return (
     <form action={action} className="flex flex-col gap-6" noValidate>

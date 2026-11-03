@@ -1,13 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
 import { Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
-import { idle } from "@/lib/action-state";
 import { resendVerificationAction, verifyEmailAction } from "@/server/modules/account/auth-actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 /** Bestätigung per Klick, damit Link-Vorschauen in Mailprogrammen das Token nicht verbrauchen. */
 export function VerifyForm({ token }: { token: string }) {
-  const [state, action] = useActionState(verifyEmailAction, idle);
+  const [state, action] = useHealthAction(verifyEmailAction);
   return (
     <form action={action} className="flex flex-col gap-5">
       <input type="hidden" name="token" value={token} />
@@ -23,7 +22,7 @@ export function VerifyForm({ token }: { token: string }) {
 }
 
 export function ResendForm({ askEmail }: { askEmail: boolean }) {
-  const [state, action] = useActionState(resendVerificationAction, idle);
+  const [state, action] = useHealthAction(resendVerificationAction);
   return (
     <form action={action} className="flex flex-col gap-4">
       <FormMessage state={state} />

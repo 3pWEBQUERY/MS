@@ -1,13 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox, Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
 import { Notice } from "@/components/ui/primitives";
-import { idle } from "@/lib/action-state";
 import { confirmMfaAction, disableMfaAction, regenerateRecoveryCodesAction } from "@/server/modules/account/mfa-actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 /** Einmalige Anzeige der Wiederherstellungscodes – sie werden nur als Hash gespeichert (ACC05). */
 function RecoveryCodes({ codes, onDone }: { codes: string[]; onDone: () => void }) {
@@ -68,7 +68,7 @@ function RecoveryCodes({ codes, onDone }: { codes: string[]; onDone: () => void 
 }
 
 export function MfaConfirmForm() {
-  const [state, action] = useActionState(confirmMfaAction, idle);
+  const [state, action] = useHealthAction(confirmMfaAction);
   const router = useRouter();
   const codes = Array.isArray(state.data?.codes) ? (state.data.codes as string[]) : null;
   if (state.status === "success" && codes) {
@@ -104,7 +104,7 @@ export function MfaConfirmForm() {
 }
 
 export function RegenerateCodes() {
-  const [state, action] = useActionState(regenerateRecoveryCodesAction, idle);
+  const [state, action] = useHealthAction(regenerateRecoveryCodesAction);
   const router = useRouter();
   const codes = Array.isArray(state.data?.codes) ? (state.data.codes as string[]) : null;
   if (state.status === "success" && codes) {
@@ -127,7 +127,7 @@ export function RegenerateCodes() {
 }
 
 export function DisableMfaForm() {
-  const [state, action] = useActionState(disableMfaAction, idle);
+  const [state, action] = useHealthAction(disableMfaAction);
   return (
     <form action={action} noValidate className="flex flex-col gap-4">
       <FormMessage state={state} />

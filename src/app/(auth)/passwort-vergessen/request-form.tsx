@@ -1,12 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
 import { Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
-import { idle } from "@/lib/action-state";
 import { requestResetAction } from "@/server/modules/account/auth-actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 export function RequestResetForm() {
-  const [state, action] = useActionState(requestResetAction, idle);
+  const [state, action] = useHealthAction(requestResetAction);
   return (
     <form action={action} className="flex flex-col gap-6" noValidate>
       <FormMessage state={state} />

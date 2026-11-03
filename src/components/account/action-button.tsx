@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
 import { FormMessage, SubmitButton } from "@/components/ui/form";
 import type { ButtonSize, ButtonVariant } from "@/components/ui/button";
-import { idle, type ActionState } from "@/lib/action-state";
+import { type ActionState } from "@/lib/action-state";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 /**
  * Formular mit genau einem Button für einfache Server Actions (HOM07):
@@ -30,7 +30,7 @@ export function ActionButton({
   /** Ziel nach erneuter Anmeldung, falls die Aktion sie verlangt */
   reauthNext?: string;
 }) {
-  const [state, formAction] = useActionState(action, idle);
+  const [state, formAction] = useHealthAction(action);
   return (
     <form action={formAction} className={className ?? "flex flex-col items-start gap-3"}>
       {Object.entries(fields ?? {}).map(([k, v]) => (

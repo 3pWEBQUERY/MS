@@ -2,6 +2,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import * as s from "../../../src/server/db/schema";
 import { HELP_TOPICS } from "../../../src/lib/catalog";
 import { DEFAULT_MOMENT_CONFIG } from "../../../src/lib/moment";
+import { requiredExpertMethods } from "../../../src/server/modules/content/shared";
 import type { SeedContext } from "../types";
 import { ARTICLES_1 } from "./articles-1";
 import { ARTICLES_2 } from "./articles-2";
@@ -165,6 +166,26 @@ export async function seedContent(ctx: SeedContext): Promise<void> {
         nextDueAt: nextReviewAt,
         note: "Demo: Abgleich mit der offiziellen Website. Vor Produktivbetrieb beim Anbieter bestätigen.",
       });
+    }
+    // CON05: Leistungsangaben zu Recht, Finanzen oder Therapie brauchen die passende Fachprüfung (hier als Demo gekennzeichnet).
+    for (const method of requiredExpertMethods(o.topics)) {
+      const [expert] = await db
+        .select({ id: s.verificationRecords.id })
+        .from(s.verificationRecords)
+        .where(and(eq(s.verificationRecords.targetType, "offer"), eq(s.verificationRecords.targetId, row.id), eq(s.verificationRecords.method, method)));
+      if (expert) {
+        await db.update(s.verificationRecords).set({ verifiedAt: reviewedAt, nextDueAt: nextReviewAt }).where(eq(s.verificationRecords.id, expert.id));
+      } else {
+        await db.insert(s.verificationRecords).values({
+          targetType: "offer",
+          targetId: row.id,
+          verifierId: staff.reviewer,
+          method,
+          verifiedAt: reviewedAt,
+          nextDueAt: nextReviewAt,
+          note: "Demo-Fachprüfung für die Testumgebung. Vor Produktivbetrieb durch die zuständige Fachperson ersetzen.",
+        });
+      }
     }
   }
 

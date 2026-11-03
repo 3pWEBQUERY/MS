@@ -1,14 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
 import { Checkbox, FormMessage, SubmitButton } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
-import { idle } from "@/lib/action-state";
 import { eraseHealthAction } from "@/server/modules/privacy/actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 /** PRI04: separate, ausdrücklich bestätigte Inhaltsauswahl. */
 export function EraseHealthForm() {
-  const [state, action] = useActionState(eraseHealthAction, idle);
+  const [state, action] = useHealthAction(eraseHealthAction);
   return (
     <form action={action} noValidate className="flex flex-col gap-5 rounded-[20px] border border-line-2 bg-surface p-5 sm:p-6">
       <FormMessage state={state} />

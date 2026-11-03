@@ -1,15 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
 import { Checkbox, Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
-import { idle } from "@/lib/action-state";
 import { deleteAccountAction } from "@/server/modules/privacy/actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 /** S16: ausdrückliche Bestätigung (Wort + Häkchen), danach Abmeldung und Beleg. */
 export function DeleteAccountForm() {
-  const [state, action] = useActionState(deleteAccountAction, idle);
+  const [state, action] = useHealthAction(deleteAccountAction);
   return (
     <form action={action} noValidate className="flex flex-col gap-6 rounded-[20px] border border-danger/40 bg-surface p-5 sm:p-6">
       <p className="text-lg font-[650] text-ink">Löschung bestätigen</p>

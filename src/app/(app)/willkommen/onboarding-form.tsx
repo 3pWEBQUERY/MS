@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { MemberProfileCard } from "@/components/account/profile-card";
 import { WhoSeesWhat } from "@/components/account/who-sees-what";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Notice } from "@/components/ui/primitives";
 import { idle } from "@/lib/action-state";
 import { CANTONS, INTERESTS, ONBOARDING_GOALS } from "@/lib/catalog";
 import { checkPseudonymAction, completeOnboardingAction } from "@/server/modules/account/profile-actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 const STEPS = [
   { title: "Wie möchtest du in der Community heissen?", eyebrow: "Pseudonym" },
@@ -23,7 +24,7 @@ const STEPS = [
  * Alle Eingaben bleiben in einem Formular erhalten; Optionales lässt sich leer lassen.
  */
 export function OnboardingForm({ initialGoal }: { initialGoal?: string }) {
-  const [state, action] = useActionState(completeOnboardingAction, idle);
+  const [state, action] = useHealthAction(completeOnboardingAction);
   const [step, setStep] = useState(0);
   const [pseudonym, setPseudonym] = useState(String(state.values?.pseudonym ?? ""));
   const [interests, setInterests] = useState<string[]>([]);

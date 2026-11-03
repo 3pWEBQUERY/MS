@@ -1,13 +1,13 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { MemberProfileCard } from "@/components/account/profile-card";
 import { Checkbox, Field, FormMessage, Input, Select, SubmitButton, Switch, UnsavedChangesGuard } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
 import { Card, Notice } from "@/components/ui/primitives";
-import { idle } from "@/lib/action-state";
 import { CANTONS, INTERESTS } from "@/lib/catalog";
 import { updateProfileAction } from "@/server/modules/account/profile-actions";
+import { useHealthAction } from "@/components/health/use-health-action";
 
 type Props = {
   profile: { pseudonym: string; interests: string[]; canton: string | null; discoverable: boolean; version: number };
@@ -15,7 +15,7 @@ type Props = {
 
 /** S09: Bearbeitung mit Live-Vorschau der Mitgliedersicht (dieselbe Komponente wie S10, US12). */
 export function ProfileForm({ profile }: Props) {
-  const [state, action] = useActionState(updateProfileAction, idle);
+  const [state, action] = useHealthAction(updateProfileAction);
   const [pseudonym, setPseudonym] = useState(profile.pseudonym);
   const [interests, setInterests] = useState<string[]>(profile.interests);
   const [canton, setCanton] = useState(profile.canton ?? "");
