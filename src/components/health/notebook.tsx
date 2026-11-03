@@ -56,7 +56,7 @@ export function ValueStrip({ items, className }: { items: { label: string; value
           key={i.label}
           className="flex flex-col gap-2 border-b border-line py-5 last:border-b-0 sm:border-b-0 sm:border-r sm:px-6 sm:py-6 sm:first:pl-0 sm:last:border-r-0"
         >
-          <dt className="font-mono text-xs font-medium uppercase tracking-[0.12em] text-ink-2">{i.label}</dt>
+          <dt className="font-display text-xs font-extrabold uppercase tracking-[0.12em] text-ink-2">{i.label}</dt>
           <dd className={cn("tabular font-display text-[1.75rem] leading-tight tracking-[-0.015em]", i.empty ? "text-ink-2" : "text-ink")}>
             {i.value}
           </dd>
@@ -67,4 +67,4 @@ export function ValueStrip({ items, className }: { items: { label: string; value
 }
 
 /** Überschrift eines Formular-/Detailabschnitts in der Display-Serif (≥ 24px) */
-export const stepTitle = "font-display text-[1.5rem] font-normal leading-tight tracking-[-0.015em] text-ink";
+export const stepTitle = "font-display text-[1.5rem] font-bold leading-tight tracking-[-0.015em] text-ink";

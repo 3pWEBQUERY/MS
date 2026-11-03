@@ -69,7 +69,7 @@ async function History({ searchParams }: { searchParams: PageProps<"/mein-ms/ver
         )}
         <p className="text-base text-ink-2" aria-live="polite">
           {range.error ? `${range.error} Angezeigt werden die letzten 30 Tage: ` : "Zeitraum: "}
-          <strong className="font-display text-[1.5rem] font-normal leading-tight tracking-[-0.015em] text-ink">{rangeLabel}</strong>
+          <strong className="font-display text-[1.5rem] font-bold leading-tight tracking-[-0.015em] text-ink">{rangeLabel}</strong>
         </p>
       </div>
 

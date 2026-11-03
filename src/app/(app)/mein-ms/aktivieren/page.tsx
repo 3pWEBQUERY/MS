@@ -96,7 +96,7 @@ async function Activate({ searchParams }: { searchParams: PageProps<"/mein-ms/ak
         <Notice tone="neutral">Du hast den Gesundheitsbereich bisher nicht aktiviert. Du kannst das hier jederzeit ändern.</Notice>
       )}
       <HealthDecisionForms action={decideHealthAction} alreadyDeclined={alreadyDeclined} next={next} />
-      <p className="font-mono text-xs uppercase tracking-[0.1em] text-ink-2">Textfassung: {HEALTH_CONSENT_VERSION}</p>
+      <p className="font-display font-extrabold text-xs uppercase tracking-[0.1em] text-ink-2">Textfassung: {HEALTH_CONSENT_VERSION}</p>
     </div>
   );
 }

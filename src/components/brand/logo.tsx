@@ -32,7 +32,7 @@ export function Logo({ href = "/", className }: { href?: string; className?: str
       <LogoMark />
       {/* Wortmarke: «MS» in Atkinson, «Plattform» in der kursiven Display-Serif (Markensignatur) */}
       <span className="whitespace-nowrap text-[1.1875rem] font-bold tracking-[-0.02em]">
-        MS<span className="font-display text-[1.25rem] font-normal italic tracking-[-0.01em] text-ink-2 max-[359px]:sr-only"> Plattform</span>
+        MS<span className="font-display text-[1.25rem] font-semibold italic tracking-[-0.01em] text-ink-2 max-[359px]:sr-only"> Plattform</span>
       </span>
     </Link>
   );

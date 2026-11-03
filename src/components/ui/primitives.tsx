@@ -302,7 +302,7 @@ export function Table({ className, scrollLabel = "Tabelle", ...props }: Componen
     >
       <table
         className={cn(
-          "w-full border-collapse text-left text-base [&_td]:border-t [&_td]:border-line [&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_tbody_th]:border-t [&_tbody_th]:border-line [&_tbody_th]:font-semibold [&_thead_th]:bg-raised [&_thead_th]:font-mono [&_thead_th]:text-xs [&_thead_th]:font-medium [&_thead_th]:uppercase [&_thead_th]:tracking-[0.1em] [&_thead_th]:text-ink-2",
+          "w-full border-collapse text-left text-base [&_td]:border-t [&_td]:border-line [&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_tbody_th]:border-t [&_tbody_th]:border-line [&_tbody_th]:font-semibold [&_thead_th]:bg-raised [&_thead_th]:font-display [&_thead_th]:text-xs [&_thead_th]:font-extrabold [&_thead_th]:uppercase [&_thead_th]:tracking-[0.1em] [&_thead_th]:text-ink-2",
           className,
         )}
         {...props}

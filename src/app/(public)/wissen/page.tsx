@@ -137,13 +137,13 @@ async function KnowledgeContent() {
                   {two(i)}
                 </span>
                 <div className="flex min-w-0 flex-col gap-1.5">
-                  <h3 className="font-display text-[1.75rem] font-normal leading-[1.1] tracking-[-0.02em] text-ink underline decoration-transparent decoration-1 underline-offset-[0.2em] transition-colors duration-150 group-hover:decoration-current">
+                  <h3 className="font-display text-[1.75rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink underline decoration-transparent decoration-1 underline-offset-[0.2em] transition-colors duration-150 group-hover:decoration-current">
                     {t.name}
                   </h3>
                   <span className="max-w-xl text-base text-ink-2">{t.description}</span>
                 </div>
                 <span className="flex items-center gap-4 pt-2">
-                  <span className="tabular whitespace-nowrap font-mono text-xs uppercase tracking-[0.1em] text-ink-2">
+                  <span className="tabular whitespace-nowrap font-display font-extrabold text-xs uppercase tracking-[0.1em] text-ink-2">
                     {t.articleCount} Artikel
                   </span>
                   <Icon name="arrow-right" className="nudge size-5 shrink-0 text-ink-3 group-hover:text-ink" />

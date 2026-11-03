@@ -59,7 +59,7 @@ export function PostForm({
           </div>
           {/* Vorschau im Satz des Strangs: Rubrik in Mono, Titel in der Display-Serif */}
           <div className="flex flex-col gap-3 rounded-[20px] border border-line bg-surface p-5 sm:p-6">
-            <p className="font-mono text-[0.8125rem] font-medium uppercase tracking-[0.12em] text-accent-ink">{topicLabel}</p>
+            <p className="font-display text-[0.8125rem] font-extrabold uppercase tracking-[0.12em] text-accent-ink">{topicLabel}</p>
             {v.title && (
               <p className="break-words font-display text-[1.5rem] leading-[1.15] tracking-[-0.015em] text-ink sm:text-[1.75rem]">{v.title}</p>
             )}

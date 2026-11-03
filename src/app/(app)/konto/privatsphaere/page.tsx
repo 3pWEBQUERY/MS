@@ -80,7 +80,7 @@ function History({ entry, tz }: { entry: ConsentEntry; tz: string }) {
   if (entry.history.length === 0) return null;
   return (
     <details className="group -mt-1" data-optional>
-      <summary className="flex min-h-11 w-fit cursor-pointer items-center gap-2 font-mono text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2 hover:text-ink">
+      <summary className="flex min-h-11 w-fit cursor-pointer items-center gap-2 font-display font-extrabold text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2 hover:text-ink">
         Verlauf ({entry.history.length})
       </summary>
       <ul className="flex flex-col divide-y divide-line border-t border-line">

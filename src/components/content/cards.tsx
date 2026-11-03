@@ -31,7 +31,7 @@ type ArticleSummary = {
 
 const two = (i: number) => String(i + 1).padStart(2, "0");
 const serifTitle =
-  "font-display text-[1.5rem] font-normal leading-[1.15] tracking-[-0.015em] text-ink underline decoration-transparent decoration-1 underline-offset-[0.2em] transition-colors duration-150 group-hover:decoration-current";
+  "font-display text-[1.5rem] font-bold leading-[1.15] tracking-[-0.015em] text-ink underline decoration-transparent decoration-1 underline-offset-[0.2em] transition-colors duration-150 group-hover:decoration-current";
 const reviewLabel = (a: { isMedical: boolean }) => (a.isMedical ? "Fachlich geprüft" : "Redaktionell geprüft");
 
 /**
@@ -71,7 +71,7 @@ export function ArticleList({
             </div>
             <span className="hidden flex-col items-end gap-3 pt-1.5 md:flex">
               <VerifiedBadge label={reviewLabel(a)} />
-              <span className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.1em] text-ink-2">
+              <span className="flex items-center gap-3 font-display font-extrabold text-xs uppercase tracking-[0.1em] text-ink-2">
                 <span className="tabular">{a.readingMinutes} Min. Lesezeit</span>
                 <Icon name="arrow-right" className="nudge size-5 text-ink-3 group-hover:text-ink" />
               </span>
@@ -120,7 +120,7 @@ export function ArticleColumns({
             <span className={cn("line-clamp-3 text-base", deep ? "text-on-deep-2" : "text-ink-2")}>{a.summary}</span>
             <span
               className={cn(
-                "mt-auto flex flex-wrap gap-x-3 gap-y-1 pt-2 font-mono text-xs uppercase tracking-[0.1em]",
+                "mt-auto flex flex-wrap gap-x-3 gap-y-1 pt-2 font-display font-extrabold text-xs uppercase tracking-[0.1em]",
                 deep ? "text-on-deep-2" : "text-ink-2",
               )}
             >

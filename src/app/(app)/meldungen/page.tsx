@@ -47,7 +47,7 @@ function DecisionCard({ d, tz }: { d: DecisionAboutMe; tz: string }) {
     <Card className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <p className="font-mono text-[0.8125rem] font-medium uppercase tracking-[0.12em] text-ink-2">Fall</p>
+          <p className="font-display text-[0.8125rem] font-extrabold uppercase tracking-[0.12em] text-ink-2">Fall</p>
           <p className="font-mono text-[1.375rem] font-medium tracking-[0.04em] text-ink">{d.caseNumber}</p>
         </div>
         {d.appeal ? (

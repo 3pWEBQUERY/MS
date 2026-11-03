@@ -161,7 +161,7 @@ export default function HomePage() {
                 <span className="font-mono text-sm text-on-deep-2">{two(i)}</span>
                 <h3 className="font-display text-[2rem] leading-none tracking-[-0.02em]">{a.title}</h3>
                 <p className="max-w-xl text-base text-on-deep-2">{a.text}</p>
-                <span className="font-mono text-xs uppercase tracking-[0.12em] text-deep-accent">{a.note}</span>
+                <span className="font-display font-extrabold text-xs uppercase tracking-[0.12em] text-deep-accent">{a.note}</span>
               </li>
             ))}
           </ol>
@@ -191,7 +191,7 @@ export default function HomePage() {
               <div key={v.title} className="grid gap-x-8 gap-y-2 border-b border-line py-6 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]">
                 <dt className="flex flex-col gap-2">
                   <span className="text-lg font-semibold">{v.title}</span>
-                  <span className="w-fit font-mono text-xs uppercase tracking-[0.12em] text-accent-ink">{v.who}</span>
+                  <span className="w-fit font-display font-extrabold text-xs uppercase tracking-[0.12em] text-accent-ink">{v.who}</span>
                 </dt>
                 <dd className="text-base text-ink-2">{v.text}</dd>
               </div>

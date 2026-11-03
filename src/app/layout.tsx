@@ -27,15 +27,16 @@ const atkinsonMono = localFont({
 });
 
 /**
- * Fraunces (SIL OFL, src/app/fonts/FRAUNCES-OFL.txt) – variable Display-Serif mit optischer Grösse.
- * Nur für grosse Überschriften (.display-*); vorgeladen, «optional» wie Atkinson (kein CLS).
+ * Nunito (SIL OFL, src/app/fonts/NUNITO-OFL.txt) – variable Titelschrift für Überschriften
+ * (.display-*, font-display) und Versalien-Beschriftungen (.eyebrow). Vorgeladen, «optional»
+ * wie Atkinson (kein CLS). Fliesstext bleibt Atkinson Hyperlegible.
  */
-const fraunces = localFont({
+const nunito = localFont({
   src: [
-    { path: "./fonts/fraunces-latin.woff2", weight: "300 700", style: "normal" },
-    { path: "./fonts/fraunces-latin-italic.woff2", weight: "300 700", style: "italic" },
+    { path: "./fonts/nunito-latin.woff2", weight: "200 1000", style: "normal" },
+    { path: "./fonts/nunito-latin-italic.woff2", weight: "200 1000", style: "italic" },
   ],
-  variable: "--font-fraunces",
+  variable: "--font-nunito",
   display: "optional",
 });
 
@@ -58,7 +59,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="de-CH" className={`${atkinson.variable} ${atkinsonMono.variable} ${fraunces.variable}`} suppressHydrationWarning>
+    <html lang="de-CH" className={`${atkinson.variable} ${atkinsonMono.variable} ${nunito.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: displayBootScript }} />
       </head>

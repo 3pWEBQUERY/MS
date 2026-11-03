@@ -62,7 +62,7 @@ async function Notifications({ searchParams }: { searchParams: PageProps<"/mitte
         ) : (
           <>
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="font-mono text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2" aria-live="polite">
+              <p className="font-display font-extrabold text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2" aria-live="polite">
                 {unread === 0 ? "Alle Hinweise sind gelesen." : unread === 1 ? "1 ungelesener Hinweis" : `${unread} ungelesene Hinweise`}
               </p>
               {unread > 0 && (

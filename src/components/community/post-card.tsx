@@ -35,7 +35,7 @@ export function PostCard({
     >
       {/* Rubrik: Thema und Zielgruppe – Mono, ruhig, ohne Badges */}
       <div className={cn("flex flex-wrap items-baseline gap-x-3 gap-y-1.5", showGroup && "md:flex-col md:pt-2")}>
-        <span className="font-mono text-[0.8125rem] font-medium uppercase tracking-[0.12em] text-accent-ink">{post.topic.name}</span>
+        <span className="font-display text-[0.8125rem] font-extrabold uppercase tracking-[0.12em] text-accent-ink">{post.topic.name}</span>
         {showGroup && post.group && (
           <span className="inline-flex min-w-0 max-w-full items-start gap-1.5 text-sm leading-snug text-ink-2">
             <Icon name={post.group.type === "closed" ? "lock" : "users"} className="mt-px size-4 shrink-0" />
