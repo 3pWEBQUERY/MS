@@ -91,7 +91,7 @@ async function EraseHealth({ searchParams }: { searchParams: PageProps<"/konto/d
                 ["Laufende oder bereitgestellte Exporte", scope.exports],
               ].map(([label, n]) => (
                 <div key={label as string} className="flex items-baseline justify-between gap-6 border-b border-line py-4">
-                  <dt className="text-base text-ink">{label}</dt>
+                  <dt className="min-w-0 break-words text-base text-ink">{label}</dt>
                   <dd className="tabular shrink-0 font-display text-[1.75rem] leading-none text-ink">{n as number}</dd>
                 </div>
               ))}

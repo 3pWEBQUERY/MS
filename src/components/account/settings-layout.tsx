@@ -63,7 +63,7 @@ export function SettingsSection({
     <section
       aria-labelledby={id}
       className={cn(
-        "grid gap-x-10 gap-y-6 py-10 sm:py-12 xl:grid-cols-[minmax(0,19rem)_minmax(0,1fr)]",
+        "grid grid-cols-1 gap-x-10 gap-y-6 py-10 sm:py-12 xl:grid-cols-[minmax(0,19rem)_minmax(0,1fr)]",
         className,
       )}
     >

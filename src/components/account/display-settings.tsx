@@ -71,10 +71,10 @@ export function DisplaySettings({ mode, initial }: { mode: "guest" | "member"; i
       {n}
     </span>
   );
-  const row = "grid gap-x-6 gap-y-3 border-b border-line py-7 sm:grid-cols-[2.5rem_minmax(0,1fr)]";
+  const row = "grid grid-cols-1 gap-x-6 gap-y-3 border-b border-line py-7 sm:grid-cols-[2.5rem_minmax(0,1fr)]";
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-start lg:gap-14">
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-start lg:gap-14">
       <div className="flex flex-col gap-8" onChange={onRadioChange}>
         <div className="flex flex-col border-t border-ink">
           {/* key: nach dem Laden der Gerätewerte neu aufbauen, damit die Auswahl stimmt */}

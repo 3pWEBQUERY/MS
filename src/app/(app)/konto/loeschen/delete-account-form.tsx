@@ -10,7 +10,7 @@ import { useResilientAction } from "@/components/ui/use-resilient-action";
 export function DeleteAccountForm() {
   const [state, action] = useResilientAction(deleteAccountAction);
   return (
-    <form action={action} noValidate className="flex flex-col gap-6 rounded-[20px] border border-danger/40 bg-surface p-5 sm:p-6">
+    <form action={action} noValidate className="flex flex-col gap-6 rounded-[20px] border border-danger/40 bg-surface p-4 sm:p-6">
       <h2 className="font-display text-[1.625rem] leading-tight tracking-[-0.015em] text-ink">Löschung bestätigen</h2>
       <FormMessage state={state} />
       <Field label="Tippe LÖSCHEN zur Bestätigung" error={state.fieldErrors?.phrase}>

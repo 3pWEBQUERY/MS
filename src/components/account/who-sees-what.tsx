@@ -48,7 +48,7 @@ export function WhoSeesWhat({ compact = false, tone = "paper" }: { compact?: boo
         <li
           key={i.title}
           className={cn(
-            "grid gap-x-8 gap-y-2 border-b py-5 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:py-6",
+            "grid grid-cols-1 gap-x-8 gap-y-2 border-b py-5 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:py-6",
             deep ? "border-deep-line" : "border-line",
           )}
         >

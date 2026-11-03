@@ -18,7 +18,7 @@ export function AuthorLine({
       <Monogram name={author.pseudonym} size={size} />
       <Link
         href={`/community/mitglied/${author.id}`}
-        className="min-w-0 break-words font-mono text-[0.9375rem] font-medium text-ink underline decoration-line-2 decoration-1 underline-offset-[0.25em] transition-colors duration-150 hover:decoration-current"
+        className="min-w-0 break-words text-[0.9375rem] font-semibold text-ink underline decoration-line-2 decoration-1 underline-offset-[0.25em] transition-colors duration-150 hover:decoration-current"
       >
         {author.pseudonym}
       </Link>

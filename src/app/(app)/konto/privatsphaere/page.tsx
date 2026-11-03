@@ -173,8 +173,8 @@ async function Privacy() {
                   )}
                   {entry.purpose === "analytics" && <AnalyticsConsentForm active={entry.latest?.decision === "granted"} />}
                   {meta.link && (
-                    <Link href={meta.link.href} className="group link-quiet inline-flex w-fit items-center gap-1.5 font-semibold text-ink">
-                      {meta.link.label}
+                    <Link href={meta.link.href} className="group link-quiet inline-flex max-w-full items-center gap-1.5 self-start font-semibold text-ink">
+                      <span className="min-w-0 break-words">{meta.link.label}</span>
                       <Icon name="arrow-right" className="nudge size-4" />
                     </Link>
                   )}

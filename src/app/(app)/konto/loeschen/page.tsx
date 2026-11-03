@@ -89,7 +89,7 @@ async function DeleteAccount() {
           </p>
         </SettingsSection>
 
-        <div className="grid gap-x-12 py-10 sm:py-12 xl:grid-cols-[minmax(0,19rem)_minmax(0,1fr)]">
+        <div className="grid grid-cols-1 gap-x-12 py-10 sm:py-12 xl:grid-cols-[minmax(0,19rem)_minmax(0,1fr)]">
           <span aria-hidden="true" className="hidden font-mono text-[0.8125rem] font-medium tracking-[0.12em] text-danger xl:block">
             04
           </span>
