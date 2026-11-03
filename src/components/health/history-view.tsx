@@ -56,8 +56,8 @@ const AXIS_H = 22;
 const H = PAD_T + PLOT_H + AXIS_H;
 
 function Marker({ shape, x, y, color }: { shape: SeriesDef["shape"]; x: number; y: number; color: string }) {
-  // 2px Flächenring um gefüllte Markierungen, damit überlappende Punkte trennbar bleiben.
-  const ring = { stroke: "var(--surface)", strokeWidth: 2 };
+  // 2px Ring im Papierton um gefüllte Markierungen, damit überlappende Punkte trennbar bleiben.
+  const ring = { stroke: "var(--bg)", strokeWidth: 2 };
   switch (shape) {
     case "circle":
       return <circle cx={x} cy={y} r={4.5} fill={color} {...ring} />;
@@ -66,7 +66,7 @@ function Marker({ shape, x, y, color }: { shape: SeriesDef["shape"]; x: number; 
     case "diamond":
       return <path d={`M${x} ${y - 5.5}L${x + 5.5} ${y}L${x} ${y + 5.5}L${x - 5.5} ${y}Z`} fill={color} {...ring} />;
     case "ring":
-      return <circle cx={x} cy={y} r={4.5} fill="var(--surface)" stroke={color} strokeWidth={2} />;
+      return <circle cx={x} cy={y} r={4.5} fill="var(--bg)" stroke={color} strokeWidth={2} />;
     case "triangle":
       return <path d={`M${x} ${y - 5.5}L${x + 5.5} ${y + 4.5}L${x - 5.5} ${y + 4.5}Z`} fill={color} {...ring} />;
   }
@@ -119,19 +119,27 @@ function Panel({
   };
 
   return (
-    <div className="flex flex-col gap-1">
-      <p className="text-sm font-semibold text-ink-2">{title}</p>
-      <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full" role="presentation">
+    <div className="flex flex-col gap-2 border-b border-line py-5">
+      <p className="font-mono text-xs font-medium uppercase tracking-[0.12em] text-ink-2">{title}</p>
+      <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full font-mono" role="presentation">
         {[min, mid, max].map((v) => (
           <g key={v}>
-            <line x1={PAD_L} x2={W - PAD_R} y1={yOf(v)} y2={yOf(v)} stroke="var(--line)" strokeWidth={1} />
-            <text x={PAD_L - 8} y={yOf(v) + 4} textAnchor="end" fontSize={12} fill="var(--ink-2)" className="tabular">
+            <line
+              x1={PAD_L}
+              x2={W - PAD_R}
+              y1={yOf(v)}
+              y2={yOf(v)}
+              stroke={v === min ? "var(--line-2)" : "var(--line)"}
+              strokeWidth={1}
+              strokeDasharray={v === min ? undefined : "2 4"}
+            />
+            <text x={PAD_L - 8} y={yOf(v) + 4} textAnchor="end" fontSize={11} fill="var(--ink-2)" className="tabular">
               {v}
             </text>
           </g>
         ))}
         {ticks.map((t) => (
-          <text key={t} x={xOf(t + 0.5)} y={H - 4} textAnchor="middle" fontSize={12} fill="var(--ink-2)" className="tabular">
+          <text key={t} x={xOf(t + 0.5)} y={H - 4} textAnchor="middle" fontSize={11} fill="var(--ink-2)" className="tabular">
             {tickLabel(t)}
           </text>
         ))}
@@ -193,12 +201,13 @@ export function HistoryView({ rows, days, from }: { rows: HistoryRow[]; days: nu
   const available = (Object.keys(SERIES) as SeriesKey[]).filter((k) => rows.some((r) => r.series === k));
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4 rounded-[16px] border border-line bg-surface p-4 sm:p-5">
+    <div className="flex flex-col gap-10">
+      {/* Filter als ruhige Leiste mit Haarlinien statt Kasten */}
+      <div className="flex flex-col gap-5 border-t border-line pt-5">
         <fieldset className="flex flex-col gap-3">
-          <legend className="mb-1 text-base font-semibold text-ink">Angezeigte Angaben</legend>
+          <legend className="eyebrow mb-2">Angezeigte Angaben</legend>
           <p className="-mt-1 text-sm text-ink-2">Gilt für Diagramm und Datentabelle gleichermassen.</p>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
             {available.map((k) => (
               <Checkbox
                 key={k}
@@ -235,7 +244,7 @@ export function HistoryView({ rows, days, from }: { rows: HistoryRow[]; days: nu
         <div aria-hidden="true" className="flex flex-col gap-4">
           {/* Ergänzende Grafik: nicht fokussierbar, weil für Screenreader verborgen; die Datentabelle ist gleichwertig (A01). */}
           <div className="relative overflow-x-auto" tabIndex={-1}>
-            <div className="flex min-w-[560px] flex-col gap-5">
+            <div className="flex min-w-[560px] flex-col border-t border-ink">
               {panels.map((p) => (
                 <Panel
                   key={p.title}
@@ -256,14 +265,14 @@ export function HistoryView({ rows, days, from }: { rows: HistoryRow[]; days: nu
           </p>
         </div>
       ) : (
-        <p className="text-base text-ink-2">Für die gewählten Angaben gibt es in diesem Zeitraum keine Werte.</p>
+        <p className="border-y border-line py-8 text-base text-ink-2">Für die gewählten Angaben gibt es in diesem Zeitraum keine Werte.</p>
       )}
 
-      <section aria-labelledby="datentabelle" className="flex flex-col gap-3">
-        <h2 id="datentabelle" className="text-xl font-[650] text-ink">
+      <section aria-labelledby="datentabelle" className="flex flex-col gap-4">
+        <h2 id="datentabelle" className="display-sm">
           Datentabelle
         </h2>
-        <p className="text-base text-ink-2">
+        <p className="-mt-1 max-w-3xl text-base text-ink-2">
           {shown.length === 1 ? "1 Angabe" : `${shown.length} Angaben`}, chronologisch. «nicht erfasst» bedeutet: an diesem
           Tag ohne Angabe – das ist kein Wert von 0.
         </p>
@@ -284,13 +293,13 @@ export function HistoryView({ rows, days, from }: { rows: HistoryRow[]; days: nu
           <tbody>
             {shown.map((r) => (
               <tr key={r.key}>
-                <td className="tabular whitespace-nowrap">{r.dateLabel}</td>
-                <td className="tabular whitespace-nowrap">{r.time ?? <span className="text-ink-2">ganzer Tag</span>}</td>
+                <td className="tabular whitespace-nowrap font-mono text-sm">{r.dateLabel}</td>
+                <td className="tabular whitespace-nowrap font-mono text-sm">{r.time ?? <span className="font-sans text-ink-2">ganzer Tag</span>}</td>
                 <td className="whitespace-nowrap">{r.source}</td>
                 <td className="min-w-40">{r.measure}</td>
-                <td className={r.value === null ? "whitespace-nowrap text-ink-2" : "whitespace-nowrap"}>{r.valueText}</td>
+                <td className={r.value === null ? "whitespace-nowrap text-ink-2" : "tabular whitespace-nowrap"}>{r.valueText}</td>
                 <td className="whitespace-nowrap">
-                  <Link href={r.href} className="font-medium text-ink underline underline-offset-4">
+                  <Link href={r.href} className="link-quiet font-medium text-ink">
                     Ansehen<span className="sr-only">: {r.source} vom {r.dateLabel}</span>
                   </Link>
                 </td>

@@ -6,7 +6,8 @@ import { ActionForm } from "@/components/community/action-form";
 import { ConfirmForm } from "@/components/community/confirm-form";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Card, KeyValue, Notice, PageHeader, PageSkeleton, PlainText, SectionHeader, Table } from "@/components/ui/primitives";
+import { AdminHeading } from "@/components/admin/ui";
+import { KeyValue, Notice, PageHeader, PageSkeleton, PlainText, Table } from "@/components/ui/primitives";
 import { formatDate, formatDateTime } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
 import { decideRequestAction, removeMemberAction, setGroupArchivedAction } from "@/server/modules/community/admin-actions";
@@ -76,8 +77,9 @@ async function Content({
           </Notice>
         )}
 
-        <Card>
+        <div>
           <KeyValue
+            className="border-y border-line"
             items={[
               ["Adresse", <Link key="a" href={`/community/gruppen/${group.slug}`} className="font-medium underline underline-offset-4">/community/gruppen/{group.slug}</Link>],
               ["Thema", group.topic ?? "–"],
@@ -87,17 +89,17 @@ async function Content({
               ["Zuletzt geändert", formatDateTime(group.updatedAt, tz)],
             ]}
           />
-          <details className="group mt-4 rounded-[12px] bg-sunk px-4 py-3">
-            <summary className="flex min-h-8 cursor-pointer list-none items-center justify-between gap-3 font-semibold text-ink [&::-webkit-details-marker]:hidden">
+          <details className="group mt-4 rounded-[16px] bg-sunk px-4 py-2">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 font-semibold text-ink [&::-webkit-details-marker]:hidden">
               Regeln anzeigen
               <Icon name="chevron-down" className="size-5 transition-transform duration-150 group-open:rotate-180" />
             </summary>
-            <PlainText text={group.rules} className="mt-3 text-base text-ink-2" />
+            <PlainText text={group.rules} className="mb-2 mt-1 text-base text-ink-2" />
           </details>
-        </Card>
+        </div>
 
-        <section aria-labelledby="requests">
-          <SectionHeader
+        <section aria-labelledby="requests" className="flex flex-col gap-5">
+          <AdminHeading
             id="requests"
             title="Aufnahmeanfragen"
             description="Anfragen enthalten keinen Text. Das Mitglied erhält nach der Entscheidung einen neutralen Hinweis."
@@ -105,9 +107,9 @@ async function Content({
           {requests.length === 0 ? (
             <p className="text-base text-ink-2">Keine offenen Anfragen.</p>
           ) : (
-            <ul className="flex flex-col gap-3">
+            <ul className="border-t border-ink">
               {requests.map((r) => (
-                <li key={r.membershipId} className="flex flex-col gap-4 rounded-[20px] border border-line bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <li key={r.membershipId} className="flex flex-col gap-4 border-b border-line py-5 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex flex-col gap-1">
                     <p className="font-semibold text-ink">{r.pseudonym}</p>
                     <p className="text-sm text-ink-2">Angefragt am {formatDate(r.requestedAt, tz)}</p>
@@ -142,8 +144,8 @@ async function Content({
         </section>
 
         {members && (
-          <section aria-labelledby="members">
-            <SectionHeader id="members" title="Mitglieder" description="Nur Pseudonyme. Entfernen beendet den Zugang sofort und wird protokolliert." />
+          <section aria-labelledby="members" className="flex flex-col gap-5">
+            <AdminHeading id="members" title="Mitglieder" description="Nur Pseudonyme. Entfernen beendet den Zugang sofort und wird protokolliert." />
             {members.items.length === 0 ? (
               <p className="text-base text-ink-2">{after ? "Keine weiteren Mitglieder." : "Noch keine Mitglieder."}</p>
             ) : (
@@ -181,7 +183,7 @@ async function Content({
               </Table>
             )}
             {members.next && (
-              <div className="pt-4">
+              <div>
                 <ButtonLink href={`/verwaltung/gruppen/${group.id}?nach=${encodeURIComponent(members.next)}`} variant="secondary">
                   Weitere Mitglieder
                 </ButtonLink>
@@ -191,7 +193,7 @@ async function Content({
         )}
 
         {isAdmin && (
-          <section aria-labelledby="archive" className="flex flex-col gap-3 rounded-[20px] border border-line bg-surface p-5 sm:p-6">
+          <section aria-labelledby="archive" className="flex flex-col gap-3 border-t border-ink pt-5">
             <h2 id="archive" className="text-xl font-[650] text-ink">
               {archived ? "Gruppe wieder aktivieren" : "Gruppe archivieren"}
             </h2>

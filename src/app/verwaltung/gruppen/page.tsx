@@ -3,7 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Badge, EmptyState, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
+import { AdminEmpty } from "@/components/admin/ui";
+import { Badge, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { requireStaff } from "@/server/auth/viewer";
 import { listGroupsForAdmin } from "@/server/modules/community/admin-queries";
 import { groupAccessLabel } from "@/server/modules/community/groups";
@@ -46,9 +47,9 @@ async function Content() {
           </Notice>
         )}
         {groups.length === 0 ? (
-          <EmptyState icon="users" title="Noch keine Gruppen">
+          <AdminEmpty icon="users" title="Noch keine Gruppen">
             {isAdmin ? "Lege die erste betreute Gruppe an." : "Die Administration legt Gruppen an."}
-          </EmptyState>
+          </AdminEmpty>
         ) : (
           <Table>
             <caption className="sr-only">Alle Gruppen</caption>
@@ -65,7 +66,7 @@ async function Content() {
               {groups.map((g) => (
                 <tr key={g.id}>
                   <td>
-                    <Link href={`/verwaltung/gruppen/${g.id}`} className="font-semibold text-ink underline-offset-4 hover:underline">
+                    <Link href={`/verwaltung/gruppen/${g.id}`} className="link-quiet font-semibold text-ink">
                       {g.title}
                     </Link>
                     {g.topic && <span className="block text-sm text-ink-2">{g.topic}</span>}
@@ -83,7 +84,7 @@ async function Content() {
                     )}
                   </td>
                   <td>{g.moderator ?? "–"}</td>
-                  <td className="tabular">{g.pending}</td>
+                  <td className="tabular font-mono">{g.pending}</td>
                 </tr>
               ))}
             </tbody>

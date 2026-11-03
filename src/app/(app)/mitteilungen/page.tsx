@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "Mitteilungen" };
 
 /**
  * S28 Benachrichtigungszentrale (MSG07, MSG08): neutrale Hinweise ohne Inhalte oder Vorschauen.
- * Das Ziel wird beim Öffnen erneut geprüft (/mitteilungen/[id]).
+ * Das Ziel wird beim Öffnen erneut geprüft (/mitteilungen/[id]). Ruhige Haarlinien-Liste ohne Kacheln.
  */
 export default function NotificationsPage({ searchParams }: PageProps<"/mitteilungen">) {
   return (
@@ -62,7 +62,7 @@ async function Notifications({ searchParams }: { searchParams: PageProps<"/mitte
         ) : (
           <>
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-base text-ink-2" aria-live="polite">
+              <p className="font-mono text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2" aria-live="polite">
                 {unread === 0 ? "Alle Hinweise sind gelesen." : unread === 1 ? "1 ungelesener Hinweis" : `${unread} ungelesene Hinweise`}
               </p>
               {unread > 0 && (
@@ -75,44 +75,50 @@ async function Notifications({ searchParams }: { searchParams: PageProps<"/mitte
                 />
               )}
             </div>
-            <ul className="flex flex-col gap-3">
+            <ul className="border-t border-ink">
               {items.map((n) => (
                 <li
                   key={n.id}
-                  className={cn(
-                    "flex flex-col gap-3 rounded-[20px] border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6",
-                    n.read ? "border-line bg-surface" : "border-line-2 bg-raised",
-                  )}
+                  className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-4 gap-y-3 border-b border-line py-5 sm:grid-cols-[1.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-6 sm:py-6"
                 >
-                  <div className="flex min-w-0 items-start gap-3">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-sunk text-ink">
-                      <Icon name={ICONS[n.type] ?? "bell"} className="size-5" />
-                    </span>
-                    <div className="flex min-w-0 flex-col gap-0.5">
-                      <p className={cn("text-base text-ink", !n.read && "font-semibold")}>
-                        {!n.read && (
-                          <span className="mr-2 inline-block size-2.5 rounded-full bg-accent align-middle" aria-hidden="true" />
-                        )}
-                        {n.label}
-                        {!n.read && <span className="sr-only"> (ungelesen)</span>}
-                      </p>
-                      <p className="text-sm text-ink-2">
-                        {formatDateTime(n.createdAt, tz)}
-                        {!n.read && <span aria-hidden="true"> · Ungelesen</span>}
-                      </p>
-                    </div>
+                  {/* Symbol ohne Kachel; ungelesen = Punkt + fetter Text + «Ungelesen» (nie nur Farbe) */}
+                  <span className="relative flex size-6 items-center justify-center self-start pt-0.5">
+                    <Icon name={ICONS[n.type] ?? "bell"} className={cn("size-5", n.read ? "text-ink-3" : "text-accent-ink")} />
+                    {!n.read && (
+                      <span className="absolute -right-1 -top-0.5 size-2.5 rounded-full border-2 border-bg bg-accent" aria-hidden="true" />
+                    )}
+                  </span>
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <p className={cn("break-words text-base leading-snug", n.read ? "text-ink-2" : "font-semibold text-ink")}>
+                      {n.label}
+                      {!n.read && <span className="sr-only"> (ungelesen)</span>}
+                    </p>
+                    <p className="font-mono text-[0.8125rem] text-ink-2">
+                      {formatDateTime(n.createdAt, tz)}
+                      {!n.read && (
+                        <span aria-hidden="true" className="text-accent-ink">
+                          {" "}
+                          · Ungelesen
+                        </span>
+                      )}
+                    </p>
                   </div>
-                  <div className="flex flex-wrap gap-2 sm:shrink-0">
-                    <ButtonLink href={`/mitteilungen/${n.id}`} prefetch={false} size="sm" variant={n.read ? "secondary" : "primary"}>
+                  <div className="col-start-2 flex flex-wrap items-center gap-x-2 gap-y-1 sm:col-start-auto sm:shrink-0 sm:justify-end">
+                    <Link
+                      href={`/mitteilungen/${n.id}`}
+                      prefetch={false}
+                      className="group inline-flex h-11 items-center gap-2 rounded-[11px] px-3 font-semibold text-ink transition-colors duration-150 hover:bg-sunk"
+                    >
                       Öffnen
                       <span className="sr-only">: {n.label}</span>
-                    </ButtonLink>
+                      <Icon name="arrow-right" className="nudge size-4" />
+                    </Link>
                     {!n.read && (
                       <form action={markNotificationReadAction}>
                         <input type="hidden" name="id" value={n.id} />
                         <button
                           type="submit"
-                          className="inline-flex h-10 items-center rounded-[10px] px-3 text-sm font-semibold text-ink-2 transition-colors hover:bg-sunk hover:text-ink"
+                          className="inline-flex h-11 items-center rounded-[11px] px-3 text-sm font-medium text-ink-2 transition-colors duration-150 hover:bg-sunk hover:text-ink"
                         >
                           Als gelesen markieren
                         </button>
@@ -140,7 +146,7 @@ async function Notifications({ searchParams }: { searchParams: PageProps<"/mitte
         )}
         <p className="text-sm text-ink-2">
           Hinweise werden nach 90 Tagen automatisch entfernt. E-Mail-Hinweise, Ruhezeiten und Pausen stellst du unter{" "}
-          <Link href="/konto/mitteilungen" className="font-medium text-ink underline underline-offset-4">
+          <Link href="/konto/mitteilungen" className="link-quiet font-medium text-ink">
             Benachrichtigungen
           </Link>{" "}
           ein.

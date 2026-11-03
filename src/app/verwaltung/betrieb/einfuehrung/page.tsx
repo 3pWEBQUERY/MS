@@ -114,7 +114,7 @@ async function Content() {
             <tbody>
               {rows.map((r) => (
                 <tr key={r.label}>
-                  <th scope="row" className="bg-surface! text-base! font-semibold! text-ink!">
+                  <th scope="row" className="bg-surface! font-sans! text-base! font-semibold! normal-case! tracking-normal! text-ink!">
                     {r.label}
                   </th>
                   <td className="tabular">{r.value}</td>
@@ -144,7 +144,7 @@ async function Content() {
             <tbody>
               {signals.map((s) => (
                 <tr key={s.key}>
-                  <th scope="row" className="bg-surface! text-base! font-semibold! text-ink!">
+                  <th scope="row" className="bg-surface! font-sans! text-base! font-semibold! normal-case! tracking-normal! text-ink!">
                     {s.label}
                     <span className="block text-sm font-normal text-ink-2">{s.hint}</span>
                   </th>
@@ -164,11 +164,11 @@ async function Content() {
         </AdminSectionBlock>
 
         <AdminSectionBlock id="schritte" title="Rollout-Schritte" description="Feature-Schalter erlauben getrennte Aktivierung; eine Pilotgruppe wird nicht ohne verfügbare Moderation aufgenommen.">
-          <ol className="grid gap-3 md:grid-cols-2">
+          <ol className="grid border-t border-ink md:grid-cols-2 md:gap-x-10">
             {STEPS.map(([title, text], i) => (
-              <li key={title} className="flex flex-col gap-1 rounded-[16px] border border-line bg-surface p-4">
+              <li key={title} className="flex flex-col gap-1 border-b border-line py-4">
                 <p className="font-semibold text-ink">
-                  <span className="tabular text-ink-2">{i + 1}. </span>
+                  <span className="tabular mr-1 font-mono text-sm font-medium text-accent-ink">{i + 1}. </span>
                   {title}
                 </p>
                 <p className="text-sm text-ink-2">{text}</p>

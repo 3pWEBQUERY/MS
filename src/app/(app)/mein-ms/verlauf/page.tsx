@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { buildHistoryRows } from "@/components/health/history-rows";
 import { HistoryView } from "@/components/health/history-view";
 import { RangeForm } from "@/components/health/range-form";
-import { EmptyState, Notice, PageHeader, PageSkeleton, SegmentNav } from "@/components/ui/primitives";
+import { Notice, PageHeader, PageSkeleton, SegmentNav } from "@/components/ui/primitives";
 import { formatDate, localDateString } from "@/lib/time";
 import { requireHealthViewer } from "@/server/modules/health/guard";
 import { getHistory } from "@/server/modules/health/queries";
@@ -69,14 +69,15 @@ async function History({ searchParams }: { searchParams: PageProps<"/mein-ms/ver
         )}
         <p className="text-base text-ink-2" aria-live="polite">
           {range.error ? `${range.error} Angezeigt werden die letzten 30 Tage: ` : "Zeitraum: "}
-          <strong className="font-semibold text-ink">{rangeLabel}</strong>
+          <strong className="font-display text-[1.5rem] font-normal leading-tight tracking-[-0.015em] text-ink">{rangeLabel}</strong>
         </p>
       </div>
 
       {rows.length === 0 ? (
-        <EmptyState icon="table" title="In diesem Zeitraum gibt es keine Einträge">
-          Wähle einen anderen Zeitraum oder halte etwas fest, wenn du magst.
-        </EmptyState>
+        <div className="flex flex-col gap-2 border-y border-line py-8">
+          <p className="display-sm">In diesem Zeitraum gibt es keine Einträge</p>
+          <p className="max-w-xl text-base text-ink-2">Wähle einen anderen Zeitraum oder halte etwas fest, wenn du magst.</p>
+        </div>
       ) : (
         <HistoryView rows={rows} days={range.days} from={range.from} />
       )}

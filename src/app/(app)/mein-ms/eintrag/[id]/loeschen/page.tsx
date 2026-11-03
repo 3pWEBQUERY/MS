@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ConfirmDeleteForm } from "@/components/health/action-forms";
-import { Card, PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { formatDateTime } from "@/lib/time";
 import { recordDenied } from "@/server/audit";
 import { deleteDiaryEntryAction } from "@/server/modules/health/diary-actions";
@@ -43,16 +43,19 @@ async function DeleteEntry({ params }: { params: PageProps<"/mein-ms/eintrag/[id
         title="Eintrag löschen?"
         back={{ href: `/mein-ms/eintrag/${entry.id}`, label: "Zurück zum Eintrag" }}
       />
-      <Card className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-ink">Was gelöscht wird</h2>
-        <ul className="flex list-disc flex-col gap-1 pl-5 text-base text-ink-2">
+      {/* Umfang als Notizbuchliste mit Haarlinien statt Karte (S26) */}
+      <section aria-labelledby="umfang" className="flex flex-col gap-4">
+        <h2 id="umfang" className="display-sm">
+          Was gelöscht wird
+        </h2>
+        <ul className="border-t border-ink text-base text-ink-2 [&>li]:border-b [&>li]:border-line [&>li]:py-3.5 [&>li:first-child]:text-ink">
           <li>
             Dein Tagebucheintrag vom {when}: {parts.join(", ")}.
           </li>
           <li>Er ist danach sofort nicht mehr abrufbar. Es gibt keinen Papierkorb.</li>
           <li>Andere Einträge, dein Check-in dieses Tages und deine Symptombezeichnungen bleiben erhalten.</li>
         </ul>
-      </Card>
+      </section>
       <ConfirmDeleteForm
         action={deleteDiaryEntryAction}
         hidden={{ id: entry.id }}

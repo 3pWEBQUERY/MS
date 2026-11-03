@@ -37,7 +37,7 @@ export function NotificationPrefsForm({
       <FormMessage state={state} />
 
       <fieldset className="flex flex-col gap-4">
-        <legend className="mb-2 text-xl font-[650] text-ink">Hinweise in der App</legend>
+        <legend className="mb-2 font-display text-[1.5rem] leading-[1.15] tracking-[-0.015em] text-ink">Hinweise in der App</legend>
         <p className="-mt-2 text-base text-ink-2">
           Hinweise erscheinen unter «Mitteilungen» – ohne Inhalte oder Vorschauen.
         </p>
@@ -60,7 +60,7 @@ export function NotificationPrefsForm({
       </fieldset>
 
       <fieldset className="flex flex-col gap-4">
-        <legend className="mb-2 text-xl font-[650] text-ink">E-Mail</legend>
+        <legend className="mb-2 font-display text-[1.5rem] leading-[1.15] tracking-[-0.015em] text-ink">E-Mail</legend>
         <div className="rounded-[20px] border border-line bg-surface p-5 sm:p-6">
           <Switch
             name="emailSocial"
@@ -72,7 +72,7 @@ export function NotificationPrefsForm({
       </fieldset>
 
       <fieldset className="flex flex-col gap-4">
-        <legend className="mb-2 text-xl font-[650] text-ink">Ruhezeit und Pause</legend>
+        <legend className="mb-2 font-display text-[1.5rem] leading-[1.15] tracking-[-0.015em] text-ink">Ruhezeit und Pause</legend>
         <p className="-mt-2 text-base text-ink-2">
           In der Ruhezeit und während einer Pause werden keine E-Mails gesendet. Hinweise in der App sammeln sich still.
         </p>

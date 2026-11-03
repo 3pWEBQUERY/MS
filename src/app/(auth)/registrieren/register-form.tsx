@@ -54,7 +54,7 @@ export function RegisterForm({ inviteRequired = false }: { inviteRequired?: bool
         hint="Mindestens 15 Zeichen. Ein Satz aus mehreren Wörtern ist sicher und gut zu merken."
         showCounter
       />
-      <div className="flex flex-col gap-4 rounded-[16px] border border-line bg-surface p-4">
+      <div className="flex flex-col divide-y divide-line border-y border-line [&>*]:py-4">
         <Checkbox
           name="audience"
           label="Ich bin mindestens 18 Jahre alt und lebe selbst mit MS."
@@ -66,7 +66,7 @@ export function RegisterForm({ inviteRequired = false }: { inviteRequired?: bool
           label={
             <>
               Ich akzeptiere die{" "}
-              <Link href="/bedingungen" target="_blank" className="font-semibold underline underline-offset-4">
+              <Link href="/bedingungen" target="_blank" className="link-quiet font-semibold">
                 Nutzungsbedingungen
               </Link>
               .
@@ -75,7 +75,7 @@ export function RegisterForm({ inviteRequired = false }: { inviteRequired?: bool
           description={
             <>
               Die{" "}
-              <Link href="/datenschutz" target="_blank" className="font-medium underline underline-offset-4">
+              <Link href="/datenschutz" target="_blank" className="link-quiet font-medium">
                 Datenschutzinformation
               </Link>{" "}
               erklärt, wer was sehen kann. Gesundheitsdaten erfasst du nur nach einer gesonderten Entscheidung.
@@ -89,7 +89,7 @@ export function RegisterForm({ inviteRequired = false }: { inviteRequired?: bool
       </SubmitButton>
       <p className="text-center text-base text-ink-2">
         Bereits registriert?{" "}
-        <Link href="/anmelden" className="font-semibold text-ink underline underline-offset-4">
+        <Link href="/anmelden" className="link-quiet font-semibold text-ink">
           Anmelden
         </Link>
       </p>

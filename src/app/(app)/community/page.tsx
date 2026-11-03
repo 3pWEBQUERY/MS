@@ -4,17 +4,21 @@ import { Suspense } from "react";
 import { BoundaryNotice } from "@/components/community/boundary-notice";
 import { CommunityNav } from "@/components/community/community-nav";
 import { LoadMore, withParams } from "@/components/community/load-more";
-import { PostCard } from "@/components/community/post-card";
+import { PostStrand } from "@/components/community/post-card";
+import { TopicFilter } from "@/components/community/topic-filter";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { EmptyState, Notice, PageHeader, PageSkeleton, SegmentNav } from "@/components/ui/primitives";
+import { EmptyState, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { requireViewer } from "@/server/auth/viewer";
 import { isEnabled } from "@/server/flags";
 import { getFeed, listTopics } from "@/server/modules/community/queries";
 
 export const metadata: Metadata = { title: "Community" };
 
-/** S29 Community-Feed (COM01): chronologisch, Themenfilter, endliche Seiten mit «Mehr laden». */
+/**
+ * S29 Community-Feed (COM01): chronologisch als Magazin-Strang mit Haarlinien, Themenfilter als
+ * Unterstrich-Tabs, endliche Seiten mit «Mehr laden». Keine Zahlen, keine Rankings.
+ */
 export default function CommunityFeedPage({ searchParams }: PageProps<"/community">) {
   return (
     <Suspense fallback={<PageSkeleton rows={4} />}>
@@ -66,7 +70,7 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/community">["s
           </Notice>
         )}
 
-        <SegmentNav
+        <TopicFilter
           label="Nach Thema filtern"
           items={[
             { href: "/community", label: "Alle Themen", active: !topic },
@@ -76,14 +80,14 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/community">["s
 
         <BoundaryNotice compact />
 
-        <section aria-labelledby="feed-heading" className="flex flex-col gap-3">
+        <section aria-labelledby="feed-heading" className="flex flex-col gap-4">
           <h2 id="feed-heading" className="sr-only">
             {topic ? `Beiträge zum Thema ${topic.name}` : "Beiträge"}
           </h2>
           {cursor && (
             <p className="text-base text-ink-2">
               Ältere Beiträge.{" "}
-              <Link href={withParams("/community", { thema: topic?.slug })} className="font-medium text-ink underline underline-offset-4">
+              <Link href={withParams("/community", { thema: topic?.slug })} className="link-quiet font-medium text-ink">
                 Zu den neuesten Beiträgen
               </Link>
             </p>
@@ -109,13 +113,7 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/community">["s
               etwas zu schreiben.
             </EmptyState>
           ) : (
-            <ul className="flex flex-col gap-3">
-              {feed.items.map((p) => (
-                <li key={p.id}>
-                  <PostCard post={p} timeZone={viewer.prefs.timezone} headingLevel="h3" />
-                </li>
-              ))}
-            </ul>
+            <PostStrand posts={feed.items} timeZone={viewer.prefs.timezone} headingLevel="h3" />
           )}
           <LoadMore href={feed.nextCursor ? withParams("/community", { thema: topic?.slug, cursor: feed.nextCursor }) : null} />
         </section>

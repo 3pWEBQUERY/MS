@@ -3,8 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ACCOUNT_STATUS_LABEL, ACCOUNT_STATUS_TONE } from "@/components/admin/labels";
 import { param } from "@/components/admin/params";
-import { AdminSectionBlock, DateTime, FilterForm, PlainInput, ShortId } from "@/components/admin/ui";
-import { Badge, EmptyState, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
+import { AdminEmpty, AdminSectionBlock, DateTime, FilterForm, PlainInput, ShortId } from "@/components/admin/ui";
+import { Badge, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { requireStaff } from "@/server/auth/viewer";
 import { searchMembers } from "@/server/modules/admin/members";
 
@@ -55,9 +55,9 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
             {result.tooShort ? (
               <p className="text-ink-2">Bitte gib mindestens 2 Zeichen ein.</p>
             ) : result.rows.length === 0 ? (
-              <EmptyState icon="search" title="Keine Treffer">
+              <AdminEmpty icon="search" title="Keine Treffer">
                 Prüfe die Schreibweise des Pseudonyms oder verwende die vollständige Konto-ID.
-              </EmptyState>
+              </AdminEmpty>
             ) : (
               <Table>
                 <caption className="sr-only">Suchtreffer</caption>

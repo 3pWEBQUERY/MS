@@ -5,7 +5,7 @@ import { LoadMore, withParams } from "@/components/community/load-more";
 import { ButtonLink } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/form";
 import { Icon, type IconName } from "@/components/ui/icon";
-import { Badge, EmptyState, PageHeader, PageSkeleton, SegmentNav } from "@/components/ui/primitives";
+import { EmptyState, PageHeader, PageSkeleton, SegmentNav } from "@/components/ui/primitives";
 import { formatDate } from "@/lib/time";
 import { requireViewer } from "@/server/auth/viewer";
 import { removeBookmarkAction } from "@/server/modules/community/bookmark-actions";
@@ -22,6 +22,7 @@ const AREAS: { param: string; area: BookmarkArea; label: string; singular: strin
 /**
  * S27 Gespeicherte Inhalte (HOM04, US11): private Merkliste, nach Bereich filterbar.
  * Nicht mehr zugängliche Ziele erscheinen neutral ohne Titel oder Text. Keine Speicherzahlen.
+ * Haarlinien-Liste mit Mono-Rubrik und Serif-Titel statt Kartenstapel.
  */
 export default function SavedPage({ searchParams }: PageProps<"/gespeichert">) {
   return (
@@ -50,7 +51,7 @@ async function Saved({ searchParams }: { searchParams: PageProps<"/gespeichert">
         ]}
       />
 
-      <section aria-labelledby="saved-list" className="flex flex-col gap-3">
+      <section aria-labelledby="saved-list" className="flex flex-col gap-4">
         <h2 id="saved-list" className="sr-only">
           {current ? `Gespeicherte ${current.label}` : "Alle gespeicherten Inhalte"}
         </h2>
@@ -72,23 +73,30 @@ async function Saved({ searchParams }: { searchParams: PageProps<"/gespeichert">
             Mit «Speichern» bei Artikeln, Beiträgen oder Hilfsangeboten legst du sie hier für später ab.
           </EmptyState>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <ul className="border-t border-ink">
             {page.items.map((b) => {
               const area = AREAS.find((a) => a.area === b.targetType)!;
               return (
                 <li
                   key={b.id}
-                  className="flex flex-col gap-3 rounded-[20px] border border-line bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+                  className="flex flex-col gap-4 border-b border-line py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:py-7"
                 >
-                  <div className="flex min-w-0 flex-col gap-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge icon={area.icon}>{area.singular}</Badge>
-                      <span className="text-sm text-ink-2">Gespeichert am {formatDate(b.savedAt, viewer.prefs.timezone)}</span>
-                    </div>
+                  <div className="flex min-w-0 flex-col gap-2.5">
+                    {/* Rubrik in Mono: Bereich mit Symbol und Datum */}
+                    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[0.8125rem] text-ink-2">
+                      <span className="inline-flex items-center gap-1.5 font-medium uppercase tracking-[0.12em] text-accent-ink">
+                        <Icon name={area.icon} className="size-4" />
+                        {area.singular}
+                      </span>
+                      <span>Gespeichert am {formatDate(b.savedAt, viewer.prefs.timezone)}</span>
+                    </p>
                     {b.target ? (
                       <>
-                        <h3 className="text-lg font-semibold text-ink">
-                          <Link href={b.target.href} className="break-words underline-offset-4 hover:underline">
+                        <h3 className="font-display text-[1.5rem] leading-[1.15] tracking-[-0.015em] text-ink">
+                          <Link
+                            href={b.target.href}
+                            className="break-words underline decoration-transparent decoration-1 underline-offset-[0.2em] transition-colors duration-150 hover:decoration-current focus-visible:decoration-current"
+                          >
                             {b.target.title}
                           </Link>
                         </h3>
@@ -96,7 +104,7 @@ async function Saved({ searchParams }: { searchParams: PageProps<"/gespeichert">
                       </>
                     ) : (
                       // HOM04: weder Titel noch Vorschautext für entfernte oder unberechtigte Inhalte.
-                      <h3 className="text-lg font-semibold text-ink-2">Nicht mehr verfügbar</h3>
+                      <h3 className="text-lg font-semibold italic text-ink-2">Nicht mehr verfügbar</h3>
                     )}
                   </div>
                   <form action={removeBookmarkAction} className="shrink-0">

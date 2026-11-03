@@ -3,8 +3,9 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { ContactForm } from "@/components/content/contact-form";
+import { EmergencyStrip } from "@/components/content/emergency-strip";
 import { PageContainer } from "@/components/content/page-container";
-import { Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { contactFormToken, resolveContactRef } from "@/server/modules/content/contact";
 import { CONTACT_CATEGORIES } from "@/server/modules/content/shared";
 
@@ -19,20 +20,24 @@ export default function ContactPage({ searchParams }: PageProps<"/kontakt">) {
     <PageContainer narrow>
       <PageHeader
         eyebrow="Kontakt"
-        title="Kontakt und Fehler melden"
+        title={
+          <>
+            Kontakt und <em>Fehler melden</em>
+          </>
+        }
         description="Fragen zur Plattform, Fehler in einem Artikel, veraltete Angaben zu einem Hilfsangebot oder Barrieren – wir lesen jedes Anliegen."
       />
-      <div className="flex flex-col gap-8">
-        <Notice tone="danger" icon="lifebuoy" title="Kein Notfallkanal">
-          Dieses Formular wird nur während der Betriebszeiten gelesen. Bei akuter Gefahr: Sanitätsnotruf <strong className="tabular">144</strong> –
+      <div className="flex flex-col gap-10">
+        <EmergencyStrip title="Kein Notfallkanal">
+          Dieses Formular wird nur während der Betriebszeiten gelesen. Bei akuter Gefahr: Sanitätsnotruf <strong className="tabular text-ink">144</strong> –
           weitere Hilfewege unter <Link href="/sicherheit">Sicherheit und akute Hilfe</Link>.
-        </Notice>
+        </EmergencyStrip>
         <Suspense fallback={<PageSkeleton rows={2} />}>
           <ContactContent searchParams={searchParams} />
         </Suspense>
-        <p className="text-sm text-ink-2">
+        <p className="border-t border-line pt-6 text-sm text-ink-2">
           Dein Anliegen wird verschlüsselt gespeichert und nur von den zuständigen Mitarbeitenden gelesen. Mehr dazu in der{" "}
-          <Link href="/datenschutz" className="font-medium text-ink underline underline-offset-4">
+          <Link href="/datenschutz" className="link-quiet font-medium text-ink">
             Datenschutzinformation
           </Link>
           .

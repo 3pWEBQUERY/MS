@@ -3,8 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { APPEAL_STATUS_LABEL, APPEAL_STATUS_TONE, OPERATING_HOURS_NOTE, PRIORITY_TONE } from "@/components/admin/labels";
 import { param, query } from "@/components/admin/params";
-import { AdminSectionBlock, DateTime, Deadline } from "@/components/admin/ui";
-import { Badge, EmptyState, PageHeader, PageSkeleton, SegmentNav, Table } from "@/components/ui/primitives";
+import { AdminEmpty, AdminSectionBlock, DateTime, Deadline } from "@/components/admin/ui";
+import { Badge, PageHeader, PageSkeleton, SegmentNav, Table } from "@/components/ui/primitives";
 import { requireStaff } from "@/server/auth/viewer";
 import { listAppeals, type AppealScope } from "@/server/modules/moderation/appeals";
 
@@ -52,9 +52,9 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
         )}
         <AdminSectionBlock id="liste" title="Einsprüche" description={OPERATING_HOURS_NOTE}>
           {list.rows.length === 0 ? (
-            <EmptyState icon="check-circle" title="Keine passenden Einsprüche">
+            <AdminEmpty icon="check-circle" title="Keine passenden Einsprüche">
               {lead ? "Neue Einsprüche erscheinen hier zur Zuweisung." : "Die Moderationsleitung weist dir Einsprüche zur Prüfung zu."}
-            </EmptyState>
+            </AdminEmpty>
           ) : (
             <Table>
               <caption className="sr-only">Einsprüche</caption>

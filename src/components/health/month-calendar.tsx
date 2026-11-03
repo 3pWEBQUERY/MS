@@ -49,44 +49,43 @@ export function MonthCalendar({
   const hasNext = next <= today.slice(0, 7);
   const label = monthLabel(month);
 
+  const navLink =
+    "group inline-flex h-11 items-center gap-1.5 rounded-[11px] px-2 text-sm font-semibold text-ink-2 transition-colors duration-150 hover:bg-sunk hover:text-ink";
+
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <Link
-          href={hrefForMonth(prev)}
-          className="inline-flex h-11 items-center gap-1.5 rounded-[11px] px-2 text-sm font-semibold text-ink-2 hover:bg-sunk hover:text-ink"
-        >
-          <Icon name="arrow-left" className="size-4" />
-          <span>
-            <span className="sr-only">Vorheriger Monat: </span>
-            {monthLabel(prev).split(" ")[0]}
-          </span>
-        </Link>
-        <p className="text-base font-semibold text-ink" aria-live="polite">
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1 border-t border-ink pt-4">
+        <p className="font-display text-[1.75rem] leading-tight tracking-[-0.02em] text-ink" aria-live="polite">
           {label}
         </p>
-        {hasNext ? (
-          <Link
-            href={hrefForMonth(next)}
-            className="inline-flex h-11 items-center gap-1.5 rounded-[11px] px-2 text-sm font-semibold text-ink-2 hover:bg-sunk hover:text-ink"
-          >
+        <div className="-mx-2 flex items-center justify-between gap-3">
+          <Link href={hrefForMonth(prev)} className={navLink}>
+            <Icon name="arrow-left" className="size-4" />
             <span>
-              <span className="sr-only">Nächster Monat: </span>
-              {monthLabel(next).split(" ")[0]}
+              <span className="sr-only">Vorheriger Monat: </span>
+              {monthLabel(prev).split(" ")[0]}
             </span>
-            <Icon name="arrow-right" className="size-4" />
           </Link>
-        ) : (
-          <span className="w-16" aria-hidden="true" />
-        )}
+          {hasNext ? (
+            <Link href={hrefForMonth(next)} className={navLink}>
+              <span>
+                <span className="sr-only">Nächster Monat: </span>
+                {monthLabel(next).split(" ")[0]}
+              </span>
+              <Icon name="arrow-right" className="nudge size-4" />
+            </Link>
+          ) : (
+            <span className="w-16" aria-hidden="true" />
+          )}
+        </div>
       </div>
-      <div className="relative overflow-x-auto rounded-[16px] border border-line bg-surface p-2">
-        <table className="w-full table-fixed border-separate border-spacing-1 text-center">
+      <div className="relative overflow-x-auto border-y border-line py-2">
+        <table className="w-full table-fixed border-separate border-spacing-x-0.5 border-spacing-y-1 text-center">
           <caption className="sr-only">Deine Einträge im {label}</caption>
           <thead>
             <tr>
               {WEEKDAYS.map(([short, long]) => (
-                <th key={short} scope="col" className="pb-1 text-sm font-semibold text-ink-2">
+                <th key={short} scope="col" className="pb-1 font-mono text-xs font-medium uppercase tracking-[0.1em] text-ink-2">
                   <abbr title={long} className="no-underline">
                     {short}
                   </abbr>
@@ -103,7 +102,9 @@ export function MonthCalendar({
                   const isToday = date === today;
                   const content = (
                     <>
-                      <span className="tabular text-sm font-semibold" aria-hidden="true">{Number(date.slice(8))}</span>
+                      <span className="tabular font-mono text-sm font-medium" aria-hidden="true">
+                        {Number(date.slice(8))}
+                      </span>
                       <span className="flex h-2.5 items-center justify-center gap-1" aria-hidden="true">
                         {day?.checkIn && <span className="size-2 rounded-full bg-ink" />}
                         {day && day.diary > 0 && <span className="size-2 border border-ink" />}
@@ -115,7 +116,7 @@ export function MonthCalendar({
                     </>
                   );
                   const base = cn(
-                    "flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-[10px] border",
+                    "flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-[10px] border",
                     isToday ? "border-ink" : "border-transparent",
                   );
                   return (
@@ -123,7 +124,7 @@ export function MonthCalendar({
                       {day ? (
                         <Link
                           href={`/mein-ms/verlauf?zeitraum=eigen&von=${date}&bis=${date}`}
-                          className={cn(base, "bg-sunk text-ink transition-colors hover:bg-raised")}
+                          className={cn(base, "bg-sunk text-ink transition-colors duration-150 hover:bg-raised")}
                         >
                           {content}
                         </Link>

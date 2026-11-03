@@ -9,7 +9,7 @@ import { useResilientAction } from "@/components/ui/use-resilient-action";
 export function EraseHealthForm() {
   const [state, action] = useResilientAction(eraseHealthAction);
   return (
-    <form action={action} noValidate className="flex flex-col gap-5 rounded-[20px] border border-line-2 bg-surface p-5 sm:p-6">
+    <form action={action} noValidate className="flex flex-col gap-5 rounded-[20px] border border-danger/40 bg-surface p-5 sm:p-6">
       <FormMessage state={state} />
       <Checkbox
         name="confirm"

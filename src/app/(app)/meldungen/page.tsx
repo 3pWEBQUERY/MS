@@ -47,8 +47,8 @@ function DecisionCard({ d, tz }: { d: DecisionAboutMe; tz: string }) {
     <Card className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-semibold uppercase tracking-[0.08em] text-ink-2">Fall</p>
-          <p className="font-mono text-lg font-semibold text-ink">{d.caseNumber}</p>
+          <p className="font-mono text-[0.8125rem] font-medium uppercase tracking-[0.12em] text-ink-2">Fall</p>
+          <p className="font-mono text-[1.375rem] font-medium tracking-[0.04em] text-ink">{d.caseNumber}</p>
         </div>
         {d.appeal ? (
           <Badge tone="info" icon="scale">
@@ -96,7 +96,7 @@ function DecisionCard({ d, tz }: { d: DecisionAboutMe; tz: string }) {
         </div>
       ) : !d.appeal ? (
         <p className="text-sm text-ink-2">
-          Die Einspruchsfrist ist abgelaufen. Spätere Anliegen kannst du über das <Link href="/kontakt" className="font-medium text-ink underline underline-offset-4">Kontaktformular</Link> einreichen.
+          Die Einspruchsfrist ist abgelaufen. Spätere Anliegen kannst du über das <Link href="/kontakt" className="link-quiet font-medium text-ink">Kontaktformular</Link> einreichen.
         </p>
       ) : null}
     </Card>
@@ -130,11 +130,12 @@ async function MyReports({ searchParams }: { searchParams: PageProps<"/meldungen
         <section aria-labelledby="entscheidungen">
           <SectionHeader
             id="entscheidungen"
+            index="01"
             title="Entscheidungen, die mich betreffen"
             description="Du kannst innerhalb von 30 Tagen Einspruch erheben. Eine andere zuständige Person prüft ihn."
           />
           {decisions.length === 0 ? (
-            <p className="text-base text-ink-2">Es gibt keine Entscheidungen der Moderation zu deinem Konto.</p>
+            <p className="border-t border-line pt-5 text-base text-ink-2">Es gibt keine Entscheidungen der Moderation zu deinem Konto.</p>
           ) : (
             <div className="flex flex-col gap-3">
               {decisions.map((d) => (
@@ -147,6 +148,7 @@ async function MyReports({ searchParams }: { searchParams: PageProps<"/meldungen
         <section aria-labelledby="meldungen">
           <SectionHeader
             id="meldungen"
+            index="02"
             title="Meine Meldungen"
             description="Die gemeldete Person erfährt nicht, wer gemeldet hat."
           />

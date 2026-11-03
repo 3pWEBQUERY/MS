@@ -7,19 +7,23 @@ import { WhoSeesWhat } from "@/components/account/who-sees-what";
 import { Button } from "@/components/ui/button";
 import { Checkbox, Field, FormMessage, Input, RadioCards, Select, SubmitButton } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
+import { cn } from "@/lib/cn";
 import { Notice } from "@/components/ui/primitives";
 import { idle } from "@/lib/action-state";
 import { CANTONS, INTERESTS, ONBOARDING_GOALS } from "@/lib/catalog";
 import { checkPseudonymAction, completeOnboardingAction } from "@/server/modules/account/profile-actions";
 import { useResilientAction } from "@/components/ui/use-resilient-action";
 
+/** Titel als Frage in der Display-Serif; `accent` ist das eine kursive Akzentwort am Ende. */
 const STEPS = [
-  { title: "Wie möchtest du in der Community heissen?", eyebrow: "Pseudonym" },
-  { title: "Was interessiert dich?", eyebrow: "Freiwillige Angaben" },
-  { title: "Was möchtest du zuerst tun?", eyebrow: "Freiwilliges Ziel" },
-  { title: "Wer sieht was", eyebrow: "Datenschutz kurz erklärt" },
-  { title: "Hilfst du mit einer anonymen Statistik?", eyebrow: "Freiwillige Entscheidung" },
-] as const;
+  { lead: "Wie möchtest du in der Community", accent: "heissen?", eyebrow: "Pseudonym" },
+  { lead: "Was", accent: "interessiert", tail: " dich?", eyebrow: "Freiwillige Angaben" },
+  { lead: "Was möchtest du zuerst", accent: "tun?", eyebrow: "Freiwilliges Ziel" },
+  { lead: "Wer sieht", accent: "was", eyebrow: "Datenschutz kurz erklärt" },
+  { lead: "Hilfst du mit einer anonymen", accent: "Statistik?", eyebrow: "Freiwillige Entscheidung" },
+] as { lead: string; accent: string; tail?: string; eyebrow: string }[];
+
+const two = (n: number) => String(n).padStart(2, "0");
 
 /**
  * S07 (ACC06): ruhig und mehrstufig, je Schritt genau eine Hauptaktion.
@@ -87,22 +91,35 @@ export function OnboardingForm({ initialGoal }: { initialGoal?: string }) {
         }
       }}
     >
-      <header className="flex flex-col gap-3">
-        <p className="text-sm font-semibold uppercase tracking-[0.08em] text-ink-2">
-          Schritt {step + 1} von {STEPS.length} · {current.eyebrow}
-        </p>
-        <h1
-          ref={headingRef}
-          tabIndex={-1}
-          className="text-3xl font-[650] tracking-[-0.025em] text-ink outline-none sm:text-[2.5rem] sm:leading-[1.08]"
-        >
-          {current.title}
-        </h1>
-        <div className="flex gap-1.5" aria-hidden="true">
+      <header className="flex flex-col gap-6">
+        {/* Fortschritt als nummerierte Haarlinien-Leiste (dekorativ; der Text darunter nennt den Schritt) */}
+        <ol className="grid grid-cols-5 gap-2" aria-hidden="true">
           {STEPS.map((s, i) => (
-            <span key={s.title} className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-ink" : "bg-sunk"}`} />
+            <li
+              key={s.eyebrow}
+              className={cn(
+                "flex flex-col gap-2 border-t-2 pt-2 font-mono text-xs tracking-[0.08em]",
+                i < step && "border-ink text-ink-2",
+                i === step && "border-accent text-accent-ink",
+                i > step && "border-line text-ink-3",
+              )}
+            >
+              {two(i + 1)}
+            </li>
           ))}
-        </div>
+        </ol>
+        <p className="eyebrow">
+          <span className="index" aria-hidden="true">
+            {two(step + 1)}
+          </span>
+          <span>
+            Schritt {step + 1} von {STEPS.length} · {current.eyebrow}
+          </span>
+        </p>
+        <h1 ref={headingRef} tabIndex={-1} className="display-md outline-none">
+          {current.lead} <em>{current.accent}</em>
+          {current.tail}
+        </h1>
       </header>
 
       <FormMessage state={state.status === "error" && !serverNameError ? state : idle} />
@@ -139,13 +156,14 @@ export function OnboardingForm({ initialGoal }: { initialGoal?: string }) {
       <section hidden={step !== 1} className="flex flex-col gap-8">
         <p className="text-lg text-ink-2">Alles hier ist freiwillig. Du kannst es leer lassen und später im Profil ergänzen.</p>
         <fieldset className="flex flex-col gap-3">
-          <legend className="mb-1 text-base font-semibold text-ink">
+          <legend className="mb-2 text-base font-semibold text-ink">
             Interessen <span className="ml-1 text-sm font-normal text-ink-2">(optional, für Mitglieder sichtbar)</span>
           </legend>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid border-t border-line sm:grid-cols-2 sm:gap-x-8">
             {INTERESTS.map(([code, label]) => (
               <Checkbox
                 key={code}
+                className="border-b border-line py-3"
                 name="interests"
                 value={code}
                 label={label}
@@ -204,8 +222,8 @@ export function OnboardingForm({ initialGoal }: { initialGoal?: string }) {
           ausdrücklichen Aktivierung genutzt.
         </p>
         <WhoSeesWhat compact />
-        <div className="flex flex-col gap-3">
-          <h2 className="text-lg font-[650] text-ink">So sehen dich andere Mitglieder</h2>
+        <div className="flex flex-col gap-4">
+          <h2 className="display-sm">So sehen dich andere Mitglieder</h2>
           <MemberProfileCard profile={{ pseudonym, interests, canton: canton || null }} />
         </div>
       </section>
@@ -216,10 +234,10 @@ export function OnboardingForm({ initialGoal }: { initialGoal?: string }) {
           Damit wir erkennen, ob die Plattform im Alltag hilft, können wir zählen, welche Bereiche genutzt werden – zum Beispiel, ob nach der
           Einführung ein Artikel geöffnet wird. Das ist unabhängig vom Gesundheitsbereich und von allem anderen.
         </p>
-        <ul className="flex list-disc flex-col gap-1 pl-5 text-base text-ink-2">
-          <li>Keine Inhalte, kein Pseudonym, keine Suchtexte und keine Gesundheitswerte, keine Tracker von Dritten.</li>
-          <li>Ein zufälliger Bezug ohne Namen; Rohdaten werden nach höchstens 30 Tagen gelöscht.</li>
-          <li>Ausgewertet werden nur Summen ab zehn Personen.</li>
+        <ul className="flex flex-col border-t border-line text-base text-ink-2">
+          <li className="border-b border-line py-3">Keine Inhalte, kein Pseudonym, keine Suchtexte und keine Gesundheitswerte, keine Tracker von Dritten.</li>
+          <li className="border-b border-line py-3">Ein zufälliger Bezug ohne Namen; Rohdaten werden nach höchstens 30 Tagen gelöscht.</li>
+          <li className="border-b border-line py-3">Ausgewertet werden nur Summen ab zehn Personen.</li>
         </ul>
         <RadioCards
           name="analytics"
@@ -233,14 +251,14 @@ export function OnboardingForm({ initialGoal }: { initialGoal?: string }) {
         />
         <p className="text-base text-ink-2">
           Ändern oder widerrufen jederzeit unter{" "}
-          <Link href="/konto/privatsphaere" className="font-medium text-ink underline underline-offset-4">
+          <Link href="/konto/privatsphaere" className="link-quiet font-medium text-ink">
             Privatsphäre und Einwilligungen
           </Link>
           .
         </p>
       </section>
 
-      <div className="flex flex-col-reverse gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col-reverse gap-3 border-t border-ink pt-6 sm:flex-row sm:items-center sm:justify-between">
         {step > 0 ? (
           <Button variant="ghost" icon={<Icon name="arrow-left" className="size-5" />} onClick={() => setStep((s) => s - 1)}>
             Zurück

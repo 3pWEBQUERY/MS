@@ -16,6 +16,8 @@ import {
 import type { ChatMessage } from "@/server/modules/messaging/conversations";
 
 const MAX = 2000;
+/** Nachrichtenblase: Radius 16px bei 16/12px Innenabstand, Lesebreite begrenzt */
+const BUBBLE = "max-w-[85%] rounded-[16px] px-4 py-3 text-base leading-relaxed sm:max-w-[70%]";
 const FALLBACK_REFRESH_MS = 5000;
 
 type Pending = {
@@ -219,15 +221,20 @@ export function ChatView({
       </p>
 
       {messages.length === 0 && visiblePending.length === 0 ? (
-        <p className="rounded-[16px] bg-sunk p-4 text-base text-ink-2">
+        <p className="border-y border-line py-8 text-center text-base text-ink-2">
           Noch keine Nachrichten. Schreib eine erste Nachricht, wenn du magst.
         </p>
       ) : (
         <div className="flex flex-col gap-6">
           {groups.map((g) => (
-            <section key={g.day} aria-label={g.label} className="flex flex-col gap-3">
-              <p className="self-center rounded-[8px] bg-sunk px-2.5 py-1 text-sm font-semibold text-ink-2">{g.label}</p>
-              <ol className="flex flex-col gap-3">
+            <section key={g.day} aria-label={g.label} className="flex flex-col gap-4">
+              {/* Tagestrenner als Haarlinie mit Mono-Datum */}
+              <p className="flex items-center gap-4 font-mono text-[0.75rem] uppercase tracking-[0.12em] text-ink-2">
+                <span aria-hidden="true" className="h-px flex-1 bg-line" />
+                <span className="text-center">{g.label}</span>
+                <span aria-hidden="true" className="h-px flex-1 bg-line" />
+              </p>
+              <ol className="flex flex-col gap-4">
                 {g.items.map((m) => (
                   <MessageItem
                     key={m.id}
@@ -241,15 +248,15 @@ export function ChatView({
             </section>
           ))}
           {visiblePending.length > 0 && (
-            <ol className="flex flex-col gap-3" aria-label="Nachrichten, die noch nicht gespeichert sind">
+            <ol className="flex flex-col gap-4" aria-label="Nachrichten, die noch nicht gespeichert sind">
               {visiblePending.map((p) => (
                 <li key={p.opId} className="flex flex-col items-end gap-1.5">
                   <span className="sr-only">Deine Nachricht:</span>
-                  <div className="max-w-[85%] rounded-[16px] bg-sunk px-4 py-3 text-base text-ink sm:max-w-[70%]">
+                  <div className={cn(BUBBLE, "border border-dashed border-line-2 bg-sunk")}>
                     <PlainText text={p.body} />
                   </div>
                   {p.status === "sending" ? (
-                    <span className="flex items-center gap-1.5 text-sm text-ink-2">
+                    <span className="flex items-center gap-1.5 font-mono text-[0.8125rem] text-ink-2">
                       <Icon name="loader" className="size-4 motion-safe:animate-spin" />
                       Wird gesendet …
                     </span>
@@ -317,13 +324,13 @@ function Composer({ otherPseudonym, onSend }: { otherPseudonym: string; onSend: 
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) submit();
   };
   return (
-    <form onSubmit={submit} className="flex flex-col gap-3 rounded-[20px] border border-line bg-surface p-4 sm:p-5" noValidate>
+    <form onSubmit={submit} className="flex flex-col gap-3 rounded-[20px] border border-line-2 bg-surface p-4 sm:p-5" noValidate>
       <Field
         label={`Nachricht an ${otherPseudonym}`}
         hint="Nur Text, keine Anhänge. Mit Strg + Enter senden."
         error={error}
         counter={
-          <span className={cn("tabular text-sm", draft.length > MAX ? "text-danger" : "text-ink-2")}>
+          <span className={cn("tabular font-mono text-[0.8125rem]", draft.length > MAX ? "text-danger" : "text-ink-2")}>
             {draft.length.toLocaleString("de-CH")} / 2 000
           </span>
         }
@@ -367,26 +374,22 @@ function MessageItem({
     <li className={cn("flex flex-col gap-1.5", m.mine ? "items-end" : "items-start")}>
       <span className="sr-only">{m.mine ? "Du" : otherPseudonym}, {time}:</span>
       {m.body === null ? (
-        <div
-          className={cn(
-            "flex max-w-[85%] items-center gap-2 rounded-[16px] border border-dashed border-line-2 px-4 py-3 text-base italic text-ink-2 sm:max-w-[70%]",
-          )}
-        >
+        <div className={cn(BUBBLE, "flex items-center gap-2 border border-dashed border-line-2 italic text-ink-2")}>
           <Icon name="minus" className="size-4 shrink-0" />
           Nachricht entfernt
         </div>
       ) : (
-        <div
-          className={cn(
-            "max-w-[85%] rounded-[16px] px-4 py-3 text-base text-ink sm:max-w-[70%]",
-            m.mine ? "bg-sunk" : "border border-line bg-surface",
-          )}
-        >
+        <div className={cn(BUBBLE, "text-ink", m.mine ? "border border-transparent bg-sunk" : "border border-line bg-surface")}>
           <PlainText text={m.body} />
         </div>
       )}
-      <div className="flex items-center gap-3 text-sm text-ink-2" aria-hidden={m.mine ? undefined : true}>
-        <span aria-hidden="true">{time}</span>
+      <div
+        className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 font-mono text-[0.8125rem] text-ink-2"
+        aria-hidden={m.mine ? undefined : true}
+      >
+        <span aria-hidden="true" className="tabular">
+          {time}
+        </span>
         {m.mine && m.body !== null && (
           <>
             <span className="flex items-center gap-1">
@@ -410,7 +413,7 @@ function RemoveMessageButton({ messageId, onRemoved }: { messageId: string; onRe
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-[6px] px-1 font-medium text-ink-2 underline underline-offset-4 hover:text-ink"
+        className="-my-1.5 inline-flex h-8 items-center rounded-[8px] px-2 font-sans text-sm font-medium text-ink-2 underline decoration-line-2 underline-offset-4 transition-colors duration-150 hover:bg-sunk hover:text-ink hover:decoration-current"
       >
         Entfernen
       </button>

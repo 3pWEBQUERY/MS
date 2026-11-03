@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ReauthNotice } from "@/components/account/reauth-notice";
+import { RuledItem, RuledList, SettingsSection, SettingsSections } from "@/components/account/settings-layout";
 import { Icon, type IconName } from "@/components/ui/icon";
-import { Card, PageHeader, PageSkeleton, SectionHeader } from "@/components/ui/primitives";
+import { PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { hasRecentAuth, requireViewer } from "@/server/auth/viewer";
 import { DeleteAccountForm } from "./delete-account-form";
 
@@ -41,62 +42,66 @@ const KEEP: string[] = [
 async function DeleteAccount() {
   const viewer = await requireViewer({ allowSuspended: true });
   return (
-    <div className="flex max-w-2xl flex-col gap-10">
+    <div className="flex flex-col gap-10">
       <PageHeader
         back={{ href: "/konto/daten", label: "Daten und Konto" }}
         eyebrow="Daten und Konto"
         title="Konto löschen"
         description="Bitte lies die Folgen in Ruhe. Möchtest du nur deine Gesundheitsdaten entfernen, geht das auch ohne Kontolöschung."
-        className="pb-0 sm:pb-0"
+        className="!mb-0"
       />
 
-      <section aria-labelledby="now-title" className="flex flex-col gap-4">
-        <SectionHeader id="now-title" title="Sofort" className="mb-0" />
-        <ul className="flex flex-col gap-3">
-          {NOW.map((i) => (
-            <li key={i.text} className="flex gap-3 text-base text-ink">
-              <Icon name={i.icon} className="mt-1 size-5 shrink-0 text-ink-2" />
-              {i.text}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section aria-labelledby="later-title" className="flex flex-col gap-4">
-        <SectionHeader id="later-title" title="Danach" className="mb-0" />
-        <ul className="flex flex-col gap-3">
-          {LATER.map((i) => (
-            <li key={i.text} className="flex gap-3 text-base text-ink">
-              <Icon name={i.icon} className="mt-1 size-5 shrink-0 text-ink-2" />
-              {i.text}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section aria-labelledby="keep-title" className="flex flex-col gap-4">
-        <SectionHeader id="keep-title" title="Was bestehen bleibt" className="mb-0" />
-        <Card tone="sunk">
-          <ul className="flex list-disc flex-col gap-2 pl-5 text-base text-ink-2">
-            {KEEP.map((t) => (
-              <li key={t}>{t}</li>
+      <SettingsSections>
+        <SettingsSection id="now-title" index="01" title="Sofort">
+          <RuledList>
+            {NOW.map((i) => (
+              <RuledItem key={i.text} icon={<Icon name={i.icon} className="size-5" />}>
+                {i.text}
+              </RuledItem>
             ))}
-          </ul>
-        </Card>
-        <p className="text-base text-ink-2">
-          Tipp: Mit einem{" "}
-          <Link href="/konto/daten" className="font-medium text-ink underline underline-offset-4">
-            Export
-          </Link>{" "}
-          kannst du deine Daten vorher sichern.
-        </p>
-      </section>
+          </RuledList>
+        </SettingsSection>
 
-      {hasRecentAuth(viewer) ? (
-        <DeleteAccountForm />
-      ) : (
-        <ReauthNotice next="/konto/loeschen">Zur Sicherheit bestätige bitte dein Passwort, bevor du dein Konto löschst.</ReauthNotice>
-      )}
+        <SettingsSection id="later-title" index="02" title="Danach">
+          <RuledList>
+            {LATER.map((i) => (
+              <RuledItem key={i.text} icon={<Icon name={i.icon} className="size-5" />}>
+                {i.text}
+              </RuledItem>
+            ))}
+          </RuledList>
+        </SettingsSection>
+
+        <SettingsSection id="keep-title" index="03" title="Was bestehen bleibt">
+          <RuledList>
+            {KEEP.map((t) => (
+              <li key={t} className="border-b border-line py-4 text-base text-ink-2">
+                {t}
+              </li>
+            ))}
+          </RuledList>
+          <p className="text-base text-ink-2">
+            Tipp: Mit einem{" "}
+            <Link href="/konto/daten" className="link-quiet font-medium text-ink">
+              Export
+            </Link>{" "}
+            kannst du deine Daten vorher sichern.
+          </p>
+        </SettingsSection>
+
+        <div className="grid gap-x-12 py-10 sm:py-12 xl:grid-cols-[minmax(0,19rem)_minmax(0,1fr)]">
+          <span aria-hidden="true" className="hidden font-mono text-[0.8125rem] font-medium tracking-[0.12em] text-danger xl:block">
+            04
+          </span>
+          <div className="max-w-2xl">
+            {hasRecentAuth(viewer) ? (
+              <DeleteAccountForm />
+            ) : (
+              <ReauthNotice next="/konto/loeschen">Zur Sicherheit bestätige bitte dein Passwort, bevor du dein Konto löschst.</ReauthNotice>
+            )}
+          </div>
+        </div>
+      </SettingsSections>
     </div>
   );
 }

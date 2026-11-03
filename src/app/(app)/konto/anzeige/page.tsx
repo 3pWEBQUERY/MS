@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { AccountNav } from "@/components/account/account-nav";
 import { DisplaySettings } from "@/components/account/display-settings";
-import { PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { SettingsHeader } from "@/components/account/settings-layout";
+import { PageSkeleton } from "@/components/ui/primitives";
 import { requireViewer } from "@/server/auth/viewer";
 
 export const metadata: Metadata = { title: "Anzeige und Bedienung", robots: { index: false } };
@@ -21,16 +21,13 @@ async function MemberDisplay() {
   const p = viewer.prefs;
   return (
     <div className="flex flex-col gap-10">
-      <div className="flex flex-col gap-6">
-        <PageHeader
-          eyebrow="Einstellungen"
-          title="Anzeige und Bedienung"
-          description="Schrift, Farbschema, Bewegung und einfache Ansicht. Jede Änderung siehst du sofort."
-          className="pb-0 sm:pb-0"
-          back={viewer.accountSuspended ? { href: "/konto/gesperrt", label: "Zurück zur Übersicht" } : undefined}
-        />
-        {!viewer.accountSuspended && <AccountNav current="anzeige" />}
-      </div>
+      <SettingsHeader
+        current="anzeige"
+        title="Anzeige und Bedienung"
+        description="Schrift, Farbschema, Bewegung und einfache Ansicht. Jede Änderung siehst du sofort."
+        back={viewer.accountSuspended ? { href: "/konto/gesperrt", label: "Zurück zur Übersicht" } : undefined}
+        showNav={!viewer.accountSuspended}
+      />
       <DisplaySettings mode="member" initial={{ theme: p.theme, textScale: p.textScale, motion: p.motion, simple: p.simpleView }} />
     </div>
   );

@@ -12,7 +12,7 @@ import {
   ROLE_LABEL,
   TARGET_LABEL,
 } from "@/components/admin/labels";
-import { AdminSectionBlock, DateTime, Deadline } from "@/components/admin/ui";
+import { AdminSectionBlock, DateTime, Deadline, LedgerItem, LedgerList, SIDE_KV, SidePanel } from "@/components/admin/ui";
 import { Badge, Card, KeyValue, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
 import { requireStaff } from "@/server/auth/viewer";
 import { getAppealForStaff } from "@/server/modules/moderation/appeals";
@@ -59,7 +59,7 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/e
           </div>
         }
       />
-      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem] xl:gap-14">
         <div className="flex min-w-0 flex-col gap-10">
           {a.viewerIsDecider && !decided && (
             <Notice tone="warning" title="Du warst am Entscheid beteiligt">
@@ -68,7 +68,7 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/e
           )}
 
           <AdminSectionBlock id="begruendung" title="Begründung des Einspruchs">
-            <Card>
+            <div className="border-l-2 border-line-2 pl-5">
               {a.reason ? (
                 <PlainText text={a.reason} className="text-base text-ink" />
               ) : (
@@ -77,11 +77,11 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/e
               <p className="mt-3 text-sm text-ink-2">
                 Eingegangen <DateTime date={a.createdAt} />
               </p>
-            </Card>
+            </div>
           </AdminSectionBlock>
 
           <AdminSectionBlock id="entscheid" title="Ursprünglicher Entscheid">
-            <Card className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 border-l-2 border-line-2 pl-5">
               <p className="text-sm text-ink-2">
                 Entschieden <DateTime date={a.case.decidedAt} />
                 {a.case.ruleRef && <> · Regelbezug {a.case.ruleRef}</>}
@@ -91,19 +91,19 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/e
               ) : (
                 <p className="text-ink-2">Keine Entscheidbegründung erfasst.</p>
               )}
-            </Card>
+            </div>
             {a.actions.length > 0 && (
-              <ul className="flex flex-col gap-2">
+              <LedgerList as="ul">
                 {a.actions.map((x) => (
-                  <li key={x.id} className="rounded-[16px] border border-line bg-surface p-4 text-sm">
+                  <LedgerItem key={x.id} className="py-4 text-sm [&>div]:gap-1">
                     <p className="font-semibold text-ink">
                       {ACTION_LABEL[x.kind]} · {x.actor ?? "System"} · <DateTime date={x.createdAt} />
                     </p>
                     {x.ruleRef && <p className="text-ink-2">Regelbezug: {x.ruleRef}</p>}
-                    {x.publicReason && <PlainText text={x.publicReason} className="mt-1 text-ink-2" />}
-                  </li>
+                    {x.publicReason && <PlainText text={x.publicReason} className="text-ink-2" />}
+                  </LedgerItem>
                 ))}
-              </ul>
+              </LedgerList>
             )}
             {(a.status === "in_review" ? a.viewerIsReviewer || a.viewerIsLead : a.viewerIsLead) && (
               <p className="text-sm text-ink-2">
@@ -125,17 +125,15 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/e
 
           {decided && a.decisionNote && (
             <AdminSectionBlock id="ergebnis" title="Ergebnis">
-              <Card>
-                <PlainText text={a.decisionNote} className="text-base text-ink" />
-              </Card>
+              <PlainText text={a.decisionNote} className="border-l-2 border-line-2 pl-5 text-base text-ink" />
             </AdminSectionBlock>
           )}
         </div>
 
-        <aside className="flex flex-col gap-6" aria-label="Angaben zum Einspruch">
-          <Card className="flex flex-col gap-2">
-            <h2 className="text-lg font-[650] text-ink">Fall</h2>
+        <aside className="flex flex-col gap-8" aria-label="Angaben zum Einspruch">
+          <SidePanel title="Fall">
             <KeyValue
+              className={SIDE_KV}
               items={[
                 ["Fallnummer", <span key="n" className="tabular font-mono">{a.case.caseNumber}</span>],
                 ["Ziel", TARGET_LABEL[a.case.targetType] ?? a.case.targetType],
@@ -145,10 +143,9 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/e
                 ["Prüfende Person", a.viewerIsReviewer ? "Du" : (a.reviewer ?? "Noch nicht zugewiesen")],
               ]}
             />
-          </Card>
+          </SidePanel>
           {a.viewerIsLead && !decided && (
-            <Card className="flex flex-col gap-3">
-              <h2 className="text-lg font-[650] text-ink">Zuweisung</h2>
+            <SidePanel title="Zuweisung">
               {a.candidates.length === 0 ? (
                 <Notice tone="warning" title="Keine unabhängige Person verfügbar">
                   Alle Personen mit Moderationsrolle waren am Entscheid beteiligt. Bitte eine weitere zuständige Person mit Rolle und MFA
@@ -164,7 +161,7 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/e
                   }))}
                 />
               )}
-            </Card>
+            </SidePanel>
           )}
         </aside>
       </div>

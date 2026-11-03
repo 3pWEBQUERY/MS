@@ -50,7 +50,7 @@ async function MfaGate({ searchParams }: { searchParams: PageProps<"/anmelden/mf
           </ActionButton>
         </div>
         <p className="mt-3 text-sm text-ink-2">
-          Fragen? <Link href="/kontakt?kategorie=konto" className="font-medium underline underline-offset-4">Kontakt aufnehmen</Link>
+          Fragen? <Link href="/kontakt?kategorie=konto" className="link-quiet font-medium">Kontakt aufnehmen</Link>
         </p>
       </Notice>
     </div>

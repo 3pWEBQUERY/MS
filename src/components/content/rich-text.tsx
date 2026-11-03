@@ -88,8 +88,9 @@ export function RichText({ text, className, headingOffset = 0 }: { text: string;
             </p>
           );
         const Tag = (b.kind === "h2" ? (headingOffset ? "h3" : "h2") : headingOffset ? "h4" : "h3") as "h2" | "h3" | "h4";
+        // h2 trägt die Display-Serif aus .prose-ms (Magazin-Zwischentitel), tiefere Ebenen bleiben in der Textschrift
         return (
-          <Tag key={i} className="font-[650] tracking-[-0.01em] text-ink">
+          <Tag key={i} className={Tag === "h2" ? "text-ink" : "font-[650] tracking-[-0.01em] text-ink"}>
             {b.text}
           </Tag>
         );

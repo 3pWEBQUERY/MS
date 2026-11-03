@@ -4,7 +4,8 @@ import { Suspense } from "react";
 import { z } from "zod";
 import { ActionButton } from "@/components/account/action-button";
 import { RequestStatusBadge, TaskStatusBadge } from "@/components/account/request-status";
-import { Card, KeyValue, Notice, PageHeader, PageSkeleton, PlainText, SectionHeader, Table } from "@/components/ui/primitives";
+import { AdminHeading } from "@/components/admin/ui";
+import { KeyValue, Notice, PageHeader, PageSkeleton, PlainText, Table } from "@/components/ui/primitives";
 import { formatDate, formatDateTime } from "@/lib/time";
 import { audit } from "@/server/audit";
 import { requireStaff } from "@/server/auth/viewer";
@@ -49,13 +50,13 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
   const analytics = req.type === "access" && req.accountId ? await analyticsAccessSummary(req.accountId) : null;
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-12">
       <PageHeader
         back={{ href: "/verwaltung/datenschutz", label: "Alle Aufträge" }}
         eyebrow={REQUEST_TYPE_LABEL[req.type]}
         title={<span className="tabular font-mono">{req.receiptNumber}</span>}
         actions={<RequestStatusBadge status={req.status} />}
-        className="pb-0 sm:pb-0"
+        className="mb-0 sm:mb-0"
       />
 
       {overdue && (
@@ -71,9 +72,9 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
       )}
 
       <section aria-labelledby="meta-title" className="flex max-w-3xl flex-col gap-4">
-        <SectionHeader id="meta-title" title="Auftrag" className="mb-0" />
-        <Card>
-          <KeyValue
+        <AdminHeading id="meta-title" title="Auftrag" />
+        <KeyValue
+            className="border-y border-line"
             items={[
               ["Art", REQUEST_TYPE_LABEL[req.type]],
               ["Eingegangen", formatDateTime(req.createdAt, tz)],
@@ -85,7 +86,6 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
               ["Abgeschlossen", req.completedAt ? formatDateTime(req.completedAt, tz) : "–"],
             ]}
           />
-        </Card>
         <p className="text-sm text-ink-2">
           {isMfa
             ? "Die Anfrage wurde nach erfolgreicher Passwort-Anmeldung gestellt. Die Identität prüft die Datenschutzstelle verhältnismässig – keine Ausweiskopien, nie allein über eine Profilangabe."
@@ -96,16 +96,14 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
 
       {isMfa && (req.status === "requested" || req.status === "verified") && (
         <section aria-labelledby="mfa-title" className="flex max-w-3xl flex-col gap-4">
-          <SectionHeader
+          <AdminHeading
             id="mfa-title"
             title={req.status === "requested" ? "Identität prüfen" : "Zweite Freigabe"}
             description={
               req.status === "requested"
                 ? "Nach der Bestätigung werden Geheimnis und Wiederherstellungscodes entfernt und alle Sitzungen beendet. Bei Konten mit Mitarbeitendenrolle setzt erst eine zweite Person zurück."
                 : "Konto mit Mitarbeitendenrolle: Die Identität ist geprüft. Das Zurücksetzen gibt eine andere Person der Datenschutzstelle frei."
-            }
-            className="mb-0"
-          />
+            } />
           {req.accountId === officer.accountId ? (
             <Notice tone="neutral" title="Eigener Auftrag">
               Eigene Aufträge bearbeitet eine andere Person der Datenschutzstelle.
@@ -126,7 +124,7 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
 
       {manual && req.status !== "completed" && req.status !== "rejected" && (
         <section aria-labelledby="handle-title" className="flex max-w-3xl flex-col gap-4">
-          <SectionHeader id="handle-title" title="Bearbeitung" className="mb-0" />
+          <AdminHeading id="handle-title" title="Bearbeitung" />
           <div className="flex flex-wrap gap-3">
             {req.status === "requested" && (
               <ActionButton action={updateRequestStatusAction} fields={{ requestId: req.id, status: "in_progress" }} variant="secondary">
@@ -142,14 +140,12 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
 
       {analytics && (
         <section aria-labelledby="analytics-title" className="flex max-w-3xl flex-col gap-4">
-          <SectionHeader
+          <AdminHeading
             id="analytics-title"
             title="Für die Auskunft: optionale Nutzungsstatistik"
-            description="Nur Stand und Anzahlen. Die Rohereignisse selbst erhält die Person mit ihrem Datenexport (Abschnitt «nutzungsstatistik»)."
-            className="mb-0"
-          />
-          <Card>
-            <KeyValue
+            description="Nur Stand und Anzahlen. Die Rohereignisse selbst erhält die Person mit ihrem Datenexport (Abschnitt «nutzungsstatistik»)." />
+          <KeyValue
+              className="border-y border-line"
               items={[
                 [
                   "Einwilligung",
@@ -165,18 +161,15 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
                 ["Zweck und Empfänger", "Produktverbesserung; nur intern, Ausgabe nur als Summen ab zehn Personen, keine Weitergabe an Dritte"],
               ]}
             />
-          </Card>
         </section>
       )}
 
       {isErasure && (
         <section aria-labelledby="tasks-title" className="flex flex-col gap-4">
-          <SectionHeader
+          <AdminHeading
             id="tasks-title"
             title="Teilschritte"
-            description={`${req.tasks.length - open} von ${req.tasks.length} erledigt. Belege enthalten nur Anzahlen, keine Inhalte.`}
-            className="mb-0"
-          />
+            description={`${req.tasks.length - open} von ${req.tasks.length} erledigt. Belege enthalten nur Anzahlen, keine Inhalte.`} />
           <Table>
             <caption className="sr-only">Teilschritte des Löschauftrags</caption>
             <thead>
@@ -213,14 +206,12 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
       )}
 
       <section aria-labelledby="exception-title" className="flex max-w-3xl flex-col gap-4">
-        <SectionHeader
+        <AdminHeading
           id="exception-title"
           title="Begründete Ausnahme"
-          description="Nur für rechtlich notwendige Aufbewahrung: getrennt, minimiert, befristet und regelmässig geprüft – kein «für immer»."
-          className="mb-0"
-        />
+          description="Nur für rechtlich notwendige Aufbewahrung: getrennt, minimiert, befristet und regelmässig geprüft – kein «für immer»." />
         {req.exceptionNote && req.exceptionUntil && (
-          <Card tone="sunk" className="flex flex-col gap-3">
+          <div className="flex flex-col items-start gap-3 border-l-2 border-accent pl-5">
             <p className="text-sm font-semibold text-ink-2">
               Befristet bis {formatDate(req.exceptionUntil, tz)}
               {exceptionDue && " · Prüfung fällig"}
@@ -229,7 +220,7 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
             <ActionButton action={clearExceptionAction} fields={{ requestId: req.id }} variant="secondary" size="sm">
               Ausnahme aufheben
             </ActionButton>
-          </Card>
+          </div>
         )}
         <ExceptionForm requestId={req.id} hasException={Boolean(req.exceptionNote)} />
       </section>

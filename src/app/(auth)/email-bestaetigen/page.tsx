@@ -57,9 +57,10 @@ async function VerifyContent({ searchParams }: { searchParams: PageProps<"/email
   const viewer = await getViewer();
   return (
     <>
-      <div className="mb-6 flex size-14 items-center justify-center rounded-[14px] bg-accent-soft text-accent-ink">
-        <Icon name="mail" className="size-7" />
-      </div>
+      {/* Ruhiges Zeichen statt Icon-Kachel: Mono-Auszeichnung mit Symbol (dekorativ) */}
+      <p aria-hidden="true" className="mb-6 flex items-center gap-3 border-t border-ink pt-4 text-accent-ink">
+        <Icon name="mail" className="size-6" />
+      </p>
       <AuthHeading title="Schau in dein Postfach">
         Wir haben dir einen Bestätigungslink gesendet, sofern zu dieser Adresse noch kein Konto besteht. Der Link ist 24
         Stunden gültig. Danach meldest du dich mit E-Mail-Adresse und Passwort an.

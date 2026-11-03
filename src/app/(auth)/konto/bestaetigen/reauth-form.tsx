@@ -21,7 +21,7 @@ export function ReauthForm({ next, withCode }: { next: string; withCode: boolean
       <SubmitButton size="lg" pendingText="Wird geprüft …" className="w-full">
         Bestätigen und fortfahren
       </SubmitButton>
-      <Link href={next.startsWith("/konto") ? "/konto/daten" : "/heute"} className="self-center text-base font-medium text-ink-2 underline underline-offset-4 hover:text-ink">
+      <Link href={next.startsWith("/konto") ? "/konto/daten" : "/heute"} className="link-quiet inline-flex min-h-11 items-center self-center text-base font-medium text-ink-2 hover:text-ink">
         Abbrechen
       </Link>
     </form>

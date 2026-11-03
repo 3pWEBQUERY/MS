@@ -25,8 +25,8 @@ export function RulesGate({ version, acceptedVersion }: { version: string; accep
   const changes = rulesChangesSince(acceptedVersion);
   return (
     <section aria-labelledby="rules-gate-title" className="flex flex-col gap-5 rounded-[20px] border border-line bg-surface p-5 sm:p-6">
-      <div className="flex flex-col gap-1.5">
-        <h2 id="rules-gate-title" className="text-xl font-[650] text-ink">
+      <div className="flex flex-col gap-2">
+        <h2 id="rules-gate-title" className="font-display text-[1.5rem] leading-[1.15] tracking-[-0.015em] text-ink sm:text-[1.75rem]">
           {updated ? "Die Community-Regeln wurden aktualisiert" : "Bevor du schreibst: unsere Regeln"}
         </h2>
         <p className="text-base text-ink-2">
@@ -50,14 +50,19 @@ export function RulesGate({ version, acceptedVersion }: { version: string; accep
           </ul>
         </div>
       )}
-      <ul className="flex list-disc flex-col gap-2 pl-5 text-base text-ink">
-        {KEY_RULES.map((r) => (
-          <li key={r}>{r}</li>
+      <ul className="border-t border-line">
+        {KEY_RULES.map((r, i) => (
+          <li key={r} className="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 border-b border-line py-3 text-base text-ink">
+            <span aria-hidden="true" className="pt-0.5 font-mono text-sm text-accent-ink">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <span>{r}</span>
+          </li>
         ))}
       </ul>
       <p className="text-sm text-ink-2">
-        Fassung {version} ·{" "}
-        <Link href="/regeln" className="font-medium text-ink underline underline-offset-4">
+        <span className="font-mono">Fassung {version}</span> ·{" "}
+        <Link href="/regeln" className="link-quiet font-medium text-ink">
           Alle Regeln lesen
         </Link>
       </p>

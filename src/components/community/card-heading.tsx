@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 
-/** Überschrift innerhalb einer Karte mit Flex-Abstand (ohne eigenen Aussenabstand). */
+/**
+ * Überschrift innerhalb einer Karte oder eines Haarlinien-Abschnitts (ohne eigenen Aussenabstand).
+ * h2 in der Display-Serif (≥ 24px), h3 als ruhiger Zwischentitel.
+ */
 export function CardHeading({
   title,
   description,
@@ -13,11 +16,15 @@ export function CardHeading({
   as?: "h2" | "h3";
 }) {
   return (
-    <div className="flex flex-col gap-1">
-      <As id={id} className={As === "h2" ? "text-xl font-[650] text-ink" : "text-lg font-[650] text-ink"}>
+    <div className="flex flex-col gap-1.5">
+      <As id={id} className={
+          As === "h2"
+            ? "font-display text-[1.5rem] leading-[1.15] tracking-[-0.015em] text-ink"
+            : "text-lg font-[650] text-ink"
+        }>
         {title}
       </As>
-      {description && <p className="text-base text-ink-2">{description}</p>}
+      {description && <p className="max-w-2xl text-base text-ink-2">{description}</p>}
     </div>
   );
 }

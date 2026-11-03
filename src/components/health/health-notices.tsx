@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Icon } from "@/components/ui/icon";
 import { Notice } from "@/components/ui/primitives";
+import { cn } from "@/lib/cn";
 
 /** Gesundheitsbereich abgelehnt oder widerrufen (US10, PRD 05 «Besondere Formularzustände»). */
 export function HealthInactiveNotice({ hasData }: { hasData: boolean }) {
@@ -43,11 +45,15 @@ export function WriteDisabledNotice() {
   );
 }
 
-/** Kurzer Hinweis zu Sichtbarkeit (PRD 05 «Kein Übertragen in die Community»). */
-export function PrivacyHint() {
+/**
+ * Kurzer Hinweis zu Sichtbarkeit (PRD 05 «Kein Übertragen in die Community»).
+ * `onDeep` für die tiefe Fläche (nur on-deep-Tokens, docs/DESIGN.md).
+ */
+export function PrivacyHint({ onDeep = false, className }: { onDeep?: boolean; className?: string }) {
   return (
-    <p className="text-sm text-ink-2">
-      Nur du siehst diese Einträge. Es gibt keine Teilen-Funktion und keine automatische Auswertung.
+    <p className={cn("flex items-start gap-2.5 text-sm", onDeep ? "text-on-deep-2" : "text-ink-2", className)}>
+      <Icon name="lock" className={cn("mt-0.5 size-4 shrink-0", onDeep ? "text-deep-accent" : "text-ink-3")} />
+      <span>Nur du siehst diese Einträge. Es gibt keine Teilen-Funktion und keine automatische Auswertung.</span>
     </p>
   );
 }

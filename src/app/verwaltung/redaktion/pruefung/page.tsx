@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { RedaktionNav } from "@/components/content/admin/common";
-import { Badge, EmptyState, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
+import { AdminEmpty } from "@/components/admin/ui";
+import { Badge, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { formatDateTime } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
 import { listReviewQueue } from "@/server/modules/content/editorial-queries";
@@ -34,9 +35,9 @@ async function ReviewQueue() {
       <div className="flex flex-col gap-8">
         <RedaktionNav roles={viewer.roles} active="pruefung" counts={{ pruefung: open.length }} />
         {queue.length === 0 ? (
-          <EmptyState icon="check-circle" title="Keine offenen Prüfaufträge">
+          <AdminEmpty icon="check-circle" title="Keine offenen Prüfaufträge">
             Sobald die Redaktion eine Version zur Prüfung sendet, erscheint sie hier.
-          </EmptyState>
+          </AdminEmpty>
         ) : (
           <Table>
             <caption className="sr-only">Offene Prüfaufträge</caption>
@@ -52,7 +53,7 @@ async function ReviewQueue() {
               {queue.map((q) => (
                 <tr key={q.versionId}>
                   <td className="min-w-64">
-                    <Link href={`/verwaltung/redaktion/artikel/${q.articleId}`} className="font-semibold text-ink underline-offset-4 hover:underline">
+                    <Link href={`/verwaltung/redaktion/artikel/${q.articleId}`} className="link-quiet font-semibold text-ink">
                       {q.title}
                     </Link>
                     <span className="block text-sm text-ink-2">

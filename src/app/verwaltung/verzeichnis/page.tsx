@@ -6,7 +6,8 @@ import { StatusAction } from "@/components/content/admin/action-form";
 import { DueBadge, OfferStatusBadge, one, StatusNotice, VerzeichnisNav } from "@/components/content/admin/common";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Badge, Card, EmptyState, PageHeader, PageSkeleton, PlainText, Table } from "@/components/ui/primitives";
+import { AdminEmpty, LedgerItem, LedgerList } from "@/components/admin/ui";
+import { Badge, PageHeader, PageSkeleton, PlainText, Table } from "@/components/ui/primitives";
 import { cantonName } from "@/lib/catalog";
 import { formatDate, formatDateTime } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
@@ -59,9 +60,9 @@ async function Directory({ searchParams }: { searchParams: PageProps<"/verwaltun
 
         {view === "hinweise" ? (
           offerHints.length === 0 ? (
-            <EmptyState icon="mail" title="Keine offenen Hinweise zu Angeboten" />
+            <AdminEmpty icon="mail" title="Keine offenen Hinweise zu Angeboten" />
           ) : (
-            <ul className="flex flex-col gap-3">
+            <LedgerList as="ul">
               {offerHints.map((m) => {
                 let text = "";
                 let reply: string | null = null;
@@ -72,8 +73,7 @@ async function Directory({ searchParams }: { searchParams: PageProps<"/verwaltun
                   text = "Dieser Hinweis kann nicht entschlüsselt werden.";
                 }
                 return (
-                  <li key={m.id}>
-                    <Card className="flex flex-col gap-3">
+                  <LedgerItem key={m.id}>
                       <div className="flex flex-wrap items-center gap-2 text-sm text-ink-2">
                         <span>{formatDateTime(m.createdAt)}</span>
                         {m.refId && titles.has(m.refId) && (
@@ -82,19 +82,20 @@ async function Directory({ searchParams }: { searchParams: PageProps<"/verwaltun
                           </Link>
                         )}
                       </div>
-                      <PlainText text={text} className="text-base text-ink" />
+                      <PlainText text={text} className="border-l-2 border-line-2 pl-4 text-base text-ink" />
                       <p className="text-sm text-ink-2">{reply ? `Antwortadresse: ${reply}` : "Keine Antwortadresse angegeben."}</p>
-                      <StatusAction action={closeContactMessageAction} fields={{ messageId: m.id, back: "verzeichnis" }} label="Als erledigt markieren" size="sm" />
-                    </Card>
-                  </li>
+                      <div>
+                        <StatusAction action={closeContactMessageAction} fields={{ messageId: m.id, back: "verzeichnis" }} label="Als erledigt markieren" size="sm" />
+                      </div>
+                  </LedgerItem>
                 );
               })}
-            </ul>
+            </LedgerList>
           )
         ) : list.length === 0 ? (
-          <EmptyState icon="check-circle" title={view === "arbeitsvorrat" ? "Arbeitsvorrat leer" : "Noch keine Angebote"}>
+          <AdminEmpty icon="check-circle" title={view === "arbeitsvorrat" ? "Arbeitsvorrat leer" : "Noch keine Angebote"}>
             {view === "arbeitsvorrat" ? "Alle publizierten Angebote sind geprüft und ohne offene Hinweise." : "Lege das erste Angebot an."}
-          </EmptyState>
+          </AdminEmpty>
         ) : (
           <Table>
             <caption className="sr-only">Hilfsangebote mit Status und Prüftermin</caption>
@@ -110,7 +111,7 @@ async function Directory({ searchParams }: { searchParams: PageProps<"/verwaltun
               {list.map((o) => (
                 <tr key={o.id}>
                   <td className="min-w-64">
-                    <Link href={`/verwaltung/verzeichnis/${o.id}`} className="font-semibold text-ink underline-offset-4 hover:underline">
+                    <Link href={`/verwaltung/verzeichnis/${o.id}`} className="link-quiet font-semibold text-ink">
                       {o.title}
                     </Link>
                     <span className="block text-sm text-ink-2">

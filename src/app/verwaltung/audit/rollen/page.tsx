@@ -4,9 +4,9 @@ import { ActionButton } from "@/components/admin/action-button";
 import { AuditNav } from "@/components/admin/audit-nav";
 import { ROLE_LABEL } from "@/components/admin/labels";
 import { AccessReviewForm, GrantRoleForm, OffboardForm } from "@/components/admin/role-forms";
-import { AdminSectionBlock, DateTime } from "@/components/admin/ui";
+import { AdminEmpty, AdminSectionBlock, DateTime } from "@/components/admin/ui";
 import { Icon } from "@/components/ui/icon";
-import { Badge, Card, EmptyState, Notice, PageHeader, PageSkeleton, PlainText, Table } from "@/components/ui/primitives";
+import { Badge, Card, Notice, PageHeader, PageSkeleton, PlainText, Table } from "@/components/ui/primitives";
 import { localDateString } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
 import { revokeRoleAction } from "@/server/modules/admin/role-actions";
@@ -56,15 +56,14 @@ async function Content() {
 
         <AdminSectionBlock id="mitarbeitende" title="Mitarbeitende mit Rollen">
           {staff.length === 0 ? (
-            <EmptyState icon="users" title="Keine Rollen vergeben" />
+            <AdminEmpty icon="users" title="Keine Rollen vergeben" />
           ) : (
-            <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <ul className="border-t border-ink">
               {staff.map((m) => {
                 const self = m.id === viewer.accountId;
                 return (
-                  <li key={m.id}>
-                    <Card className="flex h-full flex-col gap-4">
-                      <div className="flex flex-wrap items-start justify-between gap-2">
+                  <li key={m.id} className="grid gap-4 border-b border-line py-6 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)] lg:gap-10">
+                      <div className="flex flex-col items-start gap-3">
                         <div className="flex flex-col gap-0.5">
                           <p className="font-semibold text-ink">
                             {m.pseudonym}
@@ -81,13 +80,14 @@ async function Content() {
                             MFA fehlt – Rollen nicht nutzbar
                           </Badge>
                         )}
-                      </div>
                       {m.status !== "active" && (
                         <p className="text-sm text-ink-2">Konto nicht aktiv – Rollen sind wirkungslos.</p>
                       )}
-                      <ul className="flex flex-col divide-y divide-line rounded-[12px] border border-line">
+                      </div>
+                      <div className="flex min-w-0 flex-col gap-3">
+                      <ul className="flex flex-col divide-y divide-line border-y border-line">
                         {m.assignments.map((a) => (
-                          <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5">
+                          <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
                             <div className="flex flex-col">
                               <span className="font-semibold text-ink">{ROLE_LABEL[a.role]}</span>
                               <span className="text-sm text-ink-2">
@@ -123,17 +123,17 @@ async function Content() {
                         ))}
                       </ul>
                       {!self && (
-                        <details className="group rounded-[12px] border border-line">
-                          <summary className="flex min-h-11 cursor-pointer items-center gap-2 px-3 text-sm font-semibold text-ink">
+                        <details className="group">
+                          <summary className="flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-[10px] pr-2 text-sm font-semibold text-ink">
                             <Icon name="chevron-right" className="size-4 transition-transform group-open:rotate-90" />
                             Austritt: alle Rollen entziehen
                           </summary>
-                          <div className="border-t border-line p-3">
+                          <div className="mt-2 rounded-[16px] bg-sunk p-4">
                             <OffboardForm accountId={m.id} pseudonym={m.pseudonym} />
                           </div>
                         </details>
                       )}
-                    </Card>
+                      </div>
                   </li>
                 );
               })}
@@ -157,7 +157,7 @@ async function Content() {
               <AccessReviewForm quarters={recentQuarters(4)} />
             </Card>
             {reviews.length === 0 ? (
-              <EmptyState icon="list-checks" title="Noch keine Rechteprüfung dokumentiert" />
+              <AdminEmpty icon="list-checks" title="Noch keine Rechteprüfung dokumentiert" />
             ) : (
               <Table>
                 <caption className="sr-only">Dokumentierte Rechteprüfungen</caption>

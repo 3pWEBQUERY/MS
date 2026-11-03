@@ -5,7 +5,7 @@ import { Icon } from "@/components/ui/icon";
 export function LoadMore({ href, label = "Mehr laden" }: { href: string | null; label?: string }) {
   if (!href) return null;
   return (
-    <div className="flex justify-center pt-2">
+    <div className="flex pt-4">
       <ButtonLink href={href} variant="secondary" icon={<Icon name="chevron-down" className="size-5" />}>
         {label}
       </ButtonLink>

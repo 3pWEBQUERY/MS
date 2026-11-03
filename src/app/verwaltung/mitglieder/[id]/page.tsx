@@ -14,8 +14,8 @@ import {
   SANCTION_LABEL,
 } from "@/components/admin/labels";
 import { AccountStatusForm, LiftSanctionForm } from "@/components/admin/member-forms";
-import { AdminSectionBlock, DateTime } from "@/components/admin/ui";
-import { Badge, Card, EmptyState, KeyValue, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
+import { AdminEmpty, AdminSectionBlock, DateTime, SidePanel } from "@/components/admin/ui";
+import { Badge, KeyValue, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { requireStaff } from "@/server/auth/viewer";
 import { getMemberForStaff } from "@/server/modules/admin/members";
 
@@ -46,11 +46,11 @@ async function Content({ params }: { params: PageProps<"/verwaltung/mitglieder/[
         title={m.pseudonym}
         description={<Badge tone={ACCOUNT_STATUS_TONE[m.status]}>{ACCOUNT_STATUS_LABEL[m.status]}</Badge>}
       />
-      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_24rem]">
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_24rem] xl:gap-14">
         <div className="flex min-w-0 flex-col gap-10">
           <AdminSectionBlock id="konto" title="Konto">
-            <Card>
-              <KeyValue
+            <KeyValue
+                className="border-y border-line"
                 items={[
                   ["Konto-ID", <span key="id" className="break-all font-mono text-sm">{m.id}</span>],
                   ["Kontostatus", ACCOUNT_STATUS_LABEL[m.status]],
@@ -61,7 +61,6 @@ async function Content({ params }: { params: PageProps<"/verwaltung/mitglieder/[
                   ...(m.maskedEmail ? ([["E-Mail (maskiert)", <span key="e" className="font-mono">{m.maskedEmail}</span>]] as [string, ReactNode][]) : []),
                 ]}
               />
-            </Card>
             <Notice tone="neutral" icon="lock">
               Tagebuch, Nachrichten und Gesundheitsdaten sind nicht Teil der Mitgliederverwaltung.
             </Notice>
@@ -69,7 +68,7 @@ async function Content({ params }: { params: PageProps<"/verwaltung/mitglieder/[
 
           <AdminSectionBlock id="sanktionen" title="Sanktionen" description="Community-Sanktionen entziehen keine Datenschutzrechte.">
             {m.sanctions.length === 0 ? (
-              <EmptyState icon="check-circle" title="Keine Sanktionen" />
+              <AdminEmpty icon="check-circle" title="Keine Sanktionen" />
             ) : (
               <Table>
                 <caption className="sr-only">Sanktionen</caption>
@@ -228,14 +227,13 @@ async function Content({ params }: { params: PageProps<"/verwaltung/mitglieder/[
 
         <aside className="flex flex-col gap-6" aria-label="Kontostatus ändern">
           {m.viewerIsAdmin && !m.isSelf && manageable && (
-            <Card className="flex flex-col gap-4">
-              <h2 className="text-lg font-[650] text-ink">Kontostatus ändern</h2>
+            <SidePanel title="Kontostatus ändern" className="gap-4">
               <p className="text-sm text-ink-2">
                 «Eingeschränkt» sperrt das Schreiben in der Community, «Gesperrt» den Zugang zu sozialen Funktionen. Löschung läuft über die
                 Datenschutzstelle.
               </p>
               <AccountStatusForm accountId={m.id} version={m.version} current={m.status} />
-            </Card>
+            </SidePanel>
           )}
           {m.isSelf && (
             <Notice tone="info" title="Eigenes Konto">

@@ -7,7 +7,8 @@ import { PrivacyHint } from "@/components/health/health-notices";
 import { writeBlocker } from "@/components/health/write-gate";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Card, KeyValue, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
+import { ValueStrip } from "@/components/health/notebook";
+import { KeyValue, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
 import { addDays, formatDate, formatDateTime, localDateString } from "@/lib/time";
 import { updateCheckInAction } from "@/server/modules/health/checkin-actions";
 import { requireHealthViewer, timezoneLabel } from "@/server/modules/health/guard";
@@ -73,19 +74,32 @@ async function Detail({
       ) : (
         <>
           {blocked}
-          <Card className="max-w-2xl">
-            <KeyValue
+          {/* Notizbuchseite: Werte als ruhige Zeile, Angaben darunter mit Haarlinien (DIA07, ohne Bewertung) */}
+          <div className="flex max-w-3xl flex-col">
+            <ValueStrip
               items={[
-                ["Datum", formatDate(checkIn.localDate, undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" })],
-                ["Energie", valueText("energy", checkIn.energy)],
-                ["Stimmung", valueText("mood", checkIn.mood)],
-                ["Fatigue", valueText("fatigue", checkIn.fatigue)],
-                ["Notiz", checkIn.note ? <PlainText key="n" text={checkIn.note} /> : <span className="text-ink-2">{NOT_RECORDED}</span>],
-                ["Zeitzone", `${checkIn.timezone} (${formatOffset(checkIn.utcOffsetMinutes)})`],
-                ["Zuletzt geändert", formatDateTime(checkIn.updatedAt, tz)],
+                { label: "Energie", value: valueText("energy", checkIn.energy), empty: checkIn.energy === null },
+                { label: "Stimmung", value: valueText("mood", checkIn.mood), empty: checkIn.mood === null },
+                { label: "Fatigue", value: valueText("fatigue", checkIn.fatigue), empty: checkIn.fatigue === null },
               ]}
             />
-          </Card>
+            <KeyValue
+              className="border-y border-line"
+              items={[
+                ["Datum", formatDate(checkIn.localDate, undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" })],
+                [
+                  "Notiz",
+                  checkIn.note ? (
+                    <PlainText key="n" text={checkIn.note} className="max-w-prose" />
+                  ) : (
+                    <span className="text-ink-2">{NOT_RECORDED}</span>
+                  ),
+                ],
+                ["Zeitzone", <span key="z" className="tabular">{`${checkIn.timezone} (${formatOffset(checkIn.utcOffsetMinutes)})`}</span>],
+                ["Zuletzt geändert", <span key="g" className="tabular">{formatDateTime(checkIn.updatedAt, tz)}</span>],
+              ]}
+            />
+          </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             {!blocked && (
               <ButtonLink href={`/mein-ms/check-in/${checkIn.localDate}?bearbeiten=1`} icon={<Icon name="pencil" className="size-5" />}>

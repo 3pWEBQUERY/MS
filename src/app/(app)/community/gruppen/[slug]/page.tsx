@@ -7,9 +7,10 @@ import { BoundaryNotice } from "@/components/community/boundary-notice";
 import { CardHeading } from "@/components/community/card-heading";
 import { ConfirmForm } from "@/components/community/confirm-form";
 import { LoadMore, withParams } from "@/components/community/load-more";
-import { PostCard } from "@/components/community/post-card";
+import { PostStrand } from "@/components/community/post-card";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { cn } from "@/lib/cn";
 import { Badge, Card, EmptyState, Notice, PageHeader, PageSkeleton, PlainText, SectionHeader } from "@/components/ui/primitives";
 import { requireViewer, type Viewer } from "@/server/auth/viewer";
 import { isEnabled } from "@/server/flags";
@@ -27,6 +28,7 @@ export const metadata: Metadata = { title: "Gruppe" };
 /**
  * S34 Gruppendetail (Nicht-Mitglied) und S35 Gruppenraum (aktives Mitglied), COM06–COM08.
  * Mitgliedschaft wird bei jedem Abruf geprüft; verborgene Gruppen → neutrale 404.
+ * Beiträge als Haarlinien-Strang, Seitenleiste mit Regeln und Austritt ohne Kartenwand.
  */
 export default function GroupPage({ params, searchParams }: PageProps<"/community/gruppen/[slug]">) {
   return (
@@ -58,21 +60,23 @@ async function Group({
         title={group.title}
         description={group.description}
       />
-      <div className="mb-8 flex flex-wrap items-center gap-2">
-        <Badge tone="outline" icon={group.type === "closed" ? "lock" : "users"}>
+      {/* Steckbrief der Gruppe als ruhige Meta-Zeile (Zugang immer mit Text und Symbol) */}
+      <div className="-mt-2 mb-10 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm sm:-mt-4">
+        <span className="inline-flex items-center gap-2 font-medium text-ink">
+          <Icon name={group.type === "closed" ? "lock" : "users"} className="size-4 text-ink-2" />
           {groupTypeLabel(group.type)}
-        </Badge>
-        {group.topic && <Badge>{group.topic}</Badge>}
+        </span>
+        {group.topic && <span className="font-mono text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2">{group.topic}</span>}
         {group.archived && (
           <Badge tone="warning" icon="archive">
             Archiviert
           </Badge>
         )}
-        {group.moderator && <span className="text-sm text-ink-2">Betreut von {group.moderator}</span>}
+        {group.moderator && <span className="text-ink-2">Betreut von {group.moderator}</span>}
         {/* SAF02: Gruppen sind meldbar – der Server prüft, dass die Gruppe für dich sichtbar ist. */}
         <Link
           href={`/melden?typ=group&id=${group.id}`}
-          className="inline-flex h-10 items-center gap-1.5 rounded-[10px] px-2 text-sm font-medium text-ink-2 underline-offset-4 hover:bg-sunk hover:text-ink hover:underline"
+          className="-mx-2 inline-flex h-11 items-center gap-1.5 rounded-[11px] px-2 font-medium text-ink-2 transition-colors duration-150 hover:bg-sunk hover:text-ink sm:ml-auto"
         >
           <Icon name="flag" className="size-4" />
           Gruppe melden
@@ -90,27 +94,27 @@ async function Group({
 function RulesCard({ group, collapsed }: { group: GroupDetail; collapsed?: boolean }) {
   if (collapsed)
     return (
-      <details className="group rounded-[20px] border border-line bg-surface px-5 py-4 sm:px-6">
-        <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 font-semibold text-ink [&::-webkit-details-marker]:hidden">
+      <details className="group border-b border-line">
+        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 font-semibold text-ink [&::-webkit-details-marker]:hidden">
           Regeln der Gruppe
-          <Icon name="chevron-down" className="size-5 transition-transform duration-150 group-open:rotate-180" />
+          <Icon name="chevron-down" className="size-5 text-ink-2 transition-transform duration-150 group-open:rotate-180" />
         </summary>
-        <PlainText text={group.rules} className="mt-3 pb-1 text-base text-ink-2" />
-        <p className="mt-2 text-sm text-ink-2">Fassung {group.rulesVersion}</p>
+        <PlainText text={group.rules} className="pb-1 text-base text-ink-2" />
+        <p className="mb-4 mt-2 font-mono text-[0.8125rem] text-ink-2">Fassung {group.rulesVersion}</p>
       </details>
     );
   return (
-    <Card>
+    <section className="border-t border-ink pt-6">
       <SectionHeader title="Regeln der Gruppe" description={`Fassung ${group.rulesVersion}`} />
-      <PlainText text={group.rules} className="text-base text-ink" />
-    </Card>
+      <PlainText text={group.rules} className="max-w-[68ch] text-base leading-relaxed text-ink" />
+    </section>
   );
 }
 
 /** S34: Aussenstehende sehen nur Beschreibung, Zugangstyp und Regeln (COM06, AT04). */
 function GroupOutside({ group }: { group: GroupDetail }) {
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
+    <div className="flex max-w-2xl flex-col gap-8">
       <Notice tone="info" icon={group.type === "closed" ? "lock" : "users"} title={groupTypeLabel(group.type)}>
         {groupTypeHint(group.type)}
       </Notice>
@@ -203,9 +207,9 @@ async function GroupRoom({ group, viewer, cursor }: { group: GroupDetail; viewer
           </Notice>
         )}
 
-        <section aria-labelledby="group-posts" className="flex flex-col gap-3">
+        <section aria-labelledby="group-posts" className="flex flex-col gap-5">
           <div className="flex flex-wrap items-end justify-between gap-3">
-            <h2 id="group-posts" className="text-xl font-[650] text-ink">
+            <h2 id="group-posts" className="display-sm">
               Beiträge in dieser Gruppe
             </h2>
             {canWrite && (
@@ -219,22 +223,20 @@ async function GroupRoom({ group, viewer, cursor }: { group: GroupDetail; viewer
               {canWrite ? "Magst du dich kurz vorstellen oder eine Frage stellen? Es gibt keine Pflicht dazu." : undefined}
             </EmptyState>
           ) : (
-            <ul className="flex flex-col gap-3">
-              {page.items.map((p) => (
-                <li key={p.id}>
-                  <PostCard post={p} timeZone={viewer.prefs.timezone} showGroup={false} headingLevel="h3" />
-                </li>
-              ))}
-            </ul>
+            <PostStrand posts={page.items} timeZone={viewer.prefs.timezone} showGroup={false} headingLevel="h3" />
           )}
           <LoadMore href={page.nextCursor ? withParams(base, { cursor: page.nextCursor }) : null} />
         </section>
       </div>
 
-      <aside aria-label="Über diese Gruppe" className="flex flex-col gap-4">
+      <aside aria-label="Über diese Gruppe" className="flex flex-col gap-6 lg:pt-1">
         <BoundaryNotice compact />
-        {rulesCurrent && <RulesCard group={group} collapsed />}
-        <Card className="flex flex-col gap-3">
+        {rulesCurrent && (
+          <div className="border-t border-ink">
+            <RulesCard group={group} collapsed />
+          </div>
+        )}
+        <section className={cn("flex flex-col gap-4 pt-6", !rulesCurrent && "border-t border-ink")}>
           <CardHeading
             title="Gruppe verlassen"
             description="Du verlierst sofort den Zugang. Deine Beiträge bleiben bestehen und lassen sich unter «Meine Gruppen» löschen." />
@@ -256,7 +258,7 @@ async function GroupRoom({ group, viewer, cursor }: { group: GroupDetail; viewer
               pendingText="Wird verlassen …"
             />
           </div>
-        </Card>
+        </section>
       </aside>
     </div>
   );

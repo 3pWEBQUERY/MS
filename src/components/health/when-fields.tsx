@@ -1,6 +1,7 @@
 "use client";
 
 import { Field, Input } from "@/components/ui/form";
+import { stepTitle } from "./notebook";
 
 /** Zeitpunkt (Datum + Uhrzeit, lokal) mit sichtbarer Zeitzone (DIA03, PRD 09 «Zeitlogik»). */
 export function WhenFields({
@@ -20,7 +21,7 @@ export function WhenFields({
 }) {
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-1 text-lg font-semibold text-ink">Zeitpunkt</legend>
+      <legend className={`mb-2 ${stepTitle}`}>Zeitpunkt</legend>
       <p className="-mt-1 text-sm text-ink-2">
         Wann hast du es beobachtet? Zeitzone: {timezoneLabel}. Bis 365 Tage rückwirkend, nicht in der Zukunft.
       </p>

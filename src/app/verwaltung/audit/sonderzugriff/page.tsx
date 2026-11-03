@@ -4,8 +4,8 @@ import { ActionButton } from "@/components/admin/action-button";
 import { AuditNav } from "@/components/admin/audit-nav";
 import { GRANT_STATUS_LABEL, GRANT_STATUS_TONE, SPECIAL_ACCESS_SCOPES } from "@/components/admin/labels";
 import { SpecialAccessRequestForm, SpecialAccessReviewForm } from "@/components/admin/role-forms";
-import { AdminSectionBlock, DateTime, Deadline } from "@/components/admin/ui";
-import { Badge, Card, EmptyState, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
+import { AdminEmpty, AdminSectionBlock, DateTime, Deadline, LedgerItem, LedgerList } from "@/components/admin/ui";
+import { Badge, Card, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
 import { requireStaff } from "@/server/auth/viewer";
 import { revokeSpecialAccessAction } from "@/server/modules/admin/role-actions";
 import {
@@ -57,15 +57,14 @@ async function Content() {
 
         <AdminSectionBlock id="offen" title="Offene und aktive Sonderzugriffe">
           {active.length === 0 ? (
-            <EmptyState icon="check-circle" title="Kein offener oder aktiver Sonderzugriff" />
+            <AdminEmpty icon="check-circle" title="Kein offener oder aktiver Sonderzugriff" />
           ) : (
-            <ul className="flex flex-col gap-3">
+            <LedgerList as="ul" className="border-t-ink">
               {active.map((g) => {
                 const own = g.requesterId === viewer.accountId;
                 const mayRevoke = own || g.approverId === viewer.accountId || viewer.roles.includes("admin");
                 return (
-                  <li key={g.id}>
-                    <Card className="flex flex-col gap-4">
+                  <LedgerItem key={g.id} tone={g.status === "requested" ? "attention" : "plain"} className="py-6 [&>div]:gap-4">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className="flex flex-wrap items-center gap-2 font-semibold text-ink">
                           <Badge tone={GRANT_STATUS_TONE[g.status]}>{GRANT_STATUS_LABEL[g.status]}</Badge>
@@ -77,7 +76,7 @@ async function Content() {
                           </span>
                         )}
                       </div>
-                      <dl className="grid gap-2 text-sm sm:grid-cols-2">
+                      <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
                         <div>
                           <dt className="font-semibold text-ink-2">Umfang</dt>
                           <dd className="text-ink">{scopeLabel(g.scope)}</dd>
@@ -119,11 +118,10 @@ async function Content() {
                           />
                         )}
                       </div>
-                    </Card>
-                  </li>
+                  </LedgerItem>
                 );
               })}
-            </ul>
+            </LedgerList>
           )}
         </AdminSectionBlock>
 
@@ -135,9 +133,9 @@ async function Content() {
 
         {past.length > 0 && (
           <AdminSectionBlock id="verlauf" title="Verlauf">
-            <ul className="flex flex-col gap-2">
+            <ul className="border-t border-line">
               {past.map((g) => (
-                <li key={g.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-[16px] border border-line bg-surface px-4 py-3 text-sm">
+                <li key={g.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line py-3 text-sm">
                   <Badge tone={GRANT_STATUS_TONE[g.status]}>{GRANT_STATUS_LABEL[g.status]}</Badge>
                   <span className="font-mono">{g.ticket}</span>
                   <span className="text-ink-2">{scopeLabel(g.scope)}</span>

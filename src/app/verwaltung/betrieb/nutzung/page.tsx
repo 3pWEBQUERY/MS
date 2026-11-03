@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { OpsSubNav } from "@/components/admin/ops-nav";
-import { AdminSectionBlock, StatGrid, StatTile } from "@/components/admin/ui";
-import { EmptyState, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
+import { AdminEmpty, AdminSectionBlock, StatGrid, StatTile } from "@/components/admin/ui";
+import { Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { ANALYTICS_LABELS, ANALYTICS_MIN_PERSONS } from "@/lib/analytics";
 import { formatDate } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
@@ -57,16 +57,16 @@ async function Content() {
         </Notice>
 
         {!data ? (
-          <EmptyState icon="activity" title="Statistik nicht verfügbar">
+          <AdminEmpty icon="activity" title="Statistik nicht verfügbar">
             Die Auswertung ist gerade nicht abrufbar. Prüfe den technischen Status unter «Status und Schalter».
-          </EmptyState>
+          </AdminEmpty>
         ) : (
           <>
             <section aria-labelledby="basis" className="flex flex-col gap-4">
               <h2 id="basis" className="sr-only">
                 Basis
               </h2>
-              <StatGrid>
+              <StatGrid cols={2}>
                 <StatTile
                   label="Personen mit Einwilligung"
                   value={data.consenting ?? SMALL}
@@ -94,7 +94,7 @@ async function Content() {
                 <tbody>
                   {data.events.flatMap((e) => [
                     <tr key={e.name}>
-                      <th scope="row" className="bg-surface! text-base! font-semibold! text-ink!">
+                      <th scope="row" className="bg-surface! font-sans! text-base! font-semibold! normal-case! tracking-normal! text-ink!">
                         {label(e.name)}
                       </th>
                       <td className="text-sm text-ink-2">Alle</td>
@@ -121,9 +121,9 @@ async function Content() {
               description="Je Kalenderwoche der Einführung: erste nützliche Aktion innerhalb von 7 Tagen und nützliche Aktion in Woche 4. Berechnet vor Ablauf der Rohdaten."
             >
               {data.cohorts.length === 0 ? (
-                <EmptyState icon="activity" title="Noch keine abgeschlossenen Kohorten">
+                <AdminEmpty icon="activity" title="Noch keine abgeschlossenen Kohorten">
                   Eine Kohorte ist frühestens 28 Tage nach dem Einstieg vollständig.
-                </EmptyState>
+                </AdminEmpty>
               ) : (
                 <Table>
                   <caption className="sr-only">Einstiegskohorten je Woche</caption>

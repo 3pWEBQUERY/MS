@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { RequestStatusBadge } from "@/components/account/request-status";
-import { Badge, EmptyState, PageHeader, PageSkeleton, SegmentNav, Table } from "@/components/ui/primitives";
+import { AdminEmpty } from "@/components/admin/ui";
+import { Badge, PageHeader, PageSkeleton, SegmentNav, Table } from "@/components/ui/primitives";
 import { formatDate } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
 import {
@@ -42,16 +43,16 @@ async function Requests({ searchParams }: { searchParams: PageProps<"/verwaltung
         eyebrow="Datenschutz"
         title="Datenschutzaufträge"
         description="Auskunft, Export und Löschung mit Fristen, Identitätsprüfung und Teilschritten. Inhalte der Personen sind hier nicht sichtbar."
-        className="pb-0 sm:pb-0"
+        className="mb-0 sm:mb-0"
       />
       <SegmentNav
         label="Filter"
         items={FILTERS.map((f) => ({ href: `/verwaltung/datenschutz?filter=${f.key}`, label: f.label, active: f.key === filter }))}
       />
       {rows.length === 0 ? (
-        <EmptyState icon="check-circle" title="Keine Aufträge in dieser Ansicht">
+        <AdminEmpty icon="check-circle" title="Keine Aufträge in dieser Ansicht">
           Neue Aufträge erscheinen hier automatisch.
-        </EmptyState>
+        </AdminEmpty>
       ) : (
         <Table>
           <caption className="sr-only">Datenschutzaufträge mit Beleg, Art, Status, Frist und Teilschritten</caption>
@@ -80,7 +81,7 @@ async function Requests({ searchParams }: { searchParams: PageProps<"/verwaltung
                   <td>
                     <RequestStatusBadge status={r.status} />
                   </td>
-                  <td className="whitespace-nowrap">
+                  <td className="tabular whitespace-nowrap">
                     {formatDate(r.dueAt)}
                     {overdue && (
                       <span className="ml-2">

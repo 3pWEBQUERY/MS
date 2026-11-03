@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { AccountNav } from "@/components/account/account-nav";
+import { SettingsHeader } from "@/components/account/settings-layout";
 import { NotificationPrefsForm, TestNotificationButton } from "@/components/messaging/notification-prefs-form";
-import { Card, PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { PageSkeleton } from "@/components/ui/primitives";
 import { localDateString } from "@/lib/time";
 import { requireViewer } from "@/server/auth/viewer";
 import { getNotificationPrefs, SOCIAL_TYPES } from "@/server/modules/messaging/notifications";
@@ -24,30 +24,28 @@ async function NotificationSettings() {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="flex flex-col gap-6">
-        <PageHeader
-          eyebrow="Einstellungen"
-          title="Benachrichtigungen"
-          description="Wähle, worüber du informiert werden möchtest. Hinweise nennen nie Inhalte, Namen oder Gesundheitsangaben."
-          className="pb-0 sm:pb-0"
-        />
-        <AccountNav current="mitteilungen" />
-      </div>
+      <SettingsHeader
+        current="mitteilungen"
+        title="Benachrichtigungen"
+        description="Wähle, worüber du informiert werden möchtest. Hinweise nennen nie Inhalte, Namen oder Gesundheitsangaben."
+      />
       <div className="flex max-w-2xl flex-col gap-10">
         <NotificationPrefsForm
           prefs={prefs}
           minDate={localDateString(new Date(), prefs.timezone)}
           types={SOCIAL_TYPES.map(([value, label, description]) => ({ value, label, description }))}
         />
-        <Card tone="sunk" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-lg font-[650] text-ink">Test ohne Inhaltsvorschau</h2>
+        <section aria-labelledby="test-title" className="flex flex-col gap-4 border-t border-ink pt-8">
+          <div className="flex flex-col gap-2">
+            <h2 id="test-title" className="display-sm">
+              Test ohne Inhaltsvorschau
+            </h2>
             <p className="text-base text-ink-2">
               Legt einen neutralen Test-Hinweis in deinen Mitteilungen an. So siehst du, wie Hinweise aussehen – ohne Inhalte.
             </p>
           </div>
           <TestNotificationButton />
-        </Card>
+        </section>
       </div>
     </div>
   );

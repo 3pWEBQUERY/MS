@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ArticleCardLink } from "@/components/content/cards";
+import { ArticleList } from "@/components/content/cards";
 import { PageContainer } from "@/components/content/page-container";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState, PageHeader, PageSkeleton } from "@/components/ui/primitives";
@@ -31,7 +31,12 @@ async function TopicContent({ params }: { params: PageProps<"/wissen/thema/[slug
   const articles = await listPublicArticles({ topicSlug: slug });
   return (
     <>
-      <PageHeader back={{ href: "/wissen", label: "Wissen" }} eyebrow="Thema" title={topic.name} description={topic.description} />
+      <PageHeader
+        back={{ href: "/wissen", label: "Wissen" }}
+        eyebrow="Thema"
+        title={topic.name}
+        description={topic.description}
+      />
       {articles.length === 0 ? (
         <EmptyState
           icon="book"
@@ -46,13 +51,7 @@ async function TopicContent({ params }: { params: PageProps<"/wissen/thema/[slug
           publiziert.
         </EmptyState>
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {articles.map((a) => (
-            <li key={a.id}>
-              <ArticleCardLink article={a} headingLevel="h2" />
-            </li>
-          ))}
-        </ul>
+        <ArticleList articles={articles} headingLevel="h2" showTopic={false} />
       )}
     </>
   );

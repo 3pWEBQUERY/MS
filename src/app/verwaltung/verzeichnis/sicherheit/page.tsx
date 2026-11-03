@@ -5,7 +5,8 @@ import { Suspense } from "react";
 import { DueBadge, VerzeichnisNav } from "@/components/content/admin/common";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Badge, EmptyState, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
+import { AdminEmpty } from "@/components/admin/ui";
+import { Badge, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { formatDate } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
 import { listSafetyContactsForStaff, safetyDueState } from "@/server/modules/content/directory-queries";
@@ -49,9 +50,9 @@ async function SafetyAdmin() {
           </Notice>
         )}
         {rows.length === 0 ? (
-          <EmptyState icon="lifebuoy" title="Noch keine Hilfewege erfasst">
+          <AdminEmpty icon="lifebuoy" title="Noch keine Hilfewege erfasst">
             Solange hier nichts aktiv ist, zeigt die Sicherheitsseite die allgemein bekannten Schweizer Notrufnummern.
-          </EmptyState>
+          </AdminEmpty>
         ) : (
           <Table>
             <caption className="sr-only">Hilfewege mit Verifikationsstand</caption>
@@ -67,7 +68,7 @@ async function SafetyAdmin() {
               {rows.map((c) => (
                 <tr key={c.id}>
                   <td className="min-w-56">
-                    <Link href={`/verwaltung/verzeichnis/sicherheit/${c.id}`} className="font-semibold text-ink underline-offset-4 hover:underline">
+                    <Link href={`/verwaltung/verzeichnis/sicherheit/${c.id}`} className="link-quiet font-semibold text-ink">
                       {c.name}
                     </Link>
                     <span className="block text-sm text-ink-2">

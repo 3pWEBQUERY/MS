@@ -13,10 +13,10 @@ import {
   type Priority,
 } from "@/components/admin/labels";
 import { param, query } from "@/components/admin/params";
-import { AdminSectionBlock, DateTime, Deadline, FilterForm, MoreLink, PlainSelect, StatGrid, StatTile } from "@/components/admin/ui";
+import { AdminEmpty, AdminSectionBlock, DateTime, Deadline, FilterForm, MoreLink, PlainSelect, StatGrid, StatTile } from "@/components/admin/ui";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Badge, EmptyState, Notice, PageHeader, PageSkeleton, SegmentNav, Table } from "@/components/ui/primitives";
+import { Badge, Notice, PageHeader, PageSkeleton, SegmentNav, Table } from "@/components/ui/primitives";
 import { requireStaff } from "@/server/auth/viewer";
 import { reactionDone } from "@/server/modules/moderation/operating-hours";
 import {
@@ -81,7 +81,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
         actions={
           <ButtonLink href="/verwaltung/moderation/einsprueche" variant="secondary" icon={<Icon name="scale" className="size-5" />}>
             Einsprüche
-            {counts.appealsOpen > 0 && <span className="tabular rounded-[6px] bg-sunk px-1.5 text-sm">{counts.appealsOpen}</span>}
+            {counts.appealsOpen > 0 && <span className="tabular rounded-[6px] bg-sunk px-1.5 font-mono text-sm">{counts.appealsOpen}</span>}
           </ButtonLink>
         }
       />
@@ -180,9 +180,9 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
           description="Schwere Massnahmen werden binnen 24 Betriebsstunden durch eine andere zuständige Person geprüft (SAF04)."
         >
           {approvals.length === 0 ? (
-            <EmptyState icon="check-circle" title="Keine offenen Freigaben">
+            <AdminEmpty icon="check-circle" title="Keine offenen Freigaben">
               Alle schweren Massnahmen sind geprüft.
-            </EmptyState>
+            </AdminEmpty>
           ) : (
             <Table>
               <caption className="sr-only">Offene zweite Freigaben</caption>
@@ -221,9 +221,9 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
 
       <AdminSectionBlock id="faelle" title="Fälle" description="Sortiert nach Frist. Frist und Ampel gelten bis zum Entscheid.">
         {list.rows.length === 0 ? (
-          <EmptyState icon="check-circle" title={list.scope === "mine" ? "Dir sind keine passenden Fälle zugewiesen" : "Keine passenden Fälle"}>
+          <AdminEmpty icon="check-circle" title={list.scope === "mine" ? "Dir sind keine passenden Fälle zugewiesen" : "Keine passenden Fälle"}>
             {lead ? "Passe Ansicht oder Filter an, um weitere Fälle zu sehen." : "Neue Fälle weist dir die Moderationsleitung zu."}
-          </EmptyState>
+          </AdminEmpty>
         ) : (
           <Table>
             <caption className="sr-only">Moderationsfälle</caption>

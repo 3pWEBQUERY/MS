@@ -10,8 +10,9 @@ import { groupTypeHint, groupTypeLabel, listDiscoverableGroups, type GroupSummar
 export const metadata: Metadata = { title: "Gruppen entdecken" };
 
 /**
- * S33 Gruppen entdecken (COM06): offene und auffindbare geschlossene Gruppen mit Thema,
- * Beschreibung, Zugangstyp und Regeln. Keine Inhalte, Mitglieder- oder Aktivitätszahlen.
+ * S33 Gruppen entdecken (COM06): offene und auffindbare geschlossene Gruppen als nummerierter
+ * Index (Editorial-Raster statt Kartenwand) mit Thema, Beschreibung, Zugangstyp und Regeln.
+ * Die Ziffer ist reine Aufzählung, keine Rangfolge. Keine Inhalte, Mitglieder- oder Aktivitätszahlen.
  */
 export default function GroupsPage() {
   return (
@@ -22,8 +23,18 @@ export default function GroupsPage() {
 }
 
 function MembershipBadge({ status }: { status: GroupSummary["membership"] }) {
-  if (status === "active") return <Badge tone="success" icon="check">Du bist Mitglied</Badge>;
-  if (status === "requested") return <Badge tone="info" icon="clock">Anfrage ausstehend</Badge>;
+  if (status === "active")
+    return (
+      <Badge tone="success" icon="check" className="w-fit">
+        Du bist Mitglied
+      </Badge>
+    );
+  if (status === "requested")
+    return (
+      <Badge tone="info" icon="clock" className="w-fit">
+        Anfrage ausstehend
+      </Badge>
+    );
   return null;
 }
 
@@ -43,46 +54,59 @@ async function Groups() {
           Neue Gruppen werden vom Moderationsteam eingerichtet. Schau später wieder vorbei.
         </EmptyState>
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2">
-          {groups.map((g) => (
-            <li key={g.id} className="flex">
-              <article className="flex w-full flex-col gap-4 rounded-[20px] border border-line bg-surface p-5 sm:p-6">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone="outline" icon={g.type === "closed" ? "lock" : "users"}>
-                    {groupTypeLabel(g.type)}
-                  </Badge>
-                  {g.topic && <Badge>{g.topic}</Badge>}
-                  <MembershipBadge status={g.membership} />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <h2 className="text-lg font-semibold text-ink">
-                    <Link href={`/community/gruppen/${g.slug}`} className="underline-offset-4 hover:underline">
-                      {g.title}
+        <ol className="border-t border-ink">
+          {groups.map((g, i) => {
+            const href = `/community/gruppen/${g.slug}`;
+            return (
+              <li key={g.id} className="border-b border-line">
+                <article className="grid gap-x-8 gap-y-4 py-7 sm:grid-cols-[3rem_minmax(0,1fr)] sm:py-9 lg:grid-cols-[3rem_minmax(0,1fr)_15rem] lg:gap-x-10">
+                  <span aria-hidden="true" className="pt-2 font-mono text-sm font-medium tracking-[0.08em] text-accent-ink">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <div className="flex min-w-0 flex-col gap-3">
+                    <h2 className="font-display text-[1.625rem] leading-[1.12] tracking-[-0.015em] text-ink sm:text-[2rem]">
+                      <Link
+                        href={href}
+                        className="break-words underline decoration-transparent decoration-1 underline-offset-[0.2em] transition-colors duration-150 hover:decoration-current focus-visible:decoration-current"
+                      >
+                        {g.title}
+                      </Link>
+                    </h2>
+                    <p className="max-w-[60ch] text-base leading-relaxed text-ink-2">{g.description}</p>
+                    <p className="max-w-[60ch] text-sm text-ink-2">{groupTypeHint(g.type)}</p>
+                    <details className="group/rules mt-1 max-w-[60ch] border-t border-line">
+                      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-[0.9375rem] font-semibold text-ink [&::-webkit-details-marker]:hidden">
+                        Regeln der Gruppe
+                        <Icon name="chevron-down" className="size-4 text-ink-2 transition-transform duration-150 group-open/rules:rotate-180" />
+                      </summary>
+                      <PlainText text={g.rules} className="pb-2 text-base text-ink-2" />
+                    </details>
+                  </div>
+                  {/* Zugang, Thema und eigener Stand – Text und Symbol, nie nur Farbe */}
+                  <div className="flex flex-col gap-4 sm:col-start-2 lg:col-start-auto lg:pt-2">
+                    <div className="flex flex-col gap-2 text-sm">
+                      <p className="flex items-center gap-2 font-medium text-ink">
+                        <Icon name={g.type === "closed" ? "lock" : "users"} className="size-4 shrink-0 text-ink-2" />
+                        {groupTypeLabel(g.type)}
+                      </p>
+                      {g.topic && (
+                        <p className="font-mono text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2">{g.topic}</p>
+                      )}
+                    </div>
+                    <MembershipBadge status={g.membership} />
+                    <Link
+                      href={href}
+                      className="group inline-flex h-11 w-fit items-center gap-2 border-b border-ink font-semibold text-ink"
+                    >
+                      {g.membership === "active" ? "Zum Gruppenraum" : "Details und Beitritt"}
+                      <Icon name="arrow-right" className="nudge size-4" />
                     </Link>
-                  </h2>
-                  <p className="text-base text-ink-2">{g.description}</p>
-                  <p className="text-sm text-ink-2">{groupTypeHint(g.type)}</p>
-                </div>
-                <details className="group rounded-[12px] bg-sunk px-4 py-3">
-                  <summary className="flex min-h-8 cursor-pointer list-none items-center justify-between gap-3 font-semibold text-ink [&::-webkit-details-marker]:hidden">
-                    Regeln der Gruppe
-                    <Icon name="chevron-down" className="size-5 transition-transform duration-150 group-open:rotate-180" />
-                  </summary>
-                  <PlainText text={g.rules} className="mt-3 text-base text-ink-2" />
-                </details>
-                <div className="mt-auto">
-                  <Link
-                    href={`/community/gruppen/${g.slug}`}
-                    className="inline-flex h-10 items-center gap-1.5 font-semibold text-ink underline-offset-4 hover:underline"
-                  >
-                    {g.membership === "active" ? "Zum Gruppenraum" : "Details und Beitritt"}
-                    <Icon name="arrow-right" className="size-4" />
-                  </Link>
-                </div>
-              </article>
-            </li>
-          ))}
-        </ul>
+                  </div>
+                </article>
+              </li>
+            );
+          })}
+        </ol>
       )}
     </div>
   );

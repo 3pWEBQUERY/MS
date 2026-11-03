@@ -4,9 +4,9 @@ import { Suspense } from "react";
 import { ActionButton } from "@/components/admin/action-button";
 import { FLAG_LABEL, INCIDENT_STEPS } from "@/components/admin/labels";
 import { FlagForm, IncidentStepForm } from "@/components/admin/ops-forms";
-import { AdminSectionBlock, DateTime, formatSpan, StatGrid, StatTile } from "@/components/admin/ui";
+import { AdminEmpty, AdminSectionBlock, DateTime, formatSpan, pad, StatGrid, StatTile } from "@/components/admin/ui";
 import { ALARM_LABEL, OpsSubNav } from "@/components/admin/ops-nav";
-import { Badge, Card, EmptyState, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
+import { Badge, Card, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { requireStaff } from "@/server/auth/viewer";
 import { requeueDeliveryAction, requeueOutboxAction } from "@/server/modules/admin/flags-actions";
 import { deliveryProblems, listFlags, OPS_ROLES, outboxProblems, outboxSummary, systemStatus } from "@/server/modules/admin/ops";
@@ -26,7 +26,7 @@ export default function OpsPage() {
 function StatusRow({ label, ok, okText, failText, detail }: { label: string; ok: boolean; okText: string; failText: string; detail?: string }) {
   return (
     <tr>
-      <th scope="row" className="bg-surface! text-base! font-semibold! text-ink!">
+      <th scope="row" className="bg-surface! font-sans! text-base! font-semibold! normal-case! tracking-normal! text-ink!">
         {label}
       </th>
       <td>
@@ -151,10 +151,9 @@ async function Content() {
           title="Feature-Schalter"
           description="Einzeln abschaltbar (HOM08). Die Sperre gilt serverseitig sofort, bestehende Daten bleiben erhalten, keine Aktion wird nur scheinbar angenommen."
         >
-          <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <ul className="grid grid-cols-1 border-t border-ink lg:grid-cols-2 lg:gap-x-10">
             {flags.map((f) => (
-              <li key={f.key}>
-                <Card className="flex h-full flex-col gap-4">
+              <li key={f.key} className="flex flex-col gap-4 border-b border-line py-5">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="flex flex-col gap-0.5">
                       <h3 className="text-lg font-[650] text-ink">{FLAG_LABEL[f.key] ?? f.key}</h3>
@@ -177,7 +176,6 @@ async function Content() {
                     </p>
                   )}
                   <FlagForm flagKey={f.key} enabled={f.enabled} version={f.version} label={FLAG_LABEL[f.key] ?? f.key} restriction={f.restriction} />
-                </Card>
               </li>
             ))}
           </ul>
@@ -185,7 +183,7 @@ async function Content() {
 
         <AdminSectionBlock id="outbox" title="Outbox je Ereignistyp" description="Ältestes offenes Ereignis = Queuealter. Payloads enthalten nur IDs.">
           {outbox.types.length === 0 ? (
-            <EmptyState icon="check-circle" title="Keine offenen oder fehlerhaften Ereignisse" />
+            <AdminEmpty icon="check-circle" title="Keine offenen oder fehlerhaften Ereignisse" />
           ) : (
             <Table>
               <caption className="sr-only">Outbox-Status je Typ</caption>
@@ -237,7 +235,7 @@ async function Content() {
 
         <AdminSectionBlock id="fehler" title="Fehlgeschlagene Ereignisse" description="Nur Metadaten: Typ, Status, Versuche, Fehlercode.">
           {problems.length === 0 ? (
-            <EmptyState icon="check-circle" title="Keine fehlgeschlagenen Ereignisse" />
+            <AdminEmpty icon="check-circle" title="Keine fehlgeschlagenen Ereignisse" />
           ) : (
             <Table>
               <caption className="sr-only">Fehlgeschlagene Outbox-Ereignisse</caption>
@@ -277,7 +275,7 @@ async function Content() {
 
         <AdminSectionBlock id="zustellung" title="Zustellaufträge mit Problemen" description="MSG08: Kanal, Status, Versuche und Fehlercode – ohne Empfänger oder Inhalte.">
           {delivery.rows.length === 0 ? (
-            <EmptyState icon="check-circle" title="Keine fehlgeschlagenen Zustellungen" />
+            <AdminEmpty icon="check-circle" title="Keine fehlgeschlagenen Zustellungen" />
           ) : (
             <Table>
               <caption className="sr-only">Fehlgeschlagene Zustellaufträge</caption>
@@ -320,11 +318,16 @@ async function Content() {
           title="Sicherheitsvorfall"
           description="Technische Bereitschaft ersetzt keine psychosoziale Beratung. Schritte mit Ticket und Zeitpunkt protokollieren."
         >
-          <ol className="grid gap-3 md:grid-cols-2">
-            {INCIDENT_STEPS.map((s) => (
-              <li key={s.value} className="rounded-[16px] border border-line bg-surface p-4">
-                <p className="font-semibold text-ink">{s.label}</p>
-                <p className="text-sm text-ink-2">{s.description}</p>
+          <ol className="grid border-t border-ink md:grid-cols-2 md:gap-x-10">
+            {INCIDENT_STEPS.map((s, i) => (
+              <li key={s.value} className="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 border-b border-line py-4">
+                <span aria-hidden="true" className="pt-0.5 font-mono text-sm font-medium tracking-[0.08em] text-accent-ink">
+                  {pad(i + 1)}
+                </span>
+                <span className="flex flex-col gap-0.5">
+                  <span className="font-semibold text-ink">{s.label}</span>
+                  <span className="text-sm text-ink-2">{s.description}</span>
+                </span>
               </li>
             ))}
           </ol>

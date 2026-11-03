@@ -17,7 +17,7 @@ export function StartExportForm({ disabled }: { disabled?: boolean }) {
       </SubmitButton>
       <FormMessage state={state} className="w-full max-w-2xl" />
       {state.data?.auth === "reauth" && (
-        <Link href="/konto/bestaetigen?next=%2Fkonto%2Fdaten" className="text-base font-medium text-ink underline underline-offset-4">
+        <Link href="/konto/bestaetigen?next=%2Fkonto%2Fdaten" className="link-quiet text-base font-medium text-ink">
           Jetzt mit Passwort bestätigen
         </Link>
       )}

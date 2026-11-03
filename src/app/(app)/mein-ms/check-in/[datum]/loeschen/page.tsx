@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ConfirmDeleteForm } from "@/components/health/action-forms";
-import { Card, PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { formatDate } from "@/lib/time";
 import { deleteCheckInAction } from "@/server/modules/health/checkin-actions";
 import { requireHealthViewer } from "@/server/modules/health/guard";
@@ -33,14 +33,17 @@ async function DeleteCheckIn({ params }: { params: PageProps<"/mein-ms/check-in/
         title="Check-in löschen?"
         back={{ href: `/mein-ms/check-in/${checkIn.localDate}`, label: "Zurück zum Check-in" }}
       />
-      <Card className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-ink">Was gelöscht wird</h2>
-        <ul className="flex list-disc flex-col gap-1 pl-5 text-base text-ink-2">
+      {/* Umfang als Notizbuchliste mit Haarlinien statt Karte (S26) */}
+      <section aria-labelledby="umfang" className="flex flex-col gap-4">
+        <h2 id="umfang" className="display-sm">
+          Was gelöscht wird
+        </h2>
+        <ul className="border-t border-ink text-base text-ink-2 [&>li]:border-b [&>li]:border-line [&>li]:py-3.5 [&>li:first-child]:text-ink">
           <li>Dein Check-in vom {label} mit allen Angaben{checkIn.note ? " und der Notiz" : ""}.</li>
           <li>Er ist danach sofort nicht mehr abrufbar. Es gibt keinen Papierkorb.</li>
           <li>Deine Tagebucheinträge von diesem Tag bleiben erhalten.</li>
         </ul>
-      </Card>
+      </section>
       <ConfirmDeleteForm
         action={deleteCheckInAction}
         hidden={{ date: checkIn.localDate }}

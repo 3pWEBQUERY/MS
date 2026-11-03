@@ -5,7 +5,8 @@ import { Suspense } from "react";
 import { StatusAction } from "@/components/content/admin/action-form";
 import { dateInputValue, DueBadge, one, StatusNotice } from "@/components/content/admin/common";
 import { SafetyContactForm, VerifyForm } from "@/components/content/admin/directory-forms";
-import { Badge, Card, Notice, PageHeader, PageSkeleton, SectionHeader, Table } from "@/components/ui/primitives";
+import { AdminHeading } from "@/components/admin/ui";
+import { Badge, Card, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { formatDate } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
 import { setSafetyActiveAction } from "@/server/modules/content/directory-actions";
@@ -68,8 +69,8 @@ async function SafetyContactDetail({
             Dieser Hilfeweg ist weiterhin sichtbar, damit keine Notrufnummer fehlt. Bitte verifiziere ihn umgehend (SAF06).
           </Notice>
         )}
-        <Card className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold text-ink">Sichtbarkeit</h2>
+        <div className="flex flex-col items-start gap-4 border-t border-ink pt-4">
+          <h2 className="text-lg font-[650] text-ink">Sichtbarkeit</h2>
           <p className="text-base text-ink-2">
             {c.verifiedAt ? `Zuletzt verifiziert am ${formatDate(c.verifiedAt)} durch ${c.verifiedBy ?? "–"}.` : "Noch nicht verifiziert."}
           </p>
@@ -90,9 +91,9 @@ async function SafetyContactDetail({
             due !== "unverified" &&
             due !== "overdue" && <StatusAction action={setSafetyActiveAction} fields={{ contactId: c.id, active: "on" }} label="Aktivieren" variant="primary" />
           )}
-        </Card>
-        <section aria-labelledby="verifikation">
-          <SectionHeader id="verifikation" title="Verifikation erfassen" description="Erreichbarkeit und Nummer beim Anbieter bestätigen – vor Publikation und danach monatlich." />
+        </div>
+        <section aria-labelledby="verifikation" className="flex flex-col gap-5">
+          <AdminHeading id="verifikation" title="Verifikation erfassen" description="Erreichbarkeit und Nummer beim Anbieter bestätigen – vor Publikation und danach monatlich." />
           <Card>
             <VerifyForm
               target="safety"
@@ -103,7 +104,7 @@ async function SafetyContactDetail({
             />
           </Card>
           {records.length > 0 && (
-            <div className="mt-4">
+            <div>
               <Table>
                 <caption className="sr-only">Bisherige Verifikationen</caption>
                 <thead>
@@ -128,8 +129,8 @@ async function SafetyContactDetail({
             </div>
           )}
         </section>
-        <section aria-labelledby="bearbeiten">
-          <SectionHeader id="bearbeiten" title="Angaben bearbeiten" description="Eine geänderte Telefonnummer oder Website gilt als ungeprüft und geht offline, bis sie erneut verifiziert ist." />
+        <section aria-labelledby="bearbeiten" className="flex flex-col gap-5">
+          <AdminHeading id="bearbeiten" title="Angaben bearbeiten" description="Eine geänderte Telefonnummer oder Website gilt als ungeprüft und geht offline, bis sie erneut verifiziert ist." />
           <SafetyContactForm
             contactId={c.id}
             defaults={{ name: c.name, description: c.description, phone: c.phone ?? "", url: c.url ?? "", availability: c.availability, region: c.region, sort: c.sort }}

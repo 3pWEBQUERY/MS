@@ -43,7 +43,7 @@ export function ActionButton({
       {state.data?.auth === "reauth" && reauthNext && (
         <Link
           href={`/konto/bestaetigen?next=${encodeURIComponent(reauthNext)}`}
-          className="text-base font-medium text-ink underline underline-offset-4"
+          className="link-quiet text-base font-medium text-ink"
         >
           Jetzt mit Passwort bestätigen
         </Link>

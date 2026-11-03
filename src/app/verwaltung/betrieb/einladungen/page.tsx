@@ -5,8 +5,8 @@ import { ActionButton } from "@/components/admin/action-button";
 import { CreateInvitationForm } from "@/components/admin/invitation-forms";
 import { OpsSubNav } from "@/components/admin/ops-nav";
 import { param, query } from "@/components/admin/params";
-import { AdminSectionBlock, DateTime, MoreLink, StatGrid, StatTile } from "@/components/admin/ui";
-import { Badge, EmptyState, Notice, PageHeader, PageSkeleton, Table, type Tone } from "@/components/ui/primitives";
+import { AdminEmpty, AdminSectionBlock, DateTime, MoreLink, StatGrid, StatTile } from "@/components/admin/ui";
+import { Badge, Notice, PageHeader, PageSkeleton, Table, type Tone } from "@/components/ui/primitives";
 import { requireStaff } from "@/server/auth/viewer";
 import { isEnabled } from "@/server/flags";
 import {
@@ -81,7 +81,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
           </Notice>
         )}
 
-        <StatGrid>
+        <StatGrid cols={3}>
           <StatTile label="Gültige Codes" value={summary.active} icon="check-circle" />
           <StatTile label="Freie Plätze" value={summary.openSeats} icon="users" hint="Summe der offenen Kontingente gültiger Codes" />
           <StatTile label="Einlösungen (30 Tage)" value={summary.redeemed30d} icon="activity" hint="Nur gezählt, keinem Konto zugeordnet" />
@@ -97,9 +97,9 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
 
         <AdminSectionBlock id="liste" title="Erzeugte Codes" description="Neueste zuerst. Angezeigt werden nur die letzten vier Zeichen zur Wiedererkennung.">
           {list.items.length === 0 ? (
-            <EmptyState icon="mail" title="Noch keine Einladungscodes">
+            <AdminEmpty icon="mail" title="Noch keine Einladungscodes">
               Erzeuge oben einen Code für den Mitarbeitendentest oder eine Pilotgruppe.
-            </EmptyState>
+            </AdminEmpty>
           ) : (
             <Table>
               <caption className="sr-only">Einladungscodes mit Status und Kontingent</caption>
@@ -119,7 +119,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
               <tbody>
                 {list.items.map((r) => (
                   <tr key={r.id}>
-                    <th scope="row" className="bg-surface! text-base! font-semibold! text-ink!">
+                    <th scope="row" className="bg-surface! font-sans! text-base! font-semibold! normal-case! tracking-normal! text-ink!">
                       {r.purpose}
                       <span className="block text-sm font-normal text-ink-2">
                         Erzeugt <DateTime date={r.createdAt} />

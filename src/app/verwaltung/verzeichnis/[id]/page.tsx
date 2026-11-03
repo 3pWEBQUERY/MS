@@ -7,7 +7,8 @@ import { StatusAction } from "@/components/content/admin/action-form";
 import { dateInputValue, DueBadge, OfferStatusBadge, one, StatusNotice } from "@/components/content/admin/common";
 import { FlagForm, HideOfferForm, OfferForm, VerifyForm } from "@/components/content/admin/directory-forms";
 import { Icon } from "@/components/ui/icon";
-import { Card, Notice, PageHeader, PageSkeleton, SectionHeader, Table } from "@/components/ui/primitives";
+import { AdminHeading } from "@/components/admin/ui";
+import { Card, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { formatDate } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
 import { publishOfferAction } from "@/server/modules/content/directory-actions";
@@ -92,9 +93,9 @@ async function StaffOffer({
           </Notice>
         )}
 
-        <section aria-labelledby="publikation" className="grid gap-4 lg:grid-cols-2">
-          <Card className="flex flex-col gap-4">
-            <h2 id="publikation" className="text-lg font-semibold text-ink">
+        <section aria-labelledby="publikation" className="grid gap-8 lg:grid-cols-2 lg:gap-10">
+          <div className="flex flex-col items-start gap-4 border-t border-ink pt-4">
+            <h2 id="publikation" className="text-lg font-[650] text-ink">
               Publikation
             </h2>
             {o.status === "published" ? (
@@ -120,15 +121,15 @@ async function StaffOffer({
                 )}
               </>
             )}
-          </Card>
-          <Card className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold text-ink">Änderungsflag</h2>
+          </div>
+          <div className="flex flex-col gap-4 border-t border-ink pt-4">
+            <h2 className="text-lg font-[650] text-ink">Änderungsflag</h2>
             <FlagForm offerId={o.id} flagged={o.changeFlag} note={o.changeNote} />
-          </Card>
+          </div>
         </section>
 
-        <section aria-labelledby="pruefung">
-          <SectionHeader
+        <section aria-labelledby="pruefung" className="flex flex-col gap-5">
+          <AdminHeading
             id="pruefung"
             title="Prüfung erfassen"
             description="Angaben beim Anbieter prüfen. Medizinische und sozialrechtliche Leistungsangaben brauchen die passende Fachprüfung."
@@ -144,7 +145,7 @@ async function StaffOffer({
             />
           </Card>
           {records.length > 0 && (
-            <div className="mt-4">
+            <div>
               <Table>
                 <caption className="sr-only">Bisherige Prüfungen</caption>
                 <thead>
@@ -170,8 +171,8 @@ async function StaffOffer({
           )}
         </section>
 
-        <section aria-labelledby="bearbeiten">
-          <SectionHeader
+        <section aria-labelledby="bearbeiten" className="flex flex-col gap-5">
+          <AdminHeading
             id="bearbeiten"
             title="Angaben bearbeiten"
             description={o.status === "published" ? "Nach dem Speichern ist das Angebot offline, bis du es erneut publizierst." : undefined}

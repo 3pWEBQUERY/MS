@@ -3,7 +3,8 @@ import { Suspense } from "react";
 import { StatusAction } from "@/components/content/admin/action-form";
 import { MediaUploader } from "@/components/content/admin/media-uploader";
 import { one, StatusNotice } from "@/components/content/admin/common";
-import { Card, EmptyState, Notice, PageHeader, PageSkeleton, SectionHeader } from "@/components/ui/primitives";
+import { AdminEmpty, AdminHeading } from "@/components/admin/ui";
+import { Card, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { formatDate } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
 import { mediaUrl } from "@/server/modules/content/articles";
@@ -56,24 +57,24 @@ async function Media({ searchParams }: { searchParams: PageProps<"/verwaltung/me
             ENDPOINT, ACCESS_KEY_ID und SECRET_ACCESS_KEY.
           </Notice>
         ) : (
-          <section aria-labelledby="hochladen">
-            <SectionHeader id="hochladen" title="Bild hochladen" />
+          <section aria-labelledby="hochladen" className="flex flex-col gap-5">
+            <AdminHeading id="hochladen" title="Bild hochladen" />
             <Card>
               <MediaUploader />
             </Card>
           </section>
         )}
-        <section aria-labelledby="bibliothek">
-          <SectionHeader id="bibliothek" title="Bibliothek" description={`${items.length} ${items.length === 1 ? "Bild" : "Bilder"}`} />
+        <section aria-labelledby="bibliothek" className="flex flex-col gap-5">
+          <AdminHeading id="bibliothek" title="Bibliothek" description={`${items.length} ${items.length === 1 ? "Bild" : "Bilder"}`} />
           {items.length === 0 ? (
-            <EmptyState icon="image" title="Noch keine Bilder">
+            <AdminEmpty icon="image" title="Noch keine Bilder">
               Artikel funktionieren auch ohne Titelbild.
-            </EmptyState>
+            </AdminEmpty>
           ) : (
-            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((m) => (
-                <li key={m.id} className="flex flex-col gap-3 rounded-[20px] border border-line bg-surface p-2">
-                  <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[12px] bg-sunk">
+                <li key={m.id} className="flex flex-col gap-3">
+                  <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[16px] bg-sunk">
                     {configured ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={mediaUrl(m.objectKey)} alt={m.altText} className="size-full object-cover" loading="lazy" decoding="async" />
@@ -81,9 +82,9 @@ async function Media({ searchParams }: { searchParams: PageProps<"/verwaltung/me
                       <span className="text-sm text-ink-2">Vorschau nicht verfügbar</span>
                     )}
                   </div>
-                  <div className="flex flex-col gap-1 px-3 pb-3">
+                  <div className="flex flex-col gap-1 border-t border-line pt-3">
                     <p className="break-all font-semibold text-ink">{m.filename}</p>
-                    <p className="text-sm text-ink-2">
+                    <p className="tabular font-mono text-[0.8125rem] text-ink-2">
                       {formatBytes(m.sizeBytes)}
                       {m.width && m.height ? ` · ${m.width} × ${m.height}` : ""} · {formatDate(m.createdAt)}
                     </p>

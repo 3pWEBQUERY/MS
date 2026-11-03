@@ -5,6 +5,7 @@ import { ActionForm } from "@/components/community/action-form";
 import { CommunityNav } from "@/components/community/community-nav";
 import { ConfirmForm } from "@/components/community/confirm-form";
 import { ButtonLink } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { Badge, EmptyState, Notice, PageHeader, PageSkeleton, SectionHeader } from "@/components/ui/primitives";
 import { formatDate, formatDateTime } from "@/lib/time";
 import { requireViewer } from "@/server/auth/viewer";
@@ -18,6 +19,11 @@ import { groupTypeLabel, listOwnMemberships } from "@/server/modules/community/g
 import { getOwnLeftoversInLeftGroups } from "@/server/modules/community/queries";
 
 export const metadata: Metadata = { title: "Meine Gruppen" };
+
+/** Haarlinien-Zeile: Titel links, Aktion rechts (mobil darunter). */
+const ROW = "flex flex-col gap-4 border-b border-line py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8";
+const TITLE_LINK =
+  "break-words underline decoration-transparent decoration-1 underline-offset-[0.2em] transition-colors duration-150 hover:decoration-current focus-visible:decoration-current";
 
 /**
  * S36 Meine Gruppen und Anfragen (COM08, AT04): Mitgliedschaften, ausstehende Anfragen,
@@ -52,7 +58,7 @@ async function MyGroups({ searchParams }: { searchParams: PageProps<"/community/
         )}
 
         <section aria-labelledby="active-groups">
-          <SectionHeader id="active-groups" title="Mitgliedschaften" />
+          <SectionHeader id="active-groups" index="01" title="Mitgliedschaften" />
           {active.length === 0 ? (
             <EmptyState
               icon="users"
@@ -66,19 +72,20 @@ async function MyGroups({ searchParams }: { searchParams: PageProps<"/community/
               In betreuten Gruppen tauschst du dich zu einem Thema aus. Beitreten ist freiwillig und jederzeit umkehrbar.
             </EmptyState>
           ) : (
-            <ul className="flex flex-col gap-3">
+            <ul className="border-t border-ink">
               {active.map((m) => (
-                <li key={m.groupId} className="flex flex-col gap-4 rounded-[20px] border border-line bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                  <div className="flex min-w-0 flex-col gap-2">
-                    <h3 className="text-lg font-semibold text-ink">
-                      <Link href={`/community/gruppen/${m.slug}`} className="break-words underline-offset-4 hover:underline">
+                <li key={m.groupId} className={ROW}>
+                  <div className="flex min-w-0 flex-col gap-2.5">
+                    <h3 className="font-display text-[1.5rem] leading-[1.15] tracking-[-0.015em] text-ink">
+                      <Link href={`/community/gruppen/${m.slug}`} className={TITLE_LINK}>
                         {m.title}
                       </Link>
                     </h3>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge tone="outline" icon={m.type === "closed" ? "lock" : "users"}>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-2">
+                        <Icon name={m.type === "closed" ? "lock" : "users"} className="size-4" />
                         {groupTypeLabel(m.type)}
-                      </Badge>
+                      </span>
                       {m.groupStatus === "archived" && (
                         <Badge tone="warning" icon="archive">
                           Archiviert
@@ -114,22 +121,26 @@ async function MyGroups({ searchParams }: { searchParams: PageProps<"/community/
         <section aria-labelledby="pending-groups">
           <SectionHeader
             id="pending-groups"
+            index="02"
             title="Ausstehende Anfragen"
             description="Die Moderation entscheidet über die Aufnahme. Bis dahin siehst du keine Inhalte."
           />
           {pending.length === 0 ? (
-            <p className="text-base text-ink-2">Du hast keine offenen Anfragen.</p>
+            <p className="border-t border-line pt-5 text-base text-ink-2">Du hast keine offenen Anfragen.</p>
           ) : (
-            <ul className="flex flex-col gap-3">
+            <ul className="border-t border-ink">
               {pending.map((m) => (
-                <li key={m.groupId} className="flex flex-col gap-4 rounded-[20px] border border-line bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                  <div className="flex min-w-0 flex-col gap-1">
-                    <h3 className="text-lg font-semibold text-ink">
-                      <Link href={`/community/gruppen/${m.slug}`} className="break-words underline-offset-4 hover:underline">
+                <li key={m.groupId} className={ROW}>
+                  <div className="flex min-w-0 flex-col gap-1.5">
+                    <h3 className="font-display text-[1.5rem] leading-[1.15] tracking-[-0.015em] text-ink">
+                      <Link href={`/community/gruppen/${m.slug}`} className={TITLE_LINK}>
                         {m.title}
                       </Link>
                     </h3>
-                    <p className="text-sm text-ink-2">Angefragt am {formatDate(m.since, tz)} · ausstehend</p>
+                    <p className="inline-flex items-center gap-1.5 font-mono text-[0.8125rem] text-ink-2">
+                      <Icon name="clock" className="size-4" />
+                      Angefragt am {formatDate(m.since, tz)} · ausstehend
+                    </p>
                   </div>
                   <ActionForm
                     action={withdrawRequestAction}
@@ -150,17 +161,20 @@ async function MyGroups({ searchParams }: { searchParams: PageProps<"/community/
           <section aria-labelledby="leftovers">
             <SectionHeader
               id="leftovers"
+              index="03"
               title="Meine Beiträge in Gruppen, die ich verlassen habe"
               description="Hier siehst du nur deine eigenen Texte – keine Beiträge oder Antworten anderer. Du kannst sie einzeln löschen."
             />
-            <ul className="flex flex-col gap-3">
+            <ul className="border-t border-ink">
               {leftovers.posts.map((p) => (
-                <li key={p.id} className="flex flex-col gap-3 rounded-[20px] border border-line bg-surface p-5 sm:p-6">
-                  <p className="text-sm text-ink-2">
+                <li key={p.id} className="flex flex-col gap-3 border-b border-line py-6">
+                  <p className="font-mono text-[0.8125rem] text-ink-2">
                     Beitrag in «{p.groupTitle}» · {formatDateTime(p.publishedAt, tz)}
                   </p>
-                  {p.title && <h3 className="break-words text-lg font-semibold text-ink">{p.title}</h3>}
-                  <p className="break-words text-base text-ink-2">{p.excerpt}</p>
+                  {p.title && (
+                    <h3 className="break-words font-display text-[1.5rem] leading-[1.15] tracking-[-0.015em] text-ink">{p.title}</h3>
+                  )}
+                  <p className="max-w-[68ch] break-words text-base text-ink-2">{p.excerpt}</p>
                   <div>
                     <ConfirmForm
                       action={deletePostAction}
@@ -175,11 +189,11 @@ async function MyGroups({ searchParams }: { searchParams: PageProps<"/community/
                 </li>
               ))}
               {leftovers.comments.map((c) => (
-                <li key={c.id} className="flex flex-col gap-3 rounded-[20px] border border-line bg-surface p-5 sm:p-6">
-                  <p className="text-sm text-ink-2">
+                <li key={c.id} className="flex flex-col gap-3 border-b border-line py-6">
+                  <p className="font-mono text-[0.8125rem] text-ink-2">
                     Antwort in «{c.groupTitle}» · {formatDateTime(c.createdAt, tz)}
                   </p>
-                  <p className="break-words text-base text-ink-2">{c.excerpt}</p>
+                  <p className="max-w-[68ch] break-words text-base text-ink-2">{c.excerpt}</p>
                   <div>
                     <ConfirmForm
                       action={deleteCommentAction}

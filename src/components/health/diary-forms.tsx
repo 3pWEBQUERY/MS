@@ -22,6 +22,7 @@ import { FATIGUE_SCALE, INTENSITY_SCALE } from "@/lib/catalog";
 import { formatDate } from "@/lib/time";
 import { HEALTH_LIMITS } from "@/server/modules/health/validation";
 import { durationText, NOT_RECORDED, valueText } from "./format";
+import { FormStep, stepTitle } from "./notebook";
 import { WhenFields } from "./when-fields";
 
 type Action = (prev: ActionState, formData: FormData) => Promise<ActionState>;
@@ -142,7 +143,7 @@ export function SymptomEntryForm({
   };
 
   return (
-    <form id={formId} action={formAction} className="flex max-w-2xl flex-col gap-8" noValidate>
+    <form id={formId} action={formAction} className="flex max-w-3xl flex-col gap-8" noValidate>
       <UnsavedChangesGuard formId={formId} />
       {common.mode === "create" && <OperationId />}
       {common.entryId && <input type="hidden" name="id" value={common.entryId} />}
@@ -150,27 +151,29 @@ export function SymptomEntryForm({
       <FormMessage state={state} />
       {conflict && <ConflictNotice current={conflict} entryId={common.entryId} />}
 
-      <WhenFields
-        date={(v.date as string) || common.date}
-        time={(v.time as string) || common.time}
-        minDate={common.minDate}
-        maxDate={common.maxDate}
-        timezoneLabel={common.timezoneLabel}
-        errors={{ date: fe.date, time: fe.time }}
-      />
+      <FormStep index="01" first>
+        <WhenFields
+          date={(v.date as string) || common.date}
+          time={(v.time as string) || common.time}
+          minDate={common.minDate}
+          maxDate={common.maxDate}
+          timezoneLabel={common.timezoneLabel}
+          errors={{ date: fe.date, time: fe.time }}
+        />
+      </FormStep>
 
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-ink">Symptome</h2>
+      <FormStep index="02">
+        <div className="flex flex-col gap-1.5">
+          <h2 className={stepTitle}>Symptome</h2>
           <p className="text-sm text-ink-2">
             Mindestens ein Symptom mit Stärke. Wähle aus der Liste oder gib eine eigene Bezeichnung ein.
           </p>
           {fe.symptoms && <p className="text-sm font-medium text-danger">{fe.symptoms}</p>}
         </div>
         {rows.map((row, i) => (
-          <div key={row.key} className="rounded-[16px] border border-line-2 bg-surface p-4 sm:p-5">
+          <div key={row.key} className="border-t border-line-2 pt-5">
             <fieldset className="flex flex-col gap-5">
-              <legend className="mb-4 text-base font-semibold text-ink">Symptom {i + 1}</legend>
+              <legend className="eyebrow mb-4">Symptom {i + 1}</legend>
               <input type="hidden" name="row" value={row.key} />
               <Field label="Symptom" error={fe[`s_${row.key}_def`]} required>
                 {(p) => (
@@ -287,17 +290,19 @@ export function SymptomEntryForm({
             Weiteres Symptom hinzufügen
           </Button>
         )}
-      </div>
+      </FormStep>
 
-      <OptionalText
-        addLabel="Notiz hinzufügen"
-        label="Notiz"
-        name="note"
-        maxLength={HEALTH_LIMITS.diaryNote}
-        hint="Nur für dich. Wird verschlüsselt gespeichert."
-        initial={(v.note as string) ?? common.note ?? ""}
-        error={fe.note}
-      />
+      <FormStep index="03">
+        <OptionalText
+          addLabel="Notiz hinzufügen"
+          label="Notiz"
+          name="note"
+          maxLength={HEALTH_LIMITS.diaryNote}
+          hint="Nur für dich. Wird verschlüsselt gespeichert."
+          initial={(v.note as string) ?? common.note ?? ""}
+          error={fe.note}
+        />
+      </FormStep>
 
       <FormActions mode={common.mode} entryId={common.entryId} label={common.mode === "create" ? "Eintrag speichern" : "Änderungen speichern"} />
     </form>
@@ -319,7 +324,7 @@ export function FatigueEntryForm({
   const formId = common.mode === "create" ? "fatigue-neu" : "fatigue-bearbeiten";
 
   return (
-    <form id={formId} action={formAction} className="flex max-w-2xl flex-col gap-8" noValidate>
+    <form id={formId} action={formAction} className="flex max-w-3xl flex-col gap-8" noValidate>
       <UnsavedChangesGuard formId={formId} />
       {common.mode === "create" && <OperationId />}
       {common.entryId && <input type="hidden" name="id" value={common.entryId} />}
@@ -327,45 +332,51 @@ export function FatigueEntryForm({
       <FormMessage state={state} />
       {conflict && <ConflictNotice current={conflict} entryId={common.entryId} />}
 
-      <WhenFields
-        date={(v.date as string) || common.date}
-        time={(v.time as string) || common.time}
-        minDate={common.minDate}
-        maxDate={common.maxDate}
-        timezoneLabel={common.timezoneLabel}
-        errors={{ date: fe.date, time: fe.time }}
-      />
+      <FormStep index="01" first>
+        <WhenFields
+          date={(v.date as string) || common.date}
+          time={(v.time as string) || common.time}
+          minDate={common.minDate}
+          maxDate={common.maxDate}
+          timezoneLabel={common.timezoneLabel}
+          errors={{ date: fe.date, time: fe.time }}
+        />
+      </FormStep>
 
-      <ScalePicker
-        name="fatigue"
-        legend="Fatigue (erforderlich)"
-        min={FATIGUE_SCALE.min}
-        max={FATIGUE_SCALE.max}
-        minText={FATIGUE_SCALE.minText}
-        maxText={FATIGUE_SCALE.maxText}
-        help={FATIGUE_SCALE.help}
-        defaultValue={fatigue}
-        error={fe.fatigue}
-      />
+      <FormStep index="02">
+        <ScalePicker
+          name="fatigue"
+          legend="Fatigue (erforderlich)"
+          min={FATIGUE_SCALE.min}
+          max={FATIGUE_SCALE.max}
+          minText={FATIGUE_SCALE.minText}
+          maxText={FATIGUE_SCALE.maxText}
+          help={FATIGUE_SCALE.help}
+          defaultValue={fatigue}
+          error={fe.fatigue}
+        />
+      </FormStep>
 
-      <OptionalText
-        addLabel="Schlaf notieren"
-        label="Schlafbeobachtung"
-        name="sleepNote"
-        maxLength={HEALTH_LIMITS.sleepNote}
-        hint="Freitext, z. B. wie du geschlafen hast. Es wird kein Schlafwert berechnet. Wird verschlüsselt gespeichert."
-        initial={(v.sleepNote as string) ?? sleepNote ?? ""}
-        error={fe.sleepNote}
-      />
-      <OptionalText
-        addLabel="Beobachtungen hinzufügen"
-        label="Beobachtungen und Notiz"
-        name="note"
-        maxLength={HEALTH_LIMITS.diaryNote}
-        hint="Nur für dich. Wird verschlüsselt gespeichert."
-        initial={(v.note as string) ?? common.note ?? ""}
-        error={fe.note}
-      />
+      <FormStep index="03">
+        <OptionalText
+          addLabel="Schlaf notieren"
+          label="Schlafbeobachtung"
+          name="sleepNote"
+          maxLength={HEALTH_LIMITS.sleepNote}
+          hint="Freitext, z. B. wie du geschlafen hast. Es wird kein Schlafwert berechnet. Wird verschlüsselt gespeichert."
+          initial={(v.sleepNote as string) ?? sleepNote ?? ""}
+          error={fe.sleepNote}
+        />
+        <OptionalText
+          addLabel="Beobachtungen hinzufügen"
+          label="Beobachtungen und Notiz"
+          name="note"
+          maxLength={HEALTH_LIMITS.diaryNote}
+          hint="Nur für dich. Wird verschlüsselt gespeichert."
+          initial={(v.note as string) ?? common.note ?? ""}
+          error={fe.note}
+        />
+      </FormStep>
 
       <FormActions mode={common.mode} entryId={common.entryId} label={common.mode === "create" ? "Eintrag speichern" : "Änderungen speichern"} />
     </form>
@@ -374,11 +385,13 @@ export function FatigueEntryForm({
 
 function FormActions({ mode, entryId, label }: { mode: "create" | "edit"; entryId?: string; label: string }) {
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-      <SubmitButton size="lg">{label}</SubmitButton>
-      <ButtonLink href={mode === "edit" && entryId ? `/mein-ms/eintrag/${entryId}` : "/mein-ms"} variant="ghost" size="lg">
-        Abbrechen
-      </ButtonLink>
-    </div>
+    <FormStep strong className="sm:pt-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <SubmitButton size="lg">{label}</SubmitButton>
+        <ButtonLink href={mode === "edit" && entryId ? `/mein-ms/eintrag/${entryId}` : "/mein-ms"} variant="ghost" size="lg">
+          Abbrechen
+        </ButtonLink>
+      </div>
+    </FormStep>
   );
 }

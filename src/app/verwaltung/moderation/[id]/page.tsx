@@ -21,9 +21,9 @@ import {
   TARGET_LABEL,
   type CaseStatus,
 } from "@/components/admin/labels";
-import { AdminSectionBlock, DateTime, Deadline } from "@/components/admin/ui";
+import { AdminEmpty, AdminSectionBlock, DateTime, Deadline, LedgerItem, LedgerList, pad, SIDE_KV, SidePanel } from "@/components/admin/ui";
 import { Icon } from "@/components/ui/icon";
-import { Badge, Card, EmptyState, KeyValue, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
+import { Badge, Card, KeyValue, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
 import { formatDateTime } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
 import { reactionDone } from "@/server/modules/moderation/operating-hours";
@@ -131,7 +131,7 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
           </Notice>
         )}
 
-        <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem] xl:gap-14">
           <div className="flex min-w-0 flex-col gap-10">
             <AdminSectionBlock
               id="belege"
@@ -139,14 +139,13 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
               description="Nur die gemeldete Auswahl mit unveränderbarem Erfassungszeitpunkt. Weitere Chats, Profile oder Tagebücher sind nicht zugänglich."
             >
               {c.evidence.length === 0 ? (
-                <EmptyState icon="file" title="Keine Belege gesichert">
+                <AdminEmpty icon="file" title="Keine Belege gesichert">
                   Für diesen Fall liegen keine Belege vor. Entscheide nur auf Grundlage der Meldung und des Inhaltsstatus.
-                </EmptyState>
+                </AdminEmpty>
               ) : (
-                <ol className="flex flex-col gap-3">
+                <LedgerList>
                   {c.evidence.map((e, i) => (
-                    <li key={e.id}>
-                      <Card className="flex flex-col gap-3">
+                    <LedgerItem key={e.id} index={pad(i + 1)}>
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <p className="font-semibold text-ink">
                             Beleg {i + 1} · {SOURCE_LABEL[e.sourceType] ?? e.sourceType} von «{e.authorLabel}»
@@ -162,7 +161,7 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
                         {e.text === null ? (
                           <p className="text-ink-2">Der Beleg kann nicht entschlüsselt werden. Bitte die technische Bereitschaft informieren.</p>
                         ) : (
-                          <PlainText text={e.text} className="rounded-[12px] bg-sunk p-4 text-base text-ink" />
+                          <PlainText text={e.text} className="rounded-[16px] bg-sunk p-4 text-base text-ink sm:p-5" />
                         )}
                         <dl className="grid gap-x-6 gap-y-1 text-sm text-ink-2 sm:grid-cols-2">
                           <div>
@@ -182,10 +181,9 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
                             <dd className="inline break-all font-mono text-xs">{e.contentHash}</dd>
                           </div>
                         </dl>
-                      </Card>
-                    </li>
+                    </LedgerItem>
                   ))}
-                </ol>
+                </LedgerList>
               )}
             </AdminSectionBlock>
 
@@ -197,9 +195,9 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
               {c.reports.length === 0 ? (
                 <p className="text-ink-2">Dieser Fall wurde ohne Meldung eröffnet.</p>
               ) : (
-                <ul className="flex flex-col gap-3">
+                <LedgerList as="ul">
                   {c.reports.map((r) => (
-                    <li key={r.label} className="rounded-[16px] border border-line bg-surface p-4">
+                    <LedgerItem key={r.label}>
                       <p className="flex flex-wrap items-center gap-2 font-semibold text-ink">
                         {r.label}
                         <Badge tone="neutral">{REPORT_REASON_LABEL[r.reason] ?? r.reason}</Badge>
@@ -207,10 +205,10 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
                           <DateTime date={r.createdAt} />
                         </span>
                       </p>
-                      {r.details && <PlainText text={r.details} className="mt-2 text-base text-ink-2" />}
-                    </li>
+                      {r.details && <PlainText text={r.details} className="text-base text-ink-2" />}
+                    </LedgerItem>
                   ))}
-                </ul>
+                </LedgerList>
               )}
             </AdminSectionBlock>
 
@@ -218,20 +216,19 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
               {c.actions.length === 0 ? (
                 <p className="text-ink-2">Noch keine Massnahmen festgehalten.</p>
               ) : (
-                <ol className="flex flex-col gap-3">
-                  {c.actions.map((a) => {
+                <LedgerList>
+                  {c.actions.map((a, i) => {
                     const approvalOpen = a.requiresSecondApproval === 1 && !a.approvedAt;
                     const effectPending = approvalOpen && (a.kind === "account_suspend" || a.kind === "write_suspend");
                     return (
-                      <li key={a.id} id={approvalOpen ? "freigabe" : undefined}>
-                        <Card tone={approvalOpen ? "sunk" : "surface"} className="flex flex-col gap-3">
+                      <LedgerItem key={a.id} id={approvalOpen ? "freigabe" : undefined} index={pad(i + 1)} tone={approvalOpen ? "attention" : "plain"}>
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <p className="font-semibold text-ink">
                               {ACTION_LABEL[a.kind]}
                               {durationText(a.durationHours) && <span className="font-normal text-ink-2"> · {durationText(a.durationHours)}</span>}
                             </p>
                             <span className="text-sm text-ink-2">
-                              {a.ownAction ? "Du" : (a.actor ?? "System")} · <DateTime date={a.createdAt} />
+                              {a.ownAction ? "Du" : (a.actor ?? "System")} · <DateTime date={a.createdAt} className="font-mono text-[0.8125rem]" />
                             </span>
                           </div>
                           {a.ruleRef && <p className="text-sm text-ink-2">Regelbezug: {a.ruleRef}</p>}
@@ -276,11 +273,10 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
                               )}
                             </div>
                           )}
-                        </Card>
-                      </li>
+                      </LedgerItem>
                     );
                   })}
-                </ol>
+                </LedgerList>
               )}
             </AdminSectionBlock>
 
@@ -316,21 +312,21 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
 
             {(c.decisionSummary || c.decidedAt) && (
               <AdminSectionBlock id="entschieden" title="Entscheid">
-                <Card className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 border-l-2 border-line-2 pl-5">
                   <p className="text-sm text-ink-2">
                     Entschieden <DateTime date={c.decidedAt} />
                     {c.ruleRef && <> · Regelbezug {c.ruleRef}</>}
                   </p>
                   {c.decisionSummary && <PlainText text={c.decisionSummary} className="text-base text-ink" />}
-                </Card>
+                </div>
               </AdminSectionBlock>
             )}
           </div>
 
-          <aside className="flex flex-col gap-6" aria-label="Fallangaben">
-            <Card className="flex flex-col gap-2">
-              <h2 className="text-lg font-[650] text-ink">Fallangaben</h2>
+          <aside className="flex flex-col gap-8" aria-label="Fallangaben">
+            <SidePanel title="Fallangaben">
               <KeyValue
+                className={SIDE_KV}
                 items={[
                   ["Eingang", <DateTime key="e" date={c.createdAt} />],
                   ["Ziel", TARGET_LABEL[c.targetType] ?? c.targetType],
@@ -357,10 +353,9 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
                 ]}
               />
               <p className="text-sm text-ink-2">{OPERATING_HOURS_NOTE}</p>
-            </Card>
+            </SidePanel>
 
-            <Card className="flex flex-col gap-3">
-              <h2 className="text-lg font-[650] text-ink">Betroffenes Konto</h2>
+            <SidePanel title="Betroffenes Konto">
               {c.subject ? (
                 <>
                   <p className="font-semibold text-ink">{c.subject.pseudonym}</p>
@@ -387,11 +382,10 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
               ) : (
                 <p className="text-sm text-ink-2">Kein Konto zugeordnet oder Konto gelöscht.</p>
               )}
-            </Card>
+            </SidePanel>
 
             {c.viewerIsLead && c.status !== "closed" && (
-              <Card className="flex flex-col gap-3">
-                <h2 className="text-lg font-[650] text-ink">Zuweisung</h2>
+              <SidePanel title="Zuweisung">
                 <AssignCaseForm
                   caseRef={caseRef}
                   current={c.assigneeId}
@@ -402,19 +396,17 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
                       label: `${p.id === viewer.accountId ? "Ich" : p.pseudonym} (${p.roles.map((r) => ROLE_LABEL[r]).join(", ")})`,
                     }))}
                 />
-              </Card>
+              </SidePanel>
             )}
 
             {canWork && !isOwnCase && open && (
-              <Card className="flex flex-col gap-3">
-                <h2 className="text-lg font-[650] text-ink">{c.status === "new" ? "Triage" : "Priorität"}</h2>
+              <SidePanel title={c.status === "new" ? "Triage" : "Priorität"}>
                 <PriorityForm caseRef={caseRef} current={c.priority} triage={c.status === "new"} />
-              </Card>
+              </SidePanel>
             )}
 
             {canWork && !isOwnCase && transitions.length > 0 && (
-              <Card className="flex flex-col gap-3">
-                <h2 className="text-lg font-[650] text-ink">Status</h2>
+              <SidePanel title="Status">
                 <p className="text-sm text-ink-2">
                   Aktuell: {CASE_STATUS_LABEL[c.status]}. Ein Entscheid entsteht über «Entscheid speichern».
                 </p>
@@ -424,6 +416,7 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
                       key={t}
                       action={changeCaseStatusAction}
                       fields={{ ...caseRef, to: t }}
+                      size="md"
                       label={TRANSITION_LABEL[t] ?? CASE_STATUS_LABEL[t]}
                       confirm={
                         t === "closed"
@@ -443,11 +436,10 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
                     />
                   ))}
                 </div>
-              </Card>
+              </SidePanel>
             )}
 
-            <Card className="flex flex-col gap-3">
-              <h2 className="text-lg font-[650] text-ink">Einsprüche</h2>
+            <SidePanel title="Einsprüche">
               {c.appeals.length === 0 ? (
                 <p className="text-sm text-ink-2">Kein Einspruch eingegangen.</p>
               ) : (
@@ -456,15 +448,15 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
                     <li key={a.id} className="flex flex-wrap items-center gap-2 text-sm">
                       <Badge tone={APPEAL_STATUS_TONE[a.status]}>{APPEAL_STATUS_LABEL[a.status]}</Badge>
                       <DateTime date={a.createdAt} />
-                      <Link href={`/verwaltung/moderation/einsprueche/${a.id}`} className="font-semibold text-ink underline underline-offset-4">
+                      <Link href={`/verwaltung/moderation/einsprueche/${a.id}`} className="group inline-flex min-h-[44px] items-center font-semibold text-ink underline underline-offset-4">
                         Öffnen
-                        <Icon name="arrow-right" className="ml-1 inline size-4" />
+                        <Icon name="arrow-right" className="nudge ml-1 inline size-4" />
                       </Link>
                     </li>
                   ))}
                 </ul>
               )}
-            </Card>
+            </SidePanel>
           </aside>
         </div>
       </div>

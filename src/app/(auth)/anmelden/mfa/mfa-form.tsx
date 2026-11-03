@@ -49,7 +49,7 @@ export function MfaForm({ next }: { next: string }) {
       <button
         type="button"
         onClick={() => setMode((m) => (m === "totp" ? "recovery" : "totp"))}
-        className="self-center rounded-[8px] px-2 py-1 text-base font-medium text-ink-2 underline underline-offset-4 hover:text-ink"
+        className="link-quiet inline-flex min-h-11 items-center self-center rounded-[10px] px-2 text-base font-medium text-ink-2 hover:text-ink"
       >
         {mode === "totp" ? "Stattdessen Wiederherstellungscode verwenden" : "Code aus der App verwenden"}
       </button>

@@ -26,24 +26,26 @@ export default function ConversationsPage() {
 
 function ConversationRow({ c, tz }: { c: ConversationListItem; tz: string }) {
   return (
-    <li>
+    <li className="border-b border-line">
       <Link
         href={`/community/gespraeche/${c.id}`}
-        className="flex items-center gap-4 rounded-[20px] border border-line bg-surface p-5 transition-colors duration-150 hover:border-line-2 hover:bg-raised sm:p-6"
+        data-focus-inset
+        className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 py-5 transition-colors duration-150 hover:bg-raised sm:gap-x-6 sm:px-3 sm:py-6"
       >
         <Monogram name={c.otherPseudonym} />
-        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="truncate text-lg font-semibold text-ink">{c.otherPseudonym}</span>
-          <span className="text-sm text-ink-2">
+        <span className="flex min-w-0 flex-col items-start gap-1">
+          <span className="break-words text-lg font-semibold leading-snug text-ink">{c.otherPseudonym}</span>
+          <span className="font-mono text-[0.8125rem] text-ink-2">
             {c.state === "closed" ? "Kontakt beendet · nur lesen" : c.lastActivityAt ? `Zuletzt am ${formatDate(c.lastActivityAt, tz)}` : "Neu verbunden"}
           </span>
+          {/* Eigener Lesestand, neutral mit Text und Symbol – keine Anzahl (MSG04) */}
+          {c.hasNew && (
+            <Badge tone="accent" icon="message" className="mt-1">
+              Neue Nachricht
+            </Badge>
+          )}
         </span>
-        {c.hasNew && (
-          <Badge tone="accent" icon="message">
-            Neue Nachricht
-          </Badge>
-        )}
-        <Icon name="chevron-right" className="size-5 shrink-0 text-ink-2" />
+        <Icon name="arrow-right" className="nudge size-5 shrink-0 text-ink-3 group-hover:text-ink" />
       </Link>
     </li>
   );
@@ -87,11 +89,11 @@ async function Conversations() {
         ) : (
           <>
             <section aria-labelledby="aktive">
-              <SectionHeader id="aktive" title="Aktive Gespräche" />
+              <SectionHeader id="aktive" index="01" title="Aktive Gespräche" />
               {active.length === 0 ? (
-                <p className="text-base text-ink-2">Keine aktiven Gespräche.</p>
+                <p className="border-t border-line pt-5 text-base text-ink-2">Keine aktiven Gespräche.</p>
               ) : (
-                <ul className="flex flex-col gap-3">
+                <ul className="border-t border-ink">
                   {active.map((c) => (
                     <ConversationRow key={c.id} c={c} tz={tz} />
                   ))}
@@ -102,10 +104,11 @@ async function Conversations() {
               <section aria-labelledby="geschlossen">
                 <SectionHeader
                   id="geschlossen"
+                  index="02"
                   title="Geschlossene Gespräche"
                   description="Der Kontakt wurde beendet. Der bisherige Verlauf bleibt lesbar, neue Nachrichten sind nicht möglich."
                 />
-                <ul className="flex flex-col gap-3">
+                <ul className="border-t border-ink">
                   {closed.map((c) => (
                     <ConversationRow key={c.id} c={c} tz={tz} />
                   ))}
@@ -115,14 +118,21 @@ async function Conversations() {
           </>
         )}
 
-        <Notice tone="neutral" icon="lock" title="Vertraulichkeit">
-          Nachrichten werden verschlüsselt übertragen und gespeichert. Es gibt keine Ende-zu-Ende-Verschlüsselung: Die Moderation
-          sieht Nachrichten nur, wenn sie gemeldet wurden – und dann nur die ausgewählten. Gesprächsinhalte erscheinen nie in
-          E-Mails oder Vorschauen.
-        </Notice>
+        {/* Die eine tiefe Fläche dieser Seite: Vertraulichkeit als ruhige Haltung, nicht als Warnung (MSG05) */}
+        <div className="grid gap-6 rounded-[28px] bg-deep p-6 text-on-deep sm:p-10 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] md:gap-10">
+          <p className="flex items-start gap-3 font-display text-[1.75rem] leading-[1.1] tracking-[-0.015em] text-on-deep">
+            <Icon name="lock" className="mt-1.5 size-5 shrink-0 text-deep-accent" />
+            Vertraulichkeit
+          </p>
+          <p className="max-w-[60ch] text-lg leading-relaxed text-on-deep-2">
+            Nachrichten werden verschlüsselt übertragen und gespeichert. Es gibt keine Ende-zu-Ende-Verschlüsselung: Die Moderation
+            sieht Nachrichten nur, wenn sie gemeldet wurden – und dann nur die ausgewählten. Gesprächsinhalte erscheinen nie in
+            E-Mails oder Vorschauen.
+          </p>
+        </div>
 
         <p className="text-base text-ink-2">
-          <Link href="/community/blockiert" className="inline-flex items-center gap-1.5 font-medium text-ink underline underline-offset-4">
+          <Link href="/community/blockiert" className="link-quiet inline-flex min-h-11 items-center gap-2 font-medium text-ink">
             <Icon name="ban" className="size-4" />
             Blockierte Personen und ausgeblendete Gespräche
           </Link>

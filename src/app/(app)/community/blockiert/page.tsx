@@ -43,20 +43,20 @@ async function BlockList({ searchParams }: { searchParams: PageProps<"/community
             Du kannst Personen über ihr Profil, einen Beitrag oder ein Gespräch blockieren. Blockieren stellt sofort Abstand her.
           </EmptyState>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <ul className="border-t border-ink">
             {items.map((b) => (
               <li
                 key={b.id}
-                className="flex flex-col gap-4 rounded-[20px] border border-line bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+                className="flex flex-col gap-4 border-b border-line py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:py-6"
               >
-                <div className="flex min-w-0 items-center gap-3">
+                <div className="flex min-w-0 items-center gap-4">
                   <Monogram name={b.pseudonym} />
-                  <div className="flex min-w-0 flex-col gap-0.5">
-                    <p className="truncate text-lg font-semibold text-ink">{b.pseudonym}</p>
-                    <p className="text-sm text-ink-2">Blockiert am {formatDate(b.createdAt, tz)}</p>
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <p className="break-words text-lg font-semibold leading-snug text-ink">{b.pseudonym}</p>
+                    <p className="font-mono text-[0.8125rem] text-ink-2">Blockiert am {formatDate(b.createdAt, tz)}</p>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 pl-14 sm:shrink-0 sm:pl-0">
                   {b.conversationId && (
                     <ButtonLink
                       href={`/community/gespraeche/${b.conversationId}`}

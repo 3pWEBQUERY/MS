@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { PRIORITY_LABEL, ROLE_LABEL, type Priority } from "@/components/admin/labels";
 import { AdminSectionBlock, formatSpan, StatGrid, StatTile } from "@/components/admin/ui";
-import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { requireStaff, type StaffRole, type Viewer } from "@/server/auth/viewer";
@@ -24,17 +24,28 @@ export default function AdminHome() {
   );
 }
 
+/** Ruhiger Bereichslink in der Titelspalte (≥ 44px hoch, Pfeil rückt nach). */
 function SectionLink({ href, children }: { href: string; children: string }) {
   return (
-    <ButtonLink href={href} variant="secondary" size="sm" iconRight={<Icon name="arrow-right" className="size-4" />}>
-      {children}
-    </ButtonLink>
+    <Link href={href} className="group -my-2 inline-flex min-h-[44px] items-center gap-2 text-base font-semibold text-ink">
+      <span className="link-quiet">{children}</span>
+      <Icon name="arrow-right" className="nudge size-4 shrink-0 text-accent-ink" />
+    </Link>
   );
 }
 
 async function Content() {
   const viewer = await requireStaff(ALL_ROLES);
   const has = (...r: StaffRole[]) => r.some((x) => viewer.roles.includes(x));
+  // Laufende Ziffern «01», «02» … nur für die sichtbaren Aufgabenbereiche
+  const blocks = [
+    has("moderator", "moderation_lead") && "moderation",
+    has("editor", "medical_reviewer") && "redaktion",
+    has("privacy_officer") && "datenschutz",
+    has("ops", "admin") && "betrieb",
+    has("admin", "ops", "privacy_officer") && "zugriffe",
+  ].filter(Boolean);
+  const idx = (key: string) => String(blocks.indexOf(key) + 1).padStart(2, "0");
   return (
     <div>
       <PageHeader
@@ -42,22 +53,24 @@ async function Content() {
         title="Übersicht"
         description={`Angemeldet als ${viewer.pseudonym ?? "Mitarbeitende Person"} · ${viewer.roles.map((r) => ROLE_LABEL[r]).join(", ")}. Du siehst nur deine Aufgabenbereiche.`}
       />
-      <div className="flex flex-col gap-12">
-        {has("moderator", "moderation_lead") && <ModerationOverview viewer={viewer} />}
-        {has("editor", "medical_reviewer") && <EditorialOverview />}
-        {has("privacy_officer") && <PrivacyOverview />}
-        {has("ops", "admin") && <OpsOverview />}
-        {has("admin", "ops", "privacy_officer") && <AccessOverview admin={has("admin")} />}
+      <div className="flex flex-col gap-14">
+        {has("moderator", "moderation_lead") && <ModerationOverview viewer={viewer} index={idx("moderation")} />}
+        {has("editor", "medical_reviewer") && <EditorialOverview index={idx("redaktion")} />}
+        {has("privacy_officer") && <PrivacyOverview index={idx("datenschutz")} />}
+        {has("ops", "admin") && <OpsOverview index={idx("betrieb")} />}
+        {has("admin", "ops", "privacy_officer") && <AccessOverview admin={has("admin")} index={idx("zugriffe")} />}
       </div>
     </div>
   );
 }
 
-async function ModerationOverview({ viewer }: { viewer: Viewer }) {
+async function ModerationOverview({ viewer, index }: { viewer: Viewer; index: string }) {
   const [c, q] = await Promise.all([caseCounts(viewer), viewer.roles.includes("moderation_lead") ? moderationQuality() : Promise.resolve(null)]);
   const share = q && q.measured > 0 ? Math.round((q.inTarget / q.measured) * 100) : null;
   return (
     <AdminSectionBlock
+      index={index}
+      layout="split"
       id="moderation"
       title={c.lead ? "Moderation – alle offenen Fälle" : "Moderation – dir zugewiesen"}
       description="Betriebszeit täglich 09–18 Uhr. Fristen gelten als Serviceziele, nicht als Rund-um-die-Uhr-Zusage."
@@ -75,7 +88,8 @@ async function ModerationOverview({ viewer }: { viewer: Viewer }) {
           />
         ))}
       </StatGrid>
-      <StatGrid>
+      {/* Zweite Zeile schliesst ohne eigene kräftige Linie an das Prioritätenraster an */}
+      <StatGrid cols={c.lead ? 4 : 2} className="-mt-4 border-t-0">
         <StatTile label="Eskaliert" value={c.escalated} icon="warning" tone={c.escalated > 0 ? "warning" : "neutral"} href={c.lead ? "/verwaltung/moderation?ansicht=escalated" : undefined} />
         {c.lead && <StatTile label="Nicht zugewiesen" value={c.unassigned} icon="user" tone={c.unassigned > 0 ? "warning" : "neutral"} href="/verwaltung/moderation?ansicht=unassigned" />}
         {c.lead && (
@@ -98,7 +112,7 @@ async function ModerationOverview({ viewer }: { viewer: Viewer }) {
         />
       </StatGrid>
       {q && (
-        <p className="text-sm text-ink-2">
+        <p className="text-sm leading-relaxed text-ink-2">
           Moderationsqualität der letzten 30 Tage:{" "}
           {share === null ? (
             "noch keine auswertbaren Fälle."
@@ -119,10 +133,10 @@ async function ModerationOverview({ viewer }: { viewer: Viewer }) {
   );
 }
 
-async function EditorialOverview() {
+async function EditorialOverview({ index }: { index: string }) {
   const e = await editorialCounts();
   return (
-    <AdminSectionBlock id="redaktion" title="Redaktion und Verzeichnis" action={<SectionLink href="/verwaltung/redaktion">Zur Redaktion</SectionLink>}>
+    <AdminSectionBlock index={index} layout="split" id="redaktion" title="Redaktion und Verzeichnis" action={<SectionLink href="/verwaltung/redaktion">Zur Redaktion</SectionLink>}>
       <StatGrid>
         <StatTile label="Artikel in Prüfung" value={e.inReview} icon="book" />
         <StatTile label="Zur Überarbeitung zurück" value={e.changesRequested} icon="pencil" />
@@ -139,11 +153,11 @@ async function EditorialOverview() {
   );
 }
 
-async function PrivacyOverview() {
+async function PrivacyOverview({ index }: { index: string }) {
   const p = await privacyCounts();
   return (
-    <AdminSectionBlock id="datenschutz" title="Datenschutzaufträge" action={<SectionLink href="/verwaltung/datenschutz">Zum Datenschutz</SectionLink>}>
-      <StatGrid>
+    <AdminSectionBlock index={index} layout="split" id="datenschutz" title="Datenschutzaufträge" action={<SectionLink href="/verwaltung/datenschutz">Zum Datenschutz</SectionLink>}>
+      <StatGrid cols={3}>
         <StatTile label="Offene Aufträge" value={p.open} icon="shield" />
         <StatTile label="Frist überschritten" value={p.overdue} icon="clock" tone={p.overdue > 0 ? "danger" : "neutral"} />
         <StatTile label="Fehlgeschlagen" value={p.failed} icon="alert" tone={p.failed > 0 ? "danger" : "neutral"} />
@@ -152,10 +166,10 @@ async function PrivacyOverview() {
   );
 }
 
-async function OpsOverview() {
+async function OpsOverview({ index }: { index: string }) {
   const [o, d, flagsOff] = await Promise.all([outboxSummary(), deliveryProblems(), disabledFlagCount()]);
   return (
-    <AdminSectionBlock id="betrieb" title="Betrieb" action={<SectionLink href="/verwaltung/betrieb">Zum Betrieb</SectionLink>}>
+    <AdminSectionBlock index={index} layout="split" id="betrieb" title="Betrieb" action={<SectionLink href="/verwaltung/betrieb">Zum Betrieb</SectionLink>}>
       <StatGrid>
         <StatTile label="Wartende Ereignisse" value={o.totals.pending} icon="hourglass" hint={o.oldestOpen ? `Queuealter ${formatSpan(o.queueAgeMs)}` : "Warteschlange leer"} />
         <StatTile label="Fehlerwarteschlange" value={o.totals.dead} icon="alert" tone={o.totals.dead > 0 ? "danger" : "neutral"} hint={`${o.totals.failed} werden wiederholt`} />
@@ -166,7 +180,7 @@ async function OpsOverview() {
   );
 }
 
-async function AccessOverview({ admin }: { admin: boolean }) {
+async function AccessOverview({ admin, index }: { admin: boolean; index: string }) {
   const [sa, noMfa, reviews] = await Promise.all([
     countActiveSpecialAccess(),
     admin ? countStaffWithoutMfa() : Promise.resolve(0),
@@ -176,11 +190,13 @@ async function AccessOverview({ admin }: { admin: boolean }) {
   const reviewed = reviews.some((r) => r.period === quarter);
   return (
     <AdminSectionBlock
+      index={index}
+      layout="split"
       id="zugriffe"
       title="Zugriffe und Rollen"
       action={<SectionLink href={admin ? "/verwaltung/audit/rollen" : "/verwaltung/audit/sonderzugriff"}>{admin ? "Zu Rollen und Audit" : "Zum Sonderzugriff"}</SectionLink>}
     >
-      <StatGrid>
+      <StatGrid cols={admin ? 3 : 2}>
         <StatTile label="Laufende Sonderzugriffe" value={sa.active} icon="key" tone={sa.active > 0 ? "warning" : "neutral"} href="/verwaltung/audit/sonderzugriff" />
         <StatTile label="Anträge auf Sonderzugriff" value={sa.requested} icon="clipboard" href="/verwaltung/audit/sonderzugriff" />
         {admin && <StatTile label="Rollen ohne MFA" value={noMfa} icon="lock" tone={noMfa > 0 ? "warning" : "neutral"} hint="Rollen sind bis zur Einrichtung nicht nutzbar" href="/verwaltung/audit/rollen" />}

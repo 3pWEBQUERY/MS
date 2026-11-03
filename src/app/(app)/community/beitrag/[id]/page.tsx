@@ -10,7 +10,7 @@ import { ReplyForm } from "@/components/community/reply-form";
 import { RulesGate } from "@/components/community/rules-gate";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Badge, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
+import { Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
 import { COMMUNITY_RULES_VERSION } from "@/lib/catalog";
 import { formatDateTime } from "@/lib/time";
 import { requireViewer, type Viewer } from "@/server/auth/viewer";
@@ -19,7 +19,10 @@ import { COMMENT_MAX, getPostForViewer, type PostDetail } from "@/server/modules
 
 export const metadata: Metadata = { title: "Beitrag" };
 
-/** S31 Beitrag und Antworten (COM02–COM04). Rechte werden bei jedem Abruf geprüft. */
+/**
+ * S31 Beitrag und Antworten (COM02–COM04). Rechte werden bei jedem Abruf geprüft.
+ * Lesesatz wie ein Artikel (max. 68 Zeichen pro Zeile), Antworten als Haarlinien-Strang.
+ */
 export default function PostPage({ params, searchParams }: PageProps<"/community/beitrag/[id]">) {
   return (
     <Suspense fallback={<PageSkeleton rows={3} />}>
@@ -36,7 +39,7 @@ function SmallLink({ href, icon, children }: { href: string; icon: "flag" | "ban
   return (
     <Link
       href={href}
-      className="inline-flex h-10 items-center gap-1.5 rounded-[10px] px-2 text-sm font-medium text-ink-2 underline-offset-4 hover:bg-sunk hover:text-ink hover:underline"
+      className="inline-flex h-11 items-center gap-1.5 rounded-[11px] px-2.5 text-sm font-medium text-ink-2 transition-colors duration-150 hover:bg-sunk hover:text-ink"
     >
       <Icon name={icon} className="size-4" />
       {children}
@@ -85,33 +88,31 @@ async function PostView({
         )}
 
         {post.available && post.author ? (
-          <article aria-label="Beitrag" className="flex flex-col gap-5 rounded-[20px] border border-line bg-surface p-5 sm:p-6">
-            <div className="flex flex-wrap items-center gap-2">
-              {/* COM04: nie als «geprüft» gekennzeichnet – Erfahrung, kein Fachinhalt */}
-              {post.author.team ? (
-                <Badge tone="neutral" icon="shield">
-                  Beitrag des Teams
-                </Badge>
-              ) : (
-                <Badge tone="neutral" icon="message">
-                  Persönliche Erfahrung
-                </Badge>
-              )}
-              {post.group && (
-                <Badge tone="outline" icon={post.group.type === "closed" ? "lock" : "users"}>
-                  <span className="max-w-[11rem] truncate sm:max-w-[16rem]">Gruppe {post.group.title}</span>
-                </Badge>
-              )}
+          <article aria-label="Beitrag" className="flex flex-col gap-6">
+            {/* Byline und Kennzeichnung als ruhige Meta-Zeile – COM04: nie als «geprüft» gekennzeichnet */}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <span className="inline-flex items-center gap-1.5 font-mono text-[0.8125rem] uppercase tracking-[0.12em] text-ink-2">
+                  <Icon name={post.author.team ? "shield" : "message"} className="size-4" />
+                  {post.author.team ? "Beitrag des Teams" : "Persönliche Erfahrung"}
+                </span>
+                {post.group && (
+                  <span className="inline-flex min-w-0 items-center gap-1.5 font-mono text-[0.8125rem] text-ink-2">
+                    <Icon name={post.group.type === "closed" ? "lock" : "users"} className="size-4 shrink-0" />
+                    <span className="min-w-0 break-words">Gruppe {post.group.title}</span>
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <AuthorLine author={post.author} size="md" />
+                <PostedAt date={post.publishedAt} label={formatDateTime(post.publishedAt, tz)} edited={post.edited} />
+              </div>
             </div>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <AuthorLine author={post.author} size="md" />
-              <PostedAt date={post.publishedAt} label={formatDateTime(post.publishedAt, tz)} edited={post.edited} />
-            </div>
-            <PlainText text={post.body} className="text-[1.0625rem] leading-relaxed text-ink" />
-            <p className="text-sm text-ink-2">
+            <PlainText text={post.body} className="max-w-[68ch] text-[1.1875rem] leading-[1.7] text-ink" />
+            <p className="font-mono text-[0.8125rem] text-ink-2">
               Sichtbar für: {post.group ? `Mitglieder der Gruppe ${post.group.title}` : "Mitglieder der Plattform"}
             </p>
-            <div className="flex flex-wrap items-start gap-2 border-t border-line pt-4">
+            <div className="flex flex-wrap items-start gap-2 border-y border-line py-4">
               <BookmarkButton
                 targetType="post"
                 targetId={post.id}
@@ -131,20 +132,21 @@ async function PostView({
                   </ButtonLink>
                 )
               ) : (
-                <>
+                <div className="flex flex-wrap gap-1 sm:ml-auto">
                   <SmallLink href={reportHref("post", post.id)} icon="flag">
                     Melden
                   </SmallLink>
                   <SmallLink href={`/community/blockiert/neu?mitglied=${post.author.id}`} icon="ban">
                     {post.author.pseudonym} blockieren
                   </SmallLink>
-                </>
+                </div>
               )}
             </div>
           </article>
         ) : (
           // COM03: gelöschter Beitrag mit Antworten – neutraler Platzhalter ohne Text und Autor.
-          <div className="rounded-[20px] border border-dashed border-line-2 bg-sunk p-5 text-base text-ink-2 sm:p-6">
+          <div className="flex items-center gap-3 rounded-[16px] border border-dashed border-line-2 p-4 text-base text-ink-2 sm:p-5">
+            <Icon name="minus" className="size-4 shrink-0" />
             Dieser Beitrag wurde entfernt. Die Antworten bleiben sichtbar.
           </div>
         )}
@@ -169,35 +171,35 @@ function Comments({ post, viewer }: { post: PostDetail; viewer: Viewer }) {
   const tz = viewer.prefs.timezone;
   const canEditOwn = !post.group?.archived && !viewer.writeSuspended;
   return (
-    <section aria-labelledby="answers" className="flex flex-col gap-3">
-      <h2 id="answers" className="text-xl font-[650] text-ink">
+    <section aria-labelledby="answers" className="flex flex-col gap-5">
+      <h2 id="answers" className="display-sm">
         Antworten
       </h2>
       {post.comments.length === 0 ? (
-        <p className="text-base text-ink-2">Noch keine Antworten.</p>
+        <p className="border-t border-line pt-5 text-base text-ink-2">Noch keine Antworten.</p>
       ) : (
-        <ol className="flex flex-col gap-3">
+        <ol className="border-t border-ink">
           {post.comments.map((c) =>
             c.kind === "placeholder" ? (
-              <li key={c.id} className="rounded-[16px] border border-dashed border-line-2 bg-sunk px-4 py-3 text-sm text-ink-2">
+              <li key={c.id} className="flex items-center gap-3 border-b border-line py-5 text-sm italic text-ink-2">
+                <Icon name="minus" className="size-4 shrink-0" />
                 {c.reason === "blocked" ? "Diese Antwort ist für dich ausgeblendet." : "Diese Antwort ist nicht mehr verfügbar."}
               </li>
             ) : (
-              <li key={c.id}>
-                <article
-                  aria-label={`Antwort von ${c.author.pseudonym}`}
-                  className="flex flex-col gap-3 rounded-[16px] border border-line bg-surface p-4 sm:p-5"
-                >
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <li key={c.id} className="border-b border-line">
+                <article aria-label={`Antwort von ${c.author.pseudonym}`} className="flex flex-col gap-3 py-6">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                     <AuthorLine author={c.author} />
                     <PostedAt date={c.createdAt} label={formatDateTime(c.createdAt, tz)} edited={c.edited} />
                   </div>
                   {c.own ? (
-                    <OwnComment comment={{ id: c.id, body: c.body, version: c.version }} maxLength={COMMENT_MAX} canEdit={canEditOwn} />
+                    <div className="sm:pl-[2.625rem]">
+                      <OwnComment comment={{ id: c.id, body: c.body, version: c.version }} maxLength={COMMENT_MAX} canEdit={canEditOwn} />
+                    </div>
                   ) : (
                     <>
-                      <PlainText text={c.body} className="text-base text-ink" />
-                      <div className="-ml-2 flex flex-wrap gap-1">
+                      <PlainText text={c.body} className="max-w-[68ch] text-base leading-relaxed text-ink sm:pl-[2.625rem]" />
+                      <div className="-ml-2.5 flex flex-wrap gap-1 sm:ml-8">
                         <SmallLink href={reportHref("comment", c.id)} icon="flag">
                           Melden
                         </SmallLink>
@@ -251,8 +253,8 @@ function ReplyArea({ post, viewer, writeEnabled }: { post: PostDetail; viewer: V
   else content = <ReplyForm postId={post.id} maxLength={COMMENT_MAX} />;
 
   return (
-    <section aria-labelledby="reply" className="flex flex-col gap-4 rounded-[20px] border border-line bg-surface p-5 sm:p-6">
-      <h2 id="reply" className="text-xl font-[650] text-ink">
+    <section aria-labelledby="reply" className="flex flex-col gap-5 rounded-[20px] border border-line bg-surface p-5 sm:p-6">
+      <h2 id="reply" className="font-display text-[1.5rem] leading-[1.15] tracking-[-0.015em] text-ink sm:text-[1.75rem]">
         Antwort schreiben
       </h2>
       {content}

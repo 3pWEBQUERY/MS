@@ -11,6 +11,8 @@ export type AdminNavItem = {
   label: string;
   icon: IconName;
   exact?: boolean;
+  /** Gruppenbeschriftung in der Seitenleiste (rein visuell, wie in der App-Seitenleiste) */
+  group?: string;
   /** Deutliche Markierung, z. B. offene P0-Fälle (K01: Leitung alarmieren) */
   alert?: { count: number; label: string };
 };
@@ -24,18 +26,43 @@ function AlertBadge({ alert }: { alert: NonNullable<AdminNavItem["alert"]> }) {
   );
 }
 
-/** Seitenleisten-Navigation (Desktop). aria-current über SideNavLink. */
+/** Aufeinanderfolgende Einträge derselben Gruppe zusammenfassen (Reihenfolge aus sections.ts). */
+function grouped(items: AdminNavItem[]) {
+  const groups: { label?: string; items: AdminNavItem[] }[] = [];
+  for (const i of items) {
+    const last = groups.at(-1);
+    if (last && last.label === i.group) last.items.push(i);
+    else groups.push({ label: i.group, items: [i] });
+  }
+  return groups;
+}
+
+/**
+ * Seitenleisten-Navigation (Desktop) in der Sprache der App-Seitenleiste: Mono-Abschnittsbeschriftungen,
+ * aktive Zeile vertieft mit Glut-Strich (über SideNavLink, inkl. aria-current).
+ */
 export function AdminNavList({ items }: { items: AdminNavItem[] }) {
   return (
-    <ul className="flex flex-col gap-1">
-      {items.map((i) => (
-        <li key={i.href}>
-          <SideNavLink href={i.href} icon={i.icon} exact={i.exact} badge={i.alert && i.alert.count > 0 ? <AlertBadge alert={i.alert} /> : undefined}>
-            {i.label}
-          </SideNavLink>
-        </li>
+    <div className="flex flex-col gap-6">
+      {grouped(items).map((g, gi) => (
+        <div key={g.label ?? gi} className="flex flex-col">
+          {g.label && (
+            <p className="eyebrow mb-2 px-3 !text-[0.75rem]" aria-hidden="true">
+              {g.label}
+            </p>
+          )}
+          <ul className="flex flex-col gap-0.5">
+            {g.items.map((i) => (
+              <li key={i.href}>
+                <SideNavLink href={i.href} icon={i.icon} exact={i.exact} badge={i.alert && i.alert.count > 0 ? <AlertBadge alert={i.alert} /> : undefined}>
+                  {i.label}
+                </SideNavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
 
@@ -69,9 +96,9 @@ export function AdminMobileNav({ items }: { items: AdminNavItem[] }) {
         <Icon name={open ? "x" : "menu"} className="size-5" />
       </IconButton>
       {open && (
-        <div id="verwaltung-mobile-nav" className="fixed inset-x-0 top-16 z-40 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-line bg-bg px-4 pb-6 pt-3">
+        <div id="verwaltung-mobile-nav" className="fixed inset-x-0 top-16 z-40 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-line bg-bg px-4 pb-8 pt-5">
           <nav aria-label="Verwaltungsbereiche (mobil)">
-            {current && <p className="mb-2 px-1 text-sm text-ink-2">Aktuell: {current.label}</p>}
+            {current && <p className="mb-5 border-b border-line px-3 pb-4 text-sm text-ink-2">Aktuell: <span className="font-semibold text-ink">{current.label}</span></p>}
             <AdminNavList items={items} />
           </nav>
         </div>

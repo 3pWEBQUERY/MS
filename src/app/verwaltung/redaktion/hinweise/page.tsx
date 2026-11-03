@@ -3,7 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { StatusAction } from "@/components/content/admin/action-form";
 import { one, RedaktionNav, StatusNotice } from "@/components/content/admin/common";
-import { Badge, Card, EmptyState, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
+import { AdminEmpty, LedgerItem, LedgerList } from "@/components/admin/ui";
+import { Badge, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
 import { formatDateTime } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
 import { decrypt, decryptOptional } from "@/server/crypto";
@@ -51,9 +52,9 @@ async function ContactInbox({ searchParams }: { searchParams: PageProps<"/verwal
           )}
         </p>
         {messages.length === 0 ? (
-          <EmptyState icon="mail" title={done ? "Keine erledigten Hinweise" : "Keine offenen Hinweise"} />
+          <AdminEmpty icon="mail" title={done ? "Keine erledigten Hinweise" : "Keine offenen Hinweise"} />
         ) : (
-          <ul className="flex flex-col gap-3">
+          <LedgerList as="ul">
             {messages.map((m) => {
               let text = "";
               let reply: string | null = null;
@@ -64,8 +65,7 @@ async function ContactInbox({ searchParams }: { searchParams: PageProps<"/verwal
                 text = "Dieser Hinweis kann nicht entschlüsselt werden.";
               }
               return (
-                <li key={m.id}>
-                  <Card className="flex flex-col gap-4">
+                <LedgerItem key={m.id} className="[&>div]:items-start [&>div]:gap-4">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge tone="neutral">{contactCategoryLabel(m.category)}</Badge>
                       <span className="text-sm text-ink-2">{formatDateTime(m.createdAt)}</span>
@@ -80,16 +80,15 @@ async function ContactInbox({ searchParams }: { searchParams: PageProps<"/verwal
                         </Link>
                       )}
                     </div>
-                    <PlainText text={text} className="text-base text-ink" />
+                    <PlainText text={text} className="border-l-2 border-line-2 pl-4 text-base text-ink" />
                     <p className="text-sm text-ink-2">{reply ? `Antwortadresse: ${reply}` : "Keine Antwortadresse angegeben."}</p>
                     {!done && (
                       <StatusAction action={closeContactMessageAction} fields={{ messageId: m.id, back: "redaktion" }} label="Als erledigt markieren" size="sm" />
                     )}
-                  </Card>
-                </li>
+                </LedgerItem>
               );
             })}
-          </ul>
+          </LedgerList>
         )}
       </div>
     </>

@@ -3,6 +3,7 @@ import Form from "next/form";
 import { Suspense } from "react";
 import { CheckInForm } from "@/components/health/check-in-form";
 import { ActivatedNotice } from "@/components/health/health-notices";
+import { stepTitle } from "@/components/health/notebook";
 import { writeBlocker } from "@/components/health/write-gate";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Input } from "@/components/ui/form";
@@ -70,11 +71,11 @@ async function CheckIn({ searchParams }: { searchParams: PageProps<"/mein-ms/che
         >
           Pro Tag gibt es einen Check-in. Symptome oder Fatigue kannst du zusätzlich als eigenen Tagebucheintrag festhalten.
         </Notice>
-        <Form action="/mein-ms/check-in" className="flex flex-col gap-3">
-          <label htmlFor="datum" className="text-base font-semibold text-ink">
+        <Form action="/mein-ms/check-in" className="flex flex-col gap-3 border-t border-line pt-6">
+          <label htmlFor="datum" className={stepTitle}>
             Check-in für einen anderen Tag
           </label>
-          <p id="datum-hinweis" className="-mt-2 text-sm text-ink-2">
+          <p id="datum-hinweis" className="-mt-1 text-sm text-ink-2">
             Bis 365 Tage rückwirkend.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">

@@ -7,7 +7,8 @@ import { PrivacyHint } from "@/components/health/health-notices";
 import { writeBlocker } from "@/components/health/write-gate";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Card, KeyValue, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
+import { stepTitle } from "@/components/health/notebook";
+import { KeyValue, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
 import { addDays, formatDate, formatDateTime, localDateString } from "@/lib/time";
 import { recordDenied } from "@/server/audit";
 import { updateDiaryEntryAction } from "@/server/modules/health/diary-actions";
@@ -92,36 +93,47 @@ async function Entry({
   }
 
   const items: [ReactNode, ReactNode][] = [
-    ["Zeitpunkt", formatDateTime(entry.observedAt, tz)],
+    ["Zeitpunkt", <span key="t" className="tabular">{formatDateTime(entry.observedAt, tz)}</span>],
   ];
   if (entry.kind === "symptom")
     items.push([
       entry.observations.length === 1 ? "Symptom" : "Symptome",
-      <ul key="o" className="flex flex-col gap-1">
+      <ul key="o" className="flex flex-col">
         {entry.observations.map((o) => (
-          <li key={o.id}>
-            <span className="font-semibold">{o.label}</span> · Stärke {valueText("intensity", o.intensity)}
-            {o.durationMinutes ? ` · Dauer ${durationText(o.durationMinutes)}` : ""}
+          <li key={o.id} className="border-b border-line py-3 first:pt-0 last:border-b-0 last:pb-0">
+            <span className={`${stepTitle} break-words`}>{o.label}</span>
+            <span className="tabular text-base text-ink-2">
+              {" "}
+              · Stärke {valueText("intensity", o.intensity)}
+              {o.durationMinutes ? ` · Dauer ${durationText(o.durationMinutes)}` : ""}
+            </span>
           </li>
         ))}
       </ul>,
     ]);
   if (entry.kind === "fatigue") {
-    items.push(["Fatigue", valueText("fatigue", entry.fatigue)]);
+    items.push([
+      "Fatigue",
+      <span key="f" className={`${stepTitle} tabular`}>
+        {valueText("fatigue", entry.fatigue)}
+      </span>,
+    ]);
     items.push([
       "Schlafbeobachtung",
-      entry.sleepNote ? <PlainText key="s" text={entry.sleepNote} /> : <span className="text-ink-2">{NOT_RECORDED}</span>,
+      entry.sleepNote ? <PlainText key="s" text={entry.sleepNote} className="max-w-prose" /> : <span className="text-ink-2">{NOT_RECORDED}</span>,
     ]);
   }
   items.push([
     entry.kind === "fatigue" ? "Beobachtungen und Notiz" : "Notiz",
-    entry.note ? <PlainText key="n" text={entry.note} /> : <span className="text-ink-2">{NOT_RECORDED}</span>,
+    entry.note ? <PlainText key="n" text={entry.note} className="max-w-prose" /> : <span className="text-ink-2">{NOT_RECORDED}</span>,
   ]);
   items.push([
     "Erfasst in Zeitzone",
-    `${entry.timezone} (${formatOffset(entry.utcOffsetMinutes)}), lokal ${formatDate(entry.storedLocalDate)} ${entry.storedLocalTime}`,
+    <span key="z" className="tabular">
+      {`${entry.timezone} (${formatOffset(entry.utcOffsetMinutes)}), lokal ${formatDate(entry.storedLocalDate)} ${entry.storedLocalTime}`}
+    </span>,
   ]);
-  items.push(["Zuletzt geändert", formatDateTime(entry.updatedAt, tz)]);
+  items.push(["Zuletzt geändert", <span key="g" className="tabular">{formatDateTime(entry.updatedAt, tz)}</span>]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -141,9 +153,8 @@ async function Entry({
       ) : (
         <>
           {blocked}
-          <Card className="max-w-2xl">
-            <KeyValue items={items} />
-          </Card>
+          {/* Notizbuchseite statt Karte: Angaben mit Haarlinien, Werte neutral (DIA07) */}
+          <KeyValue items={items} className="max-w-3xl border-y border-ink" />
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             {!blocked && (
               <ButtonLink href={`/mein-ms/eintrag/${entry.id}?bearbeiten=1`} icon={<Icon name="pencil" className="size-5" />}>

@@ -54,10 +54,13 @@ export function ReportForm({
       <div className="flex flex-col gap-6">
         <FormMessage state={state} />
         {state.data.acute === true && <AcuteNotice />}
-        <div className="flex flex-col gap-2 rounded-[20px] border border-line bg-surface p-5 sm:p-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.08em] text-ink-2">Belegnummer</p>
-          <p className="font-mono text-2xl font-semibold tracking-[0.04em] text-ink">{state.data.receipt}</p>
-          <p className="text-base text-ink-2">
+        {/* Die eine tiefe Fläche: Belegnummer als ruhiger, verlässlicher Moment (SAF02) */}
+        <div className="flex flex-col gap-4 rounded-[28px] bg-deep p-6 text-on-deep sm:p-10">
+          <p className="font-mono text-[0.8125rem] font-medium uppercase tracking-[0.12em] text-on-deep-2">Belegnummer</p>
+          <p className="break-all font-mono text-[1.75rem] font-medium leading-tight tracking-[0.04em] text-on-deep sm:text-[2.25rem]">
+            {state.data.receipt}
+          </p>
+          <p className="max-w-[60ch] border-t border-deep-line pt-4 text-base leading-relaxed text-on-deep-2">
             Die Moderation prüft deine Meldung in den Betriebszeiten. Den Stand siehst du unter «Meine Meldungen». Die gemeldete
             Person erfährt nicht, wer gemeldet hat.
           </p>
@@ -110,7 +113,7 @@ export function ReportForm({
 
       {messages && (
         <fieldset className="flex flex-col gap-3" aria-describedby="msg-hint">
-          <legend className="mb-1 text-base font-semibold text-ink">Nachrichten als Beleg auswählen</legend>
+          <legend className="mb-1 text-lg font-[650] text-ink">Nachrichten als Beleg auswählen</legend>
           <p id="msg-hint" className="-mt-2 text-sm text-ink-2">
             Wähle bis zu zehn Nachrichten. Nur diese werden der Moderation gezeigt – der restliche Verlauf bleibt privat.{" "}
             <span className={cn("tabular font-semibold", tooMany ? "text-danger" : "text-ink")} aria-live="polite">
@@ -119,7 +122,7 @@ export function ReportForm({
           </p>
           {state.fieldErrors?.messageIds && <p className="text-sm font-medium text-danger">{state.fieldErrors.messageIds}</p>}
           {messages.length === 0 ? (
-            <p className="rounded-[16px] bg-sunk p-4 text-base text-ink-2">In diesem Gespräch gibt es keine Nachrichten, die gemeldet werden können.</p>
+            <p className="border-y border-line py-5 text-base text-ink-2">In diesem Gespräch gibt es keine Nachrichten, die gemeldet werden können.</p>
           ) : (
             <ul className="flex flex-col gap-2">
               {messages.map((m) => {
@@ -152,7 +155,7 @@ export function ReportForm({
                         />
                       </span>
                       <span className="flex min-w-0 flex-col gap-1">
-                        <span className="text-sm font-semibold text-ink-2">
+                        <span className="font-mono text-[0.8125rem] font-medium text-ink-2">
                           {m.authorLabel} · {m.time}
                         </span>
                         <PlainText text={m.body} className="text-base text-ink" />
@@ -186,7 +189,7 @@ export function ReportForm({
         <SubmitButton size="lg" pendingText="Wird gesendet …" disabled={tooMany} icon={<Icon name="flag" className="size-5" />}>
           Meldung senden
         </SubmitButton>
-        <Link href={backHref} className="inline-flex h-12 items-center px-2 text-base font-medium text-ink-2 underline underline-offset-4 hover:text-ink">
+        <Link href={backHref} className="link-quiet inline-flex h-12 items-center px-2 text-base font-medium text-ink-2 hover:text-ink">
           Abbrechen
         </Link>
       </div>

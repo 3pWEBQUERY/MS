@@ -28,7 +28,7 @@ export function LoginForm({ next }: { next: string }) {
       </Field>
       <div className="flex flex-col gap-2">
         <PasswordField autoComplete="current-password" error={fe.password} />
-        <Link href="/passwort-vergessen" className="self-end text-base font-medium text-ink-2 underline underline-offset-4 hover:text-ink">
+        <Link href="/passwort-vergessen" className="link-quiet inline-flex min-h-11 items-center self-end text-base font-medium text-ink-2 hover:text-ink">
           Passwort vergessen?
         </Link>
       </div>
@@ -37,7 +37,7 @@ export function LoginForm({ next }: { next: string }) {
       </SubmitButton>
       <p className="text-center text-base text-ink-2">
         Noch kein Konto?{" "}
-        <Link href="/registrieren" className="font-semibold text-ink underline underline-offset-4">
+        <Link href="/registrieren" className="link-quiet font-semibold text-ink">
           Registrieren
         </Link>
       </p>

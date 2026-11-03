@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { RemoveSymptomForm } from "@/components/health/action-forms";
-import { EmptyState, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { two } from "@/components/health/notebook";
+import { Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { removeOwnSymptomAction } from "@/server/modules/health/symptom-actions";
 import { requireHealthViewer } from "@/server/modules/health/guard";
 import { listOwnSymptoms } from "@/server/modules/health/queries";
@@ -36,15 +37,25 @@ async function OwnSymptoms({ searchParams }: { searchParams: PageProps<"/mein-ms
         </Notice>
       )}
       {list.length === 0 ? (
-        <EmptyState icon="notebook" title="Keine eigenen Bezeichnungen">
-          Beim Festhalten eines Symptoms kannst du «Eigene Bezeichnung eingeben» wählen. Sie erscheint dann hier.
-        </EmptyState>
+        <div className="flex flex-col gap-2 border-y border-line py-8">
+          <p className="display-sm">Keine eigenen Bezeichnungen</p>
+          <p className="text-base text-ink-2">
+            Beim Festhalten eines Symptoms kannst du «Eigene Bezeichnung eingeben» wählen. Sie erscheint dann hier.
+          </p>
+        </div>
       ) : (
-        <ul className="flex flex-col divide-y divide-line rounded-[20px] border border-line bg-surface">
-          {list.map((s) => (
-            <li key={s.id} className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex min-w-0 flex-col gap-0.5">
-                <span className="break-words font-semibold text-ink">{s.label}</span>
+        // Eigene Wörter wie in einem Register: nummeriert, Haarlinien, keine Kartenwand
+        <ol className="border-t border-ink">
+          {list.map((s, i) => (
+            <li
+              key={s.id}
+              className="grid gap-x-6 gap-y-3 border-b border-line py-5 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] sm:items-center"
+            >
+              <span aria-hidden="true" className="hidden font-mono text-sm font-medium tracking-[0.08em] text-ink-3 sm:block">
+                {two(i)}
+              </span>
+              <div className="flex min-w-0 flex-col gap-1">
+                <span className="break-words font-display text-[1.5rem] leading-tight tracking-[-0.015em] text-ink">{s.label}</span>
                 <span className="text-sm text-ink-2">
                   {s.uses === 0 ? "In keinem Eintrag verwendet" : s.uses === 1 ? "In 1 Eintrag verwendet" : `In ${s.uses} Einträgen verwendet`}
                 </span>
@@ -52,7 +63,7 @@ async function OwnSymptoms({ searchParams }: { searchParams: PageProps<"/mein-ms
               <RemoveSymptomForm action={removeOwnSymptomAction} id={s.id} label={s.label} />
             </li>
           ))}
-        </ul>
+        </ol>
       )}
       <p className="text-sm text-ink-2">
         Entfernen nimmt die Bezeichnung nur aus deiner Auswahlliste. Bestehende Einträge werden nicht verändert. Einzelne

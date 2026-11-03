@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
-import { EmptyState, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { EmptyState, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { formatDate } from "@/lib/time";
 import { getLegalPage, type LegalSlug } from "@/server/modules/content/legal";
 import { PageContainer } from "./page-container";
@@ -14,7 +14,7 @@ export function LegalPageView(props: { slug: LegalSlug; eyebrow: string; after?:
   return (
     <Suspense
       fallback={
-        <PageContainer narrow>
+        <PageContainer>
           <PageSkeleton rows={2} />
         </PageContainer>
       }
@@ -27,28 +27,38 @@ export function LegalPageView(props: { slug: LegalSlug; eyebrow: string; after?:
 async function LegalPageContent({ slug, eyebrow, after }: { slug: LegalSlug; eyebrow: string; after?: ReactNode }) {
   const page = await getLegalPage(slug);
   return (
-    <PageContainer narrow>
+    <PageContainer>
       {page ? (
         <>
           <PageHeader
             eyebrow={eyebrow}
             title={page.title}
             description={
-              <p className="text-base">
-                Fassung <span className="tabular font-mono text-sm">{page.textVersion}</span> · gültig ab {formatDate(page.validFrom)}
+              <p className="font-mono text-sm">
+                Fassung <span className="tabular">{page.textVersion}</span> · gültig ab {formatDate(page.validFrom)}
               </p>
             }
           />
-          <div className="flex flex-col gap-10">
-            <RichText text={page.body} />
-            {after}
-            <Notice tone="neutral" title="Fragen zu diesem Text?">
-              Schreib uns über das <Link href="/kontakt">Kontaktformular</Link>. Bitte sende keine medizinischen Unterlagen.
-            </Notice>
+          {/* Ruhige Lesespalte (.prose-ms), Rückfragen als Randspalte */}
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-20">
+            <div className="flex min-w-0 flex-col gap-12">
+              <RichText text={page.body} />
+              {after}
+            </div>
+            <aside aria-label="Fragen zu diesem Text" className="flex flex-col gap-3 border-t border-ink pt-5 lg:sticky lg:top-28 lg:self-start">
+              <p className="text-lg font-semibold text-ink">Fragen zu diesem Text?</p>
+              <p className="text-base text-ink-2">
+                Schreib uns über das{" "}
+                <Link href="/kontakt" className="link-quiet font-semibold text-ink">
+                  Kontaktformular
+                </Link>
+                . Bitte sende keine medizinischen Unterlagen.
+              </p>
+            </aside>
           </div>
         </>
       ) : (
-        <>
+        <div className="max-w-4xl">
           <PageHeader eyebrow={eyebrow} title="Dieser Text ist gerade nicht verfügbar" />
           <EmptyState icon="file" title="Bitte versuche es später erneut">
             Der Text wird gerade aktualisiert oder ist vorübergehend nicht abrufbar. Bei Fragen erreichst du uns über das{" "}
@@ -57,7 +67,7 @@ async function LegalPageContent({ slug, eyebrow, after }: { slug: LegalSlug; eye
             </Link>
             .
           </EmptyState>
-        </>
+        </div>
       )}
     </PageContainer>
   );

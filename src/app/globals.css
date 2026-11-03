@@ -212,6 +212,10 @@ html[data-text-scale="150"] {
     letter-spacing: -0.018em;
     text-wrap: balance;
   }
+  /* Serif-Titel bleiben in normaler Strichstärke (Fraunces wirkt über Grösse, nicht über Gewicht) */
+  :is(h1, h2, h3, h4).font-display {
+    font-weight: 400;
+  }
 
   p {
     text-wrap: pretty;

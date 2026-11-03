@@ -4,7 +4,8 @@ import { Suspense } from "react";
 import { HealthDecisionForms } from "@/components/health/action-forms";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon, type IconName } from "@/components/ui/icon";
-import { Card, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { stepTitle, two } from "@/components/health/notebook";
+import { Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { HEALTH_CONSENT_VERSION } from "@/lib/catalog";
 import { requireViewer } from "@/server/auth/viewer";
 import { decideHealthAction } from "@/server/modules/health/activation-actions";
@@ -65,30 +66,28 @@ async function Activate({ searchParams }: { searchParams: PageProps<"/mein-ms/ak
   const alreadyDeclined = viewer.healthDecided;
 
   return (
-    <div className="flex max-w-2xl flex-col gap-8">
+    <div className="flex max-w-3xl flex-col gap-8">
       <PageHeader
         eyebrow="Mein MS"
         title="Möchtest du den Gesundheitsbereich nutzen?"
         description="Hier kannst du für dich festhalten, wie es dir geht. Das ist freiwillig – alle anderen Bereiche funktionieren auch ohne."
       />
-      <Card padded={false}>
-        <ul className="divide-y divide-line">
-          {POINTS.map((p) => (
-            <li key={p.title} className="flex gap-4 p-5 sm:p-6">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-sunk text-ink-2">
-                <Icon name={p.icon} className="size-5" />
-              </span>
-              <div className="flex flex-col gap-1">
-                <h2 className="text-base font-semibold text-ink">{p.title}</h2>
-                <p className="text-base text-ink-2">{p.text}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </Card>
+      {/* Vier Punkte als nummeriertes Raster mit Haarlinien statt Symbolkacheln */}
+      <ol className="grid border-t border-ink sm:grid-cols-2 sm:gap-x-10">
+        {POINTS.map((p, i) => (
+          <li key={p.title} className="flex flex-col gap-2 border-b border-line py-6">
+            <span className="flex items-center gap-3 font-mono text-sm font-medium text-accent-ink">
+              <span aria-hidden="true">{two(i)}</span>
+              <Icon name={p.icon} className="size-4" />
+            </span>
+            <h2 className={stepTitle}>{p.title}</h2>
+            <p className="text-base text-ink-2">{p.text}</p>
+          </li>
+        ))}
+      </ol>
       <p className="text-base text-ink-2">
         Wenn du ablehnst, bleiben Community, Gespräche, Wissen und Hilfe vollständig nutzbar. Mehr dazu in der{" "}
-        <Link href="/datenschutz" className="font-medium text-ink underline underline-offset-4">
+        <Link href="/datenschutz" className="link-quiet font-medium text-ink">
           Datenschutzinformation
         </Link>
         .
@@ -97,7 +96,7 @@ async function Activate({ searchParams }: { searchParams: PageProps<"/mein-ms/ak
         <Notice tone="neutral">Du hast den Gesundheitsbereich bisher nicht aktiviert. Du kannst das hier jederzeit ändern.</Notice>
       )}
       <HealthDecisionForms action={decideHealthAction} alreadyDeclined={alreadyDeclined} next={next} />
-      <p className="text-sm text-ink-2">Textfassung: {HEALTH_CONSENT_VERSION}</p>
+      <p className="font-mono text-xs uppercase tracking-[0.1em] text-ink-2">Textfassung: {HEALTH_CONSENT_VERSION}</p>
     </div>
   );
 }

@@ -11,7 +11,7 @@ export function DeleteAccountForm() {
   const [state, action] = useResilientAction(deleteAccountAction);
   return (
     <form action={action} noValidate className="flex flex-col gap-6 rounded-[20px] border border-danger/40 bg-surface p-5 sm:p-6">
-      <p className="text-lg font-[650] text-ink">Löschung bestätigen</p>
+      <h2 className="font-display text-[1.625rem] leading-tight tracking-[-0.015em] text-ink">Löschung bestätigen</h2>
       <FormMessage state={state} />
       <Field label="Tippe LÖSCHEN zur Bestätigung" error={state.fieldErrors?.phrase}>
         {(p) => (
@@ -34,7 +34,7 @@ export function DeleteAccountForm() {
         <SubmitButton variant="danger" size="lg" pendingText="Konto wird deaktiviert …" icon={<Icon name="trash" className="size-5" />}>
           Konto endgültig löschen
         </SubmitButton>
-        <Link href="/konto/daten" className="px-2 text-base font-medium text-ink-2 underline underline-offset-4 hover:text-ink">
+        <Link href="/konto/daten" className="link-quiet inline-flex min-h-11 items-center px-2 text-base font-medium text-ink-2 hover:text-ink">
           Abbrechen
         </Link>
       </div>

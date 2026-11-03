@@ -10,7 +10,7 @@ import { useResilientAction } from "@/components/ui/use-resilient-action";
 function ReauthLink({ state }: { state: ActionState }) {
   if (state.data?.auth !== "reauth") return null;
   return (
-    <Link href="/konto/bestaetigen?next=%2Fkonto" className="text-base font-medium text-ink underline underline-offset-4">
+    <Link href="/konto/bestaetigen?next=%2Fkonto" className="link-quiet text-base font-medium text-ink">
       Jetzt mit Passwort bestätigen
     </Link>
   );

@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { ActionForm } from "@/components/messaging/action-form";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon, type IconName } from "@/components/ui/icon";
-import { Card, Monogram, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { Monogram, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { requireViewer } from "@/server/auth/viewer";
 import { isUuid } from "@/server/modules/messaging/access";
 import { blockMemberAction } from "@/server/modules/messaging/actions";
@@ -45,10 +45,10 @@ async function BlockConfirm({ searchParams }: { searchParams: PageProps<"/commun
         title={`${target.pseudonym} blockieren?`}
       />
       <div className="flex flex-col gap-8">
-        <Card className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
           <Monogram name={target.pseudonym} size="lg" />
-          <p className="text-lg font-semibold text-ink">{target.pseudonym}</p>
-        </Card>
+          <p className="break-words text-lg font-semibold text-ink">{target.pseudonym}</p>
+        </div>
 
         {target.alreadyBlocked ? (
           <Notice
@@ -62,14 +62,14 @@ async function BlockConfirm({ searchParams }: { searchParams: PageProps<"/commun
           />
         ) : (
           <>
-            <section aria-labelledby="folgen" className="flex flex-col gap-3">
-              <h2 id="folgen" className="text-xl font-[650] text-ink">
+            <section aria-labelledby="folgen" className="flex flex-col gap-5">
+              <h2 id="folgen" className="display-sm">
                 Was Blockieren bewirkt
               </h2>
-              <ul className="flex flex-col gap-3 text-base text-ink-2">
+              <ul className="border-t border-ink text-base text-ink-2">
                 {CONSEQUENCES.map(([icon, text]) => (
-                  <li key={text} className="flex items-start gap-3">
-                    <Icon name={icon} className="mt-0.5 size-5 shrink-0 text-ink" />
+                  <li key={text} className="flex items-start gap-4 border-b border-line py-4">
+                    <Icon name={icon} className="mt-0.5 size-5 shrink-0 text-accent-ink" />
                     <span>{text}</span>
                   </li>
                 ))}
@@ -97,7 +97,7 @@ async function BlockConfirm({ searchParams }: { searchParams: PageProps<"/commun
         )}
 
         <p className="text-sm text-ink-2">
-          Fühlst du dich bedroht? <Link href="/sicherheit" className="font-medium text-ink underline underline-offset-4">Sicherheit und akute Hilfe</Link> · Notruf 144
+          Fühlst du dich bedroht? <Link href="/sicherheit" className="link-quiet font-medium text-ink">Sicherheit und akute Hilfe</Link> · Notruf 144
         </p>
       </div>
     </div>

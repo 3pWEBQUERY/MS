@@ -4,8 +4,8 @@ import { AuditNav } from "@/components/admin/audit-nav";
 import { ROLE_LABEL, type StaffRoleKey } from "@/components/admin/labels";
 import { param, query } from "@/components/admin/params";
 import { VerifyChainForm } from "@/components/admin/role-forms";
-import { AdminSectionBlock, DateTime, FilterForm, MoreLink, PlainInput, PlainSelect, ShortId } from "@/components/admin/ui";
-import { Badge, Card, EmptyState, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
+import { AdminEmpty, AdminSectionBlock, DateTime, FilterForm, MoreLink, PlainInput, PlainSelect, ShortId } from "@/components/admin/ui";
+import { Badge, Card, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { audit } from "@/server/audit";
 import { requireStaff } from "@/server/auth/viewer";
 import { AUDIT_READ_ROLES, auditActionPrefixes, listAuditEvents, securityEventSummary } from "@/server/modules/admin/audit-chain";
@@ -81,7 +81,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
             <PlainInput id="f-bis" name="bis" type="date" label="Bis" defaultValue={filter.to} />
           </FilterForm>
           {events.rows.length === 0 ? (
-            <EmptyState icon="audit" title="Keine passenden Einträge" />
+            <AdminEmpty icon="audit" title="Keine passenden Einträge" />
           ) : (
             <Table>
               <caption className="sr-only">Auditeinträge, neueste zuerst</caption>
@@ -142,7 +142,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
           description="Technisch erfasst ohne Werte (AT03). Zählung der letzten 30 Tage und die jüngsten Ereignisse."
         >
           {security.byKind.length === 0 ? (
-            <EmptyState icon="shield-check" title="Keine verweigerten Zugriffe in den letzten 30 Tagen" />
+            <AdminEmpty icon="shield-check" title="Keine verweigerten Zugriffe in den letzten 30 Tagen" />
           ) : (
             <div className="grid gap-6 lg:grid-cols-2">
               <Table>

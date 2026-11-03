@@ -3,7 +3,8 @@ import { Suspense } from "react";
 import { StatusAction } from "@/components/content/admin/action-form";
 import { MomentRuleForm } from "@/components/content/admin/moment-form";
 import { one, RedaktionNav, StatusNotice } from "@/components/content/admin/common";
-import { Badge, Notice, PageHeader, PageSkeleton, SectionHeader, Table } from "@/components/ui/primitives";
+import { AdminHeading } from "@/components/admin/ui";
+import { Badge, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { DEFAULT_MOMENT_CONFIG, MOMENT_INTENTS } from "@/lib/moment";
 import { formatDateTime } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
@@ -47,8 +48,8 @@ async function MomentRules({ searchParams }: { searchParams: PageProps<"/verwalt
             Es gilt die Standardfassung aus dem Code, bis eine Version aktiviert wird.
           </Notice>
         )}
-        <section aria-labelledby="versionen">
-          <SectionHeader id="versionen" title="Versionen" />
+        <section aria-labelledby="versionen" className="flex flex-col gap-5">
+          <AdminHeading id="versionen" title="Versionen" />
           {rows.length === 0 ? (
             <p className="text-base text-ink-2">Noch keine Version angelegt.</p>
           ) : (
@@ -101,8 +102,8 @@ async function MomentRules({ searchParams }: { searchParams: PageProps<"/verwalt
             </Table>
           )}
         </section>
-        <section aria-labelledby="neu">
-          <SectionHeader id="neu" title="Neue Version anlegen" description="Vorbelegt mit der aktiven Fassung. Die neue Version gilt erst nach der Aktivierung." />
+        <section aria-labelledby="neu" className="flex flex-col gap-5">
+          <AdminHeading id="neu" title="Neue Version anlegen" description="Vorbelegt mit der aktiven Fassung. Die neue Version gilt erst nach der Aktivierung." />
           <MomentRuleForm base={base} />
         </section>
       </div>

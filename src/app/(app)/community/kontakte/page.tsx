@@ -30,19 +30,25 @@ export default function ContactsPage({ searchParams }: PageProps<"/community/kon
   );
 }
 
+/** Haarlinien-Zeile: Monogramm, Pseudonym und Mono-Metadaten links, Aktionen rechts (mobil darunter). */
 function Row({ pseudonym, meta, children }: { pseudonym: string; meta?: ReactNode; children?: ReactNode }) {
   return (
-    <li className="flex flex-col gap-4 rounded-[20px] border border-line bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-      <div className="flex min-w-0 items-center gap-3">
+    <li className="flex flex-col gap-4 border-b border-line py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:py-6">
+      <div className="flex min-w-0 items-center gap-4">
         <Monogram name={pseudonym} />
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <p className="truncate text-lg font-semibold text-ink">{pseudonym}</p>
-          {meta && <div className="text-sm text-ink-2">{meta}</div>}
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="break-words text-lg font-semibold leading-snug text-ink">{pseudonym}</p>
+          {meta && <div className="font-mono text-[0.8125rem] text-ink-2">{meta}</div>}
         </div>
       </div>
-      {children && <div className="flex flex-wrap items-start gap-2">{children}</div>}
+      {children && <div className="flex flex-wrap items-start gap-2 pl-14 sm:shrink-0 sm:pl-0">{children}</div>}
     </li>
   );
+}
+
+/** Leerer Abschnitt als ruhige Zeile unter der Haarlinie */
+function EmptyLine({ children }: { children: ReactNode }) {
+  return <p className="border-t border-line pt-5 text-base text-ink-2">{children}</p>;
 }
 
 async function Contacts({ searchParams }: { searchParams: PageProps<"/community/kontakte">["searchParams"] }) {
@@ -83,13 +89,14 @@ async function Contacts({ searchParams }: { searchParams: PageProps<"/community/
             <section aria-labelledby="incoming">
               <SectionHeader
                 id="incoming"
+                index="01"
                 title="Eingehende Anfragen"
                 description="Nimm nur an, wenn du mit dieser Person schreiben möchtest. Eine Ablehnung wird nicht als solche angezeigt."
               />
               {lists.incoming.length === 0 ? (
-                <p className="text-base text-ink-2">Keine offenen Anfragen.</p>
+                <EmptyLine>Keine offenen Anfragen.</EmptyLine>
               ) : (
-                <ul className="flex flex-col gap-3">
+                <ul className="border-t border-ink">
                   {lists.incoming.map((r) => (
                     <Row
                       key={r.relationshipId}
@@ -99,7 +106,7 @@ async function Contacts({ searchParams }: { searchParams: PageProps<"/community/
                           {r.requestedAt ? `Angefragt am ${formatDate(r.requestedAt, tz)}` : "Angefragt"}
                           {r.expiresAt ? ` · gültig bis ${formatDate(r.expiresAt, tz)}` : ""}
                           {" · "}
-                          <Link href={`/community/mitglied/${r.otherId}`} className="font-medium text-ink underline underline-offset-4">
+                          <Link href={`/community/mitglied/${r.otherId}`} className="link-quiet font-sans font-medium text-ink">
                             Profil
                           </Link>
                         </>
@@ -128,11 +135,11 @@ async function Contacts({ searchParams }: { searchParams: PageProps<"/community/
             </section>
 
             <section aria-labelledby="outgoing">
-              <SectionHeader id="outgoing" title="Gesendete Anfragen" />
+              <SectionHeader id="outgoing" index="02" title="Gesendete Anfragen" />
               {lists.outgoing.length === 0 ? (
-                <p className="text-base text-ink-2">Keine gesendeten Anfragen.</p>
+                <EmptyLine>Keine gesendeten Anfragen.</EmptyLine>
               ) : (
-                <ul className="flex flex-col gap-3">
+                <ul className="border-t border-ink">
                   {lists.outgoing.map((r) => (
                     <Row
                       key={r.relationshipId}
@@ -167,11 +174,11 @@ async function Contacts({ searchParams }: { searchParams: PageProps<"/community/
             </section>
 
             <section aria-labelledby="active">
-              <SectionHeader id="active" title="Bestehende Kontakte" />
+              <SectionHeader id="active" index="03" title="Bestehende Kontakte" />
               {lists.active.length === 0 ? (
-                <p className="text-base text-ink-2">Noch keine bestehenden Kontakte.</p>
+                <EmptyLine>Noch keine bestehenden Kontakte.</EmptyLine>
               ) : (
-                <ul className="flex flex-col gap-3">
+                <ul className="border-t border-ink">
                   {lists.active.map((r) => (
                     <Row key={r.relationshipId} pseudonym={r.pseudonym} meta={`Verbunden seit ${formatDate(r.since, tz)}`}>
                       {r.conversationId && (
@@ -198,7 +205,7 @@ async function Contacts({ searchParams }: { searchParams: PageProps<"/community/
         )}
 
         <p className="text-base text-ink-2">
-          <Link href="/community/blockiert" className="inline-flex items-center gap-1.5 font-medium text-ink underline underline-offset-4">
+          <Link href="/community/blockiert" className="link-quiet inline-flex min-h-11 items-center gap-2 font-medium text-ink">
             <Icon name="ban" className="size-4" />
             Blockierte Personen verwalten
           </Link>

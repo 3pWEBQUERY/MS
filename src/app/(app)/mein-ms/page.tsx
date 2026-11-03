@@ -4,9 +4,9 @@ import { Suspense } from "react";
 import { EntryList } from "@/components/health/entry-list";
 import { ActivatedNotice, HealthInactiveNotice, PrivacyHint, WriteDisabledNotice } from "@/components/health/health-notices";
 import { MonthCalendar } from "@/components/health/month-calendar";
-import { ButtonLink } from "@/components/ui/button";
+import { two } from "@/components/health/notebook";
 import { Icon, type IconName } from "@/components/ui/icon";
-import { CardLink, EmptyState, Notice, PageHeader, PageSkeleton, SectionHeader, SegmentNav } from "@/components/ui/primitives";
+import { IndexList, IndexRow, Notice, PageHeader, PageSkeleton, SectionHeader, SegmentNav } from "@/components/ui/primitives";
 import { addDays, localDateString } from "@/lib/time";
 import { requireHealthViewer } from "@/server/modules/health/guard";
 import {
@@ -30,6 +30,12 @@ export default function MeinMsPage({ searchParams }: PageProps<"/mein-ms">) {
 }
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
+
+const ELSEWHERE: { href: string; label: string; icon: IconName }[] = [
+  { href: "/community", label: "Community", icon: "users" },
+  { href: "/wissen", label: "Wissen", icon: "book" },
+  { href: "/hilfe", label: "Hilfe", icon: "lifebuoy" },
+];
 
 function StatusNotices({ sp }: { sp: Record<string, string | string[] | undefined> }) {
   const deleted = one(sp.geloescht);
@@ -68,30 +74,41 @@ async function Overview({ searchParams }: { searchParams: PageProps<"/mein-ms">[
   const header = (
     <PageHeader
       eyebrow="Privat"
-      title="Mein MS"
+      title={
+        <>
+          Mein <em>MS</em>
+        </>
+      }
       description="Deine eigene Dokumentation – freiwillig, nur für dich sichtbar."
+      className="!mb-0"
     />
   );
 
   if (!active && !hasData) {
     return (
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-12">
         {header}
         <StatusNotices sp={sp} />
         <HealthInactiveNotice hasData={false} />
-        <section aria-labelledby="weiter" className="flex flex-col gap-4">
+        <section aria-labelledby="weiter">
           <SectionHeader id="weiter" title="Weiter zu" />
-          <div className="flex flex-wrap gap-2">
-            <ButtonLink href="/community" variant="secondary" icon={<Icon name="users" className="size-5" />}>
-              Community
-            </ButtonLink>
-            <ButtonLink href="/wissen" variant="secondary" icon={<Icon name="book" className="size-5" />}>
-              Wissen
-            </ButtonLink>
-            <ButtonLink href="/hilfe" variant="secondary" icon={<Icon name="lifebuoy" className="size-5" />}>
-              Hilfe
-            </ButtonLink>
-          </div>
+          <ul className="grid border-t border-ink sm:grid-cols-3">
+            {ELSEWHERE.map((q) => (
+              <li key={q.href} className="border-b border-line sm:border-b-0 sm:border-r sm:last:border-r-0">
+                <Link
+                  href={q.href}
+                  data-focus-inset
+                  className="group flex min-h-20 items-center justify-between gap-4 px-1 py-4 transition-colors duration-150 hover:bg-raised sm:min-h-28 sm:flex-col sm:items-stretch sm:px-5"
+                >
+                  <Icon name={q.icon} className="size-5 text-accent-ink" />
+                  <span className="flex items-center justify-between gap-3 font-display text-[1.5rem] leading-tight tracking-[-0.015em] text-ink max-sm:flex-1">
+                    {q.label}
+                    <Icon name="arrow-right" className="nudge size-5 shrink-0 text-ink-3 group-hover:text-ink" />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
       </div>
     );
@@ -113,98 +130,126 @@ async function Overview({ searchParams }: { searchParams: PageProps<"/mein-ms">[
   ];
   const listHref = (d: 7 | 30) => `/mein-ms?tage=${d}${month !== today.slice(0, 7) ? `&monat=${month}` : ""}`;
 
+  // Abschnittsziffern laufen fortlaufend, auch wenn «Neu festhalten» fehlt.
+  let n = 0;
+  const next = () => two(n++);
+
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-12">
       {header}
       <StatusNotices sp={sp} />
       {!active && <HealthInactiveNotice hasData />}
       {active && !writeOn && <WriteDisabledNotice />}
 
+      {/* Die eine tiefe Fläche der Seite: der freiwillige nächste Schritt */}
       {canWrite && (
-        <section aria-labelledby="neu" className="flex flex-col gap-4">
-          <SectionHeader id="neu" title="Neu festhalten" />
-          <ul className="grid gap-3 sm:grid-cols-3">
-            {actions.map((a) => (
-              <li key={a.href}>
-                <CardLink href={a.href} className="flex h-full flex-col gap-3">
-                  <Icon name={a.icon} className="size-6 text-ink" />
-                  <span className="flex flex-col gap-1">
-                    <span className="font-semibold text-ink">{a.title}</span>
-                    <span className="text-sm text-ink-2">{a.text}</span>
-                  </span>
-                </CardLink>
-              </li>
-            ))}
-          </ul>
-          <PrivacyHint />
+        <section aria-labelledby="neu" className="rounded-[28px] bg-deep text-on-deep">
+          <div className="flex flex-col gap-8 p-6 sm:p-10">
+            <div className="flex flex-col gap-3">
+              <span aria-hidden="true" className="font-mono text-[0.8125rem] font-medium tracking-[0.12em] text-deep-accent">
+                {next()}
+              </span>
+              <h2 id="neu" className="display-md !text-on-deep">
+                Neu festhalten
+              </h2>
+            </div>
+            <ul className="grid border-t border-deep-line sm:grid-cols-3">
+              {actions.map((a) => (
+                <li
+                  key={a.href}
+                  className="border-b border-deep-line last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0 sm:first:*:pl-0 sm:last:*:pr-0"
+                >
+                  <Link
+                    href={a.href}
+                    data-focus-inset
+                    className="group flex h-full flex-col gap-3 py-5 sm:px-6 sm:py-6"
+                  >
+                    <span className="flex items-center justify-between">
+                      <Icon name={a.icon} className="size-5 text-deep-accent" />
+                      <Icon name="arrow-right" className="nudge size-5 text-on-deep-2 group-hover:text-on-deep" />
+                    </span>
+                    <span className="font-display text-[1.5rem] leading-tight tracking-[-0.015em] text-on-deep underline decoration-transparent decoration-1 underline-offset-[0.2em] transition-colors duration-150 group-hover:decoration-current">
+                      {a.title}
+                    </span>
+                    <span className="text-sm text-on-deep-2">{a.text}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="border-t border-deep-line px-6 py-4 sm:px-10">
+            <PrivacyHint onDeep />
+          </div>
         </section>
       )}
 
-      <section aria-labelledby="eintraege" className="flex flex-col gap-4">
-        <SectionHeader
-          id="eintraege"
-          title="Deine Einträge"
-          description={`Letzte ${days} Tage, neueste zuerst.`}
-          action={
-            <Link href="/mein-ms/verlauf" className="hidden shrink-0 items-center gap-1.5 font-semibold text-ink underline underline-offset-4 sm:inline-flex">
-              <Icon name="table" className="size-5" />
-              Verlauf und Datentabelle
-            </Link>
-          }
-        />
-        <SegmentNav
-          label="Zeitraum der Liste"
-          items={[
-            { href: listHref(7), label: "7 Tage", active: days === 7 },
-            { href: listHref(30), label: "30 Tage", active: days === 30 },
-          ]}
-        />
-        {entries.length > 0 ? (
-          <EntryList entries={entries} />
-        ) : (
-          <EmptyState icon="notebook" title={`In den letzten ${days} Tagen gibt es keine Einträge`}>
-            {canWrite
-              ? "Wenn du magst, kannst du oben etwas festhalten. Es gibt keine Pflicht und keine Erinnerung."
-              : "Ältere Einträge findest du im Verlauf."}
-          </EmptyState>
-        )}
-        <Link href="/mein-ms/verlauf" className="inline-flex w-fit items-center gap-1.5 font-semibold text-ink underline underline-offset-4 sm:hidden">
-          <Icon name="table" className="size-5" />
-          Verlauf und Datentabelle
-        </Link>
-      </section>
+      {/* Notizbuch: Einträge links, Kalender und Verwaltung als Randspalte (ab xl) */}
+      <div className="grid gap-12 xl:grid-cols-[minmax(0,1fr)_21rem] xl:gap-14">
+        <section aria-labelledby="eintraege" className="flex min-w-0 flex-col gap-4">
+          <SectionHeader
+            id="eintraege"
+            index={next()}
+            title="Deine Einträge"
+            description={`Letzte ${days} Tage, neueste zuerst.`}
+            action={
+              <Link href="/mein-ms/verlauf" className="group link-quiet hidden shrink-0 items-center gap-1.5 font-semibold text-ink sm:inline-flex">
+                <Icon name="table" className="size-5" />
+                Verlauf und Datentabelle
+                <Icon name="arrow-right" className="nudge size-4" />
+              </Link>
+            }
+          />
+          {/* Segmentleiste sitzt direkt auf der Liste: eine Linie statt zwei */}
+          <div>
+            <SegmentNav
+              label="Zeitraum der Liste"
+              items={[
+                { href: listHref(7), label: "7 Tage", active: days === 7 },
+                { href: listHref(30), label: "30 Tage", active: days === 30 },
+              ]}
+            />
+            {entries.length > 0 ? (
+              <EntryList entries={entries} />
+            ) : (
+              <div className="flex flex-col gap-2 border-b border-line py-8">
+                <p className="display-sm">{`In den letzten ${days} Tagen gibt es keine Einträge`}</p>
+              <p className="max-w-xl text-base text-ink-2">
+                {canWrite
+                  ? "Wenn du magst, kannst du oben etwas festhalten. Es gibt keine Pflicht und keine Erinnerung."
+                  : "Ältere Einträge findest du im Verlauf."}
+                </p>
+              </div>
+            )}
+          </div>
+          <Link href="/mein-ms/verlauf" className="group link-quiet inline-flex w-fit items-center gap-1.5 py-2 font-semibold text-ink sm:hidden">
+            <Icon name="table" className="size-5" />
+            Verlauf und Datentabelle
+            <Icon name="arrow-right" className="nudge size-4" />
+          </Link>
+        </section>
 
-      {/* Optionale Ansicht: in der einfachen Ansicht ausgeblendet; Liste und Verlauf bleiben (HOM06). */}
-      <section aria-labelledby="kalender" id="kalender-bereich" className="flex flex-col gap-4" data-optional>
-        <SectionHeader id="kalender" title="Kalender" description="Tage, an denen du etwas festgehalten hast." />
-        <MonthCalendar
-          month={month}
-          today={today}
-          days={calendar}
-          hrefForMonth={(m) => `/mein-ms?tage=${days}&monat=${m}#kalender-bereich`}
-        />
-      </section>
+        <div className="flex min-w-0 flex-col gap-12 xl:pt-1">
+          {/* Optionale Ansicht: in der einfachen Ansicht ausgeblendet; Liste und Verlauf bleiben (HOM06). */}
+          <section aria-labelledby="kalender" id="kalender-bereich" className="flex flex-col" data-optional>
+            <SectionHeader id="kalender" index={next()} title="Kalender" description="Tage, an denen du etwas festgehalten hast." />
+            <MonthCalendar
+              month={month}
+              today={today}
+              days={calendar}
+              hrefForMonth={(m) => `/mein-ms?tage=${days}&monat=${m}#kalender-bereich`}
+            />
+          </section>
 
-      <section aria-labelledby="verwalten" className="flex flex-col gap-3">
-        <SectionHeader id="verwalten" title="Verwalten" />
-        <ul className="flex flex-col gap-2 text-base">
-          <li>
-            <Link href="/mein-ms/symptome" className="font-medium text-ink underline underline-offset-4">
-              Eigene Symptombezeichnungen
-            </Link>
-          </li>
-          <li>
-            <Link href="/konto/daten" className="font-medium text-ink underline underline-offset-4">
-              Daten exportieren oder löschen
-            </Link>
-          </li>
-          <li>
-            <Link href="/konto/privatsphaere" className="font-medium text-ink underline underline-offset-4">
-              Einwilligung zum Gesundheitsbereich
-            </Link>
-          </li>
-        </ul>
-      </section>
+          <section aria-labelledby="verwalten" className="flex flex-col">
+            <SectionHeader id="verwalten" index={next()} title="Verwalten" />
+            <IndexList className="!border-ink">
+              <IndexRow href="/mein-ms/symptome" title="Eigene Symptombezeichnungen" />
+              <IndexRow href="/konto/daten" title="Daten exportieren oder löschen" />
+              <IndexRow href="/konto/privatsphaere" title="Einwilligung zum Gesundheitsbereich" />
+            </IndexList>
+          </section>
+        </div>
+      </div>
     </div>
   );
 }

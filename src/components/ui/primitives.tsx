@@ -126,6 +126,7 @@ export function PageHeader({
   description,
   actions,
   back,
+  size = "md",
   className,
 }: {
   eyebrow?: ReactNode;
@@ -133,6 +134,8 @@ export function PageHeader({
   description?: ReactNode;
   actions?: ReactNode;
   back?: { href: string; label: string };
+  /** «lg» für Einstiegsseiten (Wissen, Hilfe, Artikel) */
+  size?: "md" | "lg";
   className?: string;
 }) {
   return (
@@ -141,7 +144,7 @@ export function PageHeader({
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex max-w-3xl flex-col gap-4">
           {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-          <h1 className="display-md">{title}</h1>
+          <h1 className={size === "lg" ? "display-lg" : "display-md"}>{title}</h1>
           {description && <div className="max-w-2xl text-lg leading-relaxed text-ink-2">{description}</div>}
         </div>
         {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
@@ -359,14 +362,29 @@ export function SegmentNav({
 }
 
 /** Externer Link – als solcher erkennbar, ohne Weitergabe von Parametern (CON04) */
-export function ExternalLink({ href, children, className }: { href: string; children: ReactNode; className?: string }) {
+export function ExternalLink({
+  href,
+  children,
+  className,
+  tone = "paper",
+}: {
+  href: string;
+  children: ReactNode;
+  className?: string;
+  /** «deep» auf bg-deep (helle Glut statt accent-ink) */
+  tone?: "paper" | "deep";
+}) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer nofollow"
       referrerPolicy="no-referrer"
-      className={cn("inline-flex items-center gap-1 font-medium text-accent-ink underline underline-offset-4", className)}
+      className={cn(
+        "inline-flex items-center gap-1 font-medium underline underline-offset-4",
+        tone === "deep" ? "text-deep-accent" : "text-accent-ink",
+        className,
+      )}
     >
       {children}
       <Icon name="external" className="size-4" />

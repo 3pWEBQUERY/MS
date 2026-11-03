@@ -28,17 +28,17 @@ export function ContactForm({
 
   if (state.status === "success" && state.data?.sent) {
     return (
-      <div role="status" className="flex flex-col items-start gap-4 rounded-[20px] border border-line bg-surface p-6 sm:p-8">
-        <span className="flex size-12 items-center justify-center rounded-[12px] bg-success-soft text-success">
-          <Icon name="check-circle" className="size-6" />
-        </span>
-        <p className="text-lg font-semibold text-ink">{state.message}</p>
+      <div role="status" className="flex flex-col items-start gap-4 border-y border-ink py-8">
+        <p className="inline-flex items-start gap-3 font-display text-[1.75rem] leading-tight tracking-[-0.015em] text-ink">
+          <Icon name="check-circle" className="mt-1 size-6 shrink-0 text-success" />
+          {state.message}
+        </p>
         <p className="text-base text-ink-2">Bei akuter Gefahr wende dich bitte direkt an die Hilfewege auf der Sicherheitsseite.</p>
-        <div className="flex flex-wrap gap-4">
-          <Link href="/" className="font-semibold text-ink underline underline-offset-4">
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <Link href="/" className="link-quiet inline-flex min-h-11 items-center font-semibold text-ink">
             Zur Startseite
           </Link>
-          <Link href="/sicherheit" className="font-semibold text-danger underline underline-offset-4">
+          <Link href="/sicherheit" className="link-quiet inline-flex min-h-11 items-center font-semibold text-danger">
             Sicherheit und akute Hilfe
           </Link>
         </div>

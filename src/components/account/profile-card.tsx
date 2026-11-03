@@ -29,12 +29,12 @@ export function MemberProfileCard({
       <div className="flex items-center gap-4">
         <Monogram name={name} size="lg" />
         <div className="flex min-w-0 flex-col gap-0.5">
-          <Heading className="break-words text-xl font-[650] text-ink">{name}</Heading>
-          <span className="text-sm text-ink-2">Mitglied</span>
+          <Heading className="break-words font-display text-[1.625rem] leading-tight tracking-[-0.015em] text-ink">{name}</Heading>
+          <span className="font-mono text-xs uppercase tracking-[0.12em] text-ink-2">Mitglied</span>
         </div>
       </div>
-      <dl className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
+      <dl className="flex flex-col border-t border-line">
+        <div className="flex flex-col gap-2 border-b border-line py-4 last:border-b-0 last:pb-0">
           <dt className="text-sm font-semibold text-ink-2">Interessen</dt>
           <dd>
             {profile.interests.length > 0 ? (
@@ -51,7 +51,7 @@ export function MemberProfileCard({
           </dd>
         </div>
         {canton && (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 border-b border-line py-4 last:border-b-0 last:pb-0">
             <dt className="text-sm font-semibold text-ink-2">Kanton</dt>
             <dd className="flex items-center gap-1.5 text-base text-ink">
               <Icon name="pin" className="size-4 text-ink-2" />

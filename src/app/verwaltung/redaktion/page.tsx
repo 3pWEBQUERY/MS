@@ -5,7 +5,8 @@ import { Suspense } from "react";
 import { ArticleStatusBadge, DueBadge, one, RedaktionNav } from "@/components/content/admin/common";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { EmptyState, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
+import { AdminEmpty } from "@/components/admin/ui";
+import { Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { formatDate } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
 import { listArticlesForStaff, listContactMessages, listReviewQueue, publicState } from "@/server/modules/content/editorial-queries";
@@ -62,9 +63,9 @@ async function EditorialContent({ searchParams }: { searchParams: PageProps<"/ve
           </Notice>
         )}
         {list.length === 0 ? (
-          <EmptyState icon="book" title={view === "faellig" ? "Nichts fällig" : "Noch keine Artikel"}>
+          <AdminEmpty icon="book" title={view === "faellig" ? "Nichts fällig" : "Noch keine Artikel"}>
             {view === "faellig" ? "Alle publizierten Artikel haben einen gültigen Prüftermin." : "Lege den ersten Artikel als Entwurf an."}
-          </EmptyState>
+          </AdminEmpty>
         ) : (
           <Table>
             <caption className="sr-only">Artikel mit Arbeitsversion und öffentlichem Stand</caption>
@@ -80,14 +81,14 @@ async function EditorialContent({ searchParams }: { searchParams: PageProps<"/ve
               {list.map((r) => (
                 <tr key={r.id}>
                   <td className="min-w-64">
-                    <Link href={`/verwaltung/redaktion/artikel/${r.id}`} className="font-semibold text-ink underline-offset-4 hover:underline">
+                    <Link href={`/verwaltung/redaktion/artikel/${r.id}`} className="link-quiet font-semibold text-ink">
                       {r.latestTitle}
                     </Link>
                     <span className="block text-sm text-ink-2">{r.topicName}</span>
                   </td>
                   <td>
                     <span className="flex flex-wrap items-center gap-2">
-                      <span className="tabular text-sm text-ink-2">V{r.latestVersionNo}</span>
+                      <span className="tabular font-mono text-sm text-ink-2">V{r.latestVersionNo}</span>
                       <ArticleStatusBadge status={r.latestStatus} />
                     </span>
                   </td>

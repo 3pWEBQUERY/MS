@@ -6,7 +6,7 @@ import { EXPORT_ERROR, ExportStatusBadge } from "@/components/account/export-sta
 import { ReauthNotice } from "@/components/account/reauth-notice";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Card, KeyValue, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { KeyValue, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { formatDateTime } from "@/lib/time";
 import { recordDenied } from "@/server/audit";
 import { hasRecentAuth, requireViewer } from "@/server/auth/viewer";
@@ -59,30 +59,37 @@ async function ExportStatus({ params }: { params: PageProps<"/konto/export/[id]"
         eyebrow="Datenexport"
         title="Exportstatus"
         description={`Auftrag vom ${formatDateTime(job.createdAt, tz)}`}
-        className="pb-0 sm:pb-0"
+        className="!mb-0"
       />
 
-      <Card className="flex flex-col gap-5">
+      <div className="flex flex-col gap-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="font-semibold text-ink">Status</p>
+          <p className="eyebrow">Status</p>
           <ExportStatusBadge status={job.status} />
         </div>
 
         {(pending || job.status === "ready") && (
-          <ol className="flex flex-col gap-3" aria-label="Fortschritt">
+          <ol className="flex flex-col border-t border-ink" aria-label="Fortschritt">
             {STEPS.map((s, i) => {
               const done = i < stepIndex || job.status === "ready";
               const active = i === stepIndex && pending;
               return (
-                <li key={s.key} className="flex items-center gap-3" aria-current={active ? "step" : undefined}>
+                <li
+                  key={s.key}
+                  className="grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-4 border-b border-line py-4"
+                  aria-current={active ? "step" : undefined}
+                >
+                  <span aria-hidden="true" className={`font-mono text-sm tracking-[0.08em] ${done || active ? "text-accent-ink" : "text-ink-3"}`}>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className={done || active ? "font-semibold text-ink" : "text-ink-2"}>
+                    {s.label}
+                    <span className="sr-only">{done ? " – erledigt" : active ? " – läuft" : " – ausstehend"}</span>
+                  </span>
                   <span
                     className={`flex size-8 shrink-0 items-center justify-center rounded-[8px] ${done ? "bg-ink text-ink-inverse" : active ? "border border-ink text-ink" : "bg-sunk text-ink-3"}`}
                   >
                     <Icon name={done ? "check" : active ? "loader" : "minus"} className={`size-4 ${active ? "motion-safe:animate-spin" : ""}`} />
-                  </span>
-                  <span className={done || active ? "text-ink" : "text-ink-2"}>
-                    {s.label}
-                    <span className="sr-only">{done ? " – erledigt" : active ? " – läuft" : " – ausstehend"}</span>
                   </span>
                 </li>
               );
@@ -95,6 +102,7 @@ async function ExportStatus({ params }: { params: PageProps<"/konto/export/[id]"
         {job.status === "ready" && job.expiresAt && (
           <>
             <KeyValue
+              className="-mt-6 border-b border-line"
               items={[
                 ["Bereitgestellt", job.readyAt ? formatDateTime(job.readyAt, tz) : "–"],
                 ["Herunterladbar bis", formatDateTime(job.expiresAt, tz)],
@@ -136,7 +144,7 @@ async function ExportStatus({ params }: { params: PageProps<"/konto/export/[id]"
             {EXPORT_ERROR[job.errorCode ?? ""] ?? "Der Export konnte nicht erstellt werden. Es wurde nichts gespeichert. Bitte starte einen neuen Export."}
           </Notice>
         )}
-      </Card>
+      </div>
 
       {(job.status === "expired" || job.status === "failed") && (
         <ButtonLink href="/konto/daten" variant="secondary" className="w-fit">

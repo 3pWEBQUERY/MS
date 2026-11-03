@@ -18,9 +18,13 @@ function RecoveryCodes({ codes, onDone }: { codes: string[]; onDone: () => void 
       <Notice tone="warning" role="status" title="Jetzt sichern – die Codes werden nur dieses eine Mal angezeigt">
         Bewahre sie getrennt vom Smartphone auf, zum Beispiel ausgedruckt oder in deinem Passwortmanager.
       </Notice>
-      <ol className="tabular grid grid-cols-1 gap-2 rounded-[16px] border border-line bg-sunk p-4 font-mono text-lg text-ink min-[400px]:grid-cols-2">
-        {codes.map((c) => (
-          <li key={c} className="rounded-[8px] bg-surface px-3 py-2">
+      {/* Codes als Haarlinien-Raster mit Mono-Ziffern – ruhig lesbar, gut abzuschreiben */}
+      <ol className="tabular grid grid-cols-1 gap-x-8 border-t border-ink font-mono text-lg text-ink min-[400px]:grid-cols-2">
+        {codes.map((c, i) => (
+          <li key={c} className="flex items-baseline gap-4 border-b border-line py-3">
+            <span aria-hidden="true" className="text-sm text-ink-3">
+              {String(i + 1).padStart(2, "0")}
+            </span>
             {c}
           </li>
         ))}

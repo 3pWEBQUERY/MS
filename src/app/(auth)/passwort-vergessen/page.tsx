@@ -14,7 +14,7 @@ export default function ForgotPasswordPage() {
       </AuthHeading>
       <RequestResetForm />
       <p className="mt-6 text-center text-base text-ink-2">
-        <Link href="/anmelden" className="font-semibold text-ink underline underline-offset-4">
+        <Link href="/anmelden" className="link-quiet font-semibold text-ink">
           Zurück zur Anmeldung
         </Link>
       </p>

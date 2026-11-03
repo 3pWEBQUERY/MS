@@ -15,9 +15,11 @@ export default function Page() {
       slug="barrierefreiheit"
       eyebrow="Barrierefreiheit"
       after={
-        <div className="flex flex-col gap-3 rounded-[20px] border border-line bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-          <p className="text-base text-ink">Etwas ist für dich schwer zu bedienen oder zu lesen? Das möchten wir wissen.</p>
-          <ButtonLink href="/kontakt?kategorie=barriere" variant="secondary" icon={<Icon name="flag" className="size-5" />}>
+        <div className="flex max-w-[68ch] flex-col gap-5 border-y border-ink py-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="font-display text-[1.5rem] leading-snug tracking-[-0.01em] text-ink">
+            Etwas ist für dich schwer zu bedienen oder zu lesen? <em className="text-accent-ink">Das möchten wir wissen.</em>
+          </p>
+          <ButtonLink href="/kontakt?kategorie=barriere" variant="secondary" className="shrink-0" icon={<Icon name="flag" className="size-5" />}>
             Barriere melden
           </ButtonLink>
         </div>

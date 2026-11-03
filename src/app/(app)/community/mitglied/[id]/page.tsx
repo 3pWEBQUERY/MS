@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Badge, Card, KeyValue, Monogram, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { Badge, KeyValue, Monogram, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { cantonName, interestLabel } from "@/lib/catalog";
 import { requireViewer } from "@/server/auth/viewer";
 import { getMemberProfileForViewer } from "@/server/modules/community/queries";
@@ -49,8 +49,9 @@ async function MemberProfile({ params }: { params: PageProps<"/community/mitglie
           </Notice>
         )}
 
-        <Card className="flex flex-col gap-5">
-          <div className="flex flex-wrap items-center gap-3">
+        {/* Profilgrenze sichtbar machen: wenige Angaben, ruhig auf der Haarlinie statt in einer Karte */}
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-wrap items-center gap-4">
             <Monogram name={profile.pseudonym} size="lg" />
             {profile.team ? (
               <Badge tone="info" icon="shield">
@@ -63,6 +64,7 @@ async function MemberProfile({ params }: { params: PageProps<"/community/mitglie
             )}
           </div>
           <KeyValue
+            className="border-y border-t-ink border-b-line"
             items={[
               [
                 "Interessen",
@@ -81,10 +83,10 @@ async function MemberProfile({ params }: { params: PageProps<"/community/mitglie
               ...(canton ? ([["Kanton", canton]] as [string, string][]) : []),
             ]}
           />
-        </Card>
+        </div>
 
         {!profile.self && (
-          <section aria-labelledby="profile-actions" className="flex flex-col gap-3">
+          <section aria-labelledby="profile-actions" className="flex flex-col gap-4">
             <h2 id="profile-actions" className="sr-only">
               Aktionen
             </h2>
@@ -109,7 +111,7 @@ async function MemberProfile({ params }: { params: PageProps<"/community/mitglie
             </div>
             <p className="text-sm text-ink-2">
               Gespräche beginnen erst, wenn beide zugestimmt haben. Eine Anfrage enthält keinen Text.{" "}
-              <Link href="/regeln" className="font-medium text-ink underline underline-offset-4">
+              <Link href="/regeln" className="link-quiet font-medium text-ink">
                 Regeln
               </Link>
             </p>

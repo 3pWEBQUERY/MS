@@ -8,7 +8,8 @@ import { ArticleVersionForm, ReviewForm, SourceForm, WithdrawForm } from "@/comp
 import { ArticleStatusBadge, dateInputValue, DueBadge, one, StatusNotice } from "@/components/content/admin/common";
 import { RichText } from "@/components/content/rich-text";
 import { Icon } from "@/components/ui/icon";
-import { Card, ExternalLink, KeyValue, Notice, PageHeader, PageSkeleton, SectionHeader, Table } from "@/components/ui/primitives";
+import { AdminHeading } from "@/components/admin/ui";
+import { Card, ExternalLink, KeyValue, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { formatDate, formatDateTime } from "@/lib/time";
 import { recordDenied } from "@/server/audit";
 import { requireStaff } from "@/server/auth/viewer";
@@ -113,13 +114,14 @@ async function StaffArticle({
         <StatusNotice code={one(sp.status)} messages={STATUS_MESSAGES} />
 
         {/* Öffentlicher Stand */}
-        <section aria-labelledby="oeffentlich">
-          <SectionHeader id="oeffentlich" title="Öffentlicher Stand" />
-          <Card className="flex flex-col gap-5">
+        <section aria-labelledby="oeffentlich" className="flex flex-col gap-5">
+          <AdminHeading id="oeffentlich" title="Öffentlicher Stand" />
+          <div className="flex flex-col gap-5">
             {pub ? (
               <KeyValue
+                className="border-y border-line"
                 items={[
-                  ["Version", <span key="v" className="tabular">V{pub.versionNo}</span>],
+                  ["Version", <span key="v" className="tabular font-mono">V{pub.versionNo}</span>],
                   ["Status", <ArticleStatusBadge key="s" status={pub.status} />],
                   ["Publiziert", pub.publishedAt ? formatDateTime(pub.publishedAt) : "–"],
                   ["Nächster Prüftermin", pub.reviewDueAt ? formatDate(pub.reviewDueAt) : "–"],
@@ -159,13 +161,13 @@ async function StaffArticle({
                 />
               )}
             </div>
-          </Card>
+          </div>
         </section>
 
         {/* Arbeitsversion */}
         <section aria-labelledby="arbeitsversion" className="flex flex-col gap-5">
           <div className="flex flex-wrap items-center gap-3">
-            <h2 id="arbeitsversion" className="text-xl font-[650] text-ink">
+            <h2 id="arbeitsversion" className="text-xl font-[650] tracking-[-0.01em] text-ink">
               Arbeitsversion V{latest.versionNo}
             </h2>
             <ArticleStatusBadge status={latest.status} />
@@ -271,8 +273,8 @@ async function StaffArticle({
         </section>
 
         {/* Verlauf */}
-        <section aria-labelledby="versionen">
-          <SectionHeader id="versionen" title="Versionen und Prüfungen" />
+        <section aria-labelledby="versionen" className="flex flex-col gap-5">
+          <AdminHeading id="versionen" title="Versionen und Prüfungen" />
           <Table>
             <caption className="sr-only">Alle Versionen mit Prüfentscheiden</caption>
             <thead>
@@ -288,9 +290,9 @@ async function StaffArticle({
                 const rv = reviews.filter((r) => r.versionId === v.id);
                 return (
                   <tr key={v.id}>
-                    <td className="tabular whitespace-nowrap">
+                    <td className="tabular whitespace-nowrap font-mono">
                       V{v.versionNo}
-                      {v.id === article.publishedVersionId && <span className="block text-sm text-ink-2">öffentliche Version</span>}
+                      {v.id === article.publishedVersionId && <span className="block font-sans text-sm text-ink-2">öffentliche Version</span>}
                     </td>
                     <td>
                       <ArticleStatusBadge status={v.status} />
@@ -319,8 +321,8 @@ async function StaffArticle({
 function VersionPreview({ title, summary, body }: { title: string; summary: string; body: string }) {
   return (
     <Card className="flex flex-col gap-5">
-      <p className="text-sm font-semibold uppercase tracking-[0.08em] text-ink-2">Vorschau</p>
-      <p className="text-2xl font-[650] text-ink">{title}</p>
+      <p className="eyebrow">Vorschau</p>
+      <p className="font-display text-[1.75rem] leading-tight tracking-[-0.015em] text-ink">{title}</p>
       <div className="rounded-[12px] bg-sunk p-4">
         <p className="mb-1 text-sm font-semibold text-ink-2">Kurzfassung</p>
         <p className="text-base text-ink">{summary}</p>
@@ -343,9 +345,12 @@ function SourcesBlock({
       {sources.length === 0 ? (
         <p className="text-base text-ink-2">Noch keine Quellen hinterlegt.</p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {sources.map((s) => (
-            <li key={s.id} className="flex flex-col gap-3 rounded-[16px] border border-line bg-surface p-4 sm:flex-row sm:items-start sm:justify-between">
+        <ol className="border-t border-line">
+          {sources.map((s, i) => (
+            <li key={s.id} className="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 gap-y-3 border-b border-line py-4 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] sm:items-start">
+              <span aria-hidden="true" className="pt-0.5 font-mono text-sm font-medium tracking-[0.08em] text-ink-3">
+                {String(i + 1).padStart(2, "0")}
+              </span>
               <div className="flex min-w-0 flex-col gap-1">
                 <p className="font-semibold text-ink">{s.title}</p>
                 <p className="text-sm text-ink-2">
@@ -360,11 +365,13 @@ function SourcesBlock({
                 )}
               </div>
               {editable && (
-                <StatusAction action={removeSourceAction} fields={{ sourceId: s.id }} label="Entfernen" variant="quiet-danger" size="sm" pendingText="Wird entfernt …" />
+                <div className="col-start-2 sm:col-start-3">
+                  <StatusAction action={removeSourceAction} fields={{ sourceId: s.id }} label="Entfernen" variant="quiet-danger" size="sm" pendingText="Wird entfernt …" />
+                </div>
               )}
             </li>
           ))}
-        </ul>
+        </ol>
       )}
     </div>
   );
