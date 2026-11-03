@@ -70,6 +70,14 @@ Für volle RLS-Wirkung: `docs/db-roles.sql` ausführen und den Web-Service mit d
 
 > PRD-Vorgabe «primäre Datenhaltung in der Schweiz» (Kapitel 11, D04): Railway bietet keine Schweizer Region. Vor produktiven Daten ist zu entscheiden, ob Amsterdam (EU) genügt oder ein Schweizer Anbieter nötig ist.
 
+## Betrieb
+
+- Runbooks für Login-Ausfall, verzögerte Nachrichten, Export-/Löschfehler, Backup, Datenabfluss, Wiederanlauf und falsche Hilfewege: `docs/RUNBOOKS.md`.
+- Health-Endpunkte: `/api/v1/health` (Railway-Healthcheck, nur Web und Datenbank) und `/api/v1/health/worker` (externer Prüfer: Lebenszeichen des Arbeiters und Alarme, 503 bei Alarm). Der Worker schreibt Alarme als `[alarm] code=…` ins Log.
+- Verwaltung `/verwaltung/betrieb`: Status, Feature-Schalter, Outbox; `…/einfuehrung`: Startbestand (CON08) und Stoppkriterien (PRD 17); `…/nutzung`: optionale Nutzungsstatistik, nur Summen ab zehn Personen (PRD 15).
+- CI: `.github/workflows/ci.yml` (Typen, Lint, Tests, 600-Zeilen-Regel, `npm audit`, Build). Im Railway-Service «Wait for CI» aktivieren.
+- Anfragen tragen eine Korrelations-ID (`X-Request-Id`), API-Fehlerantworten nennen sie als `correlationId`.
+
 ## Struktur
 
 Siehe `docs/ENGINEERING.md`. Kurz:

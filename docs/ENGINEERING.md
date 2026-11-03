@@ -88,6 +88,8 @@ export async function createPostAction(_prev: ActionState, formData: FormData): 
 - Feature-Schalter: `assertEnabled("community_write" | "chat" | "health_write" | "registration")`.
 - Audit für privilegierte Aktionen: `audit({ actorId, actorRole, action, objectType, objectId, ticket })` – **ohne** Freitext oder Gesundheitswerte.
 - Outbox (Hintergrundaufgaben, Mitteilungen): `enqueue({ type, aggregateType, aggregateId, payload, dedupeKey }, tx)` in derselben Transaktion. Payload nur IDs.
+- Optionale Nutzungsstatistik (PRD 15): `trackLater(accountId, event)` aus `@/server/modules/analytics/track` – nur die fünf Ereignisse aus `src/lib/analytics.ts`, ohne IDs, Texte oder Werte; gespeichert wird nur mit Einwilligung «analytics». Technische Fehler eines Kernablaufs: `runAction(fn, values, { flow: "F02" })`. Im Browser nur `sendAnalytics()` aus `@/components/analytics/beacon` (Server prüft erneut).
+- Logs: nur Codes, IDs und Zähler; Fehlermeldungen von Bibliotheken über `redactLogText()` (`@/lib/log-safety`). `src/lib/log-safety.test.ts` prüft alle `console.*`-Aufrufe automatisch auf verbotene Felder (NFR15).
 - Freitext immer mit `cleanText()` bereinigen; Ausgabe nur als Text (`PlainText`), nie `dangerouslySetInnerHTML`.
 - Verschlüsselung von Freitexten (Tagebuchnotizen, Nachrichten, Belege, Meldungsdetails): `encrypt()` / `decrypt()` aus `@/server/crypto`.
 
