@@ -11,3 +11,5 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Projektregeln MS Plattform
 
 Vor jeder Änderung lesen: `docs/ENGINEERING.md` (Architektur, Cache-Components-Muster, Rechte, Server Actions) und `docs/DESIGN.md` (keine Verläufe, keine Schatten, konzentrische Radien). Fachliche Grundlage: `docs/PRD.md` (Anforderungs-IDs wie ACC01, S18, COM02 in Kommentaren referenzieren).
+
+**Dateigrösse:** Keine Datei darf mehr als 600 Zeilen haben (`npm run check:lines`). Grosse Module nach Verantwortung aufteilen (z. B. `queries.ts` → `sql-helpers.ts`, `profile-queries.ts`), bestehende Importpfade über Re-Exporte erhalten.

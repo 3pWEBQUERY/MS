@@ -110,6 +110,8 @@ export async function createPostAction(_prev: ActionState, formData: FormData): 
 
 ## Qualitätsprüfung
 
+- `npm run check:lines`: **keine Datei über 600 Zeilen.** Bei Bedarf nach Verantwortung aufteilen; Daten (Seeds) in mehrere Dateien.
+
 - `npm run typecheck` (führt `next typegen` + `tsc` aus) und `npx eslint <dateien>` müssen sauber sein.
 - **Nicht** `next build` oder `next dev` parallel zu anderen Agents starten.
 - Barrierefreiheit: Labels, `aria-describedby` für Fehler (über `Field`), Überschriftenhierarchie (genau ein `h1` pro Seite über `PageHeader`), Landmarken, Fokus sichtbar, Tastaturbedienung, Tabellen mit `<th scope>`.
