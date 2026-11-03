@@ -66,7 +66,7 @@ export function MeinMoment({
                   if (!active) sendAnalytics({ name: "moment_path_selected", params: { path: i.key } });
                 }}
                 className={cn(
-                  "group flex min-h-28 flex-col items-start justify-between gap-4 rounded-[20px] border px-5 py-4 text-left transition-colors duration-150",
+                  "group flex min-h-20 flex-col items-start justify-between gap-2 rounded-[20px] border px-5 py-4 text-left transition-colors duration-150 sm:min-h-28 sm:gap-4",
                   active ? "border-on-deep bg-on-deep text-deep" : "border-deep-line text-on-deep hover:border-on-deep-2",
                 )}
               >
