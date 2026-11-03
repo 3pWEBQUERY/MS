@@ -98,10 +98,10 @@ vertretbarer als ein Verlust. Soziale Sammelmails schützt `notifications.ts` zu
 ## QA09 / A02 – automatisierte Barrierefreiheit und Reflow
 
 `npm run test:e2e` (`e2e/a11y.spec.ts`): axe-core 4.14 mit den Tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`,
-`wcag22aa` über 58 Seiten (17 öffentliche, 27 Mitglieder-, 14 Verwaltungsseiten mit drei Rollen und MFA) in vier
+`wcag22aa` über 58 Seiten (17 öffentliche, 27 Mitglieder-, 14 Verwaltungsseiten mit drei Rollen und MFA) in sechs
 Modi: hell 1280 px, dunkel 1280 px, hell 320 px (Reflow, entspricht 400 % Zoom bei 1280 px), dunkel 640 px mit
-Schrift 150 % (entspricht 200 % Zoom). Zusätzlich: kein horizontales Scrollen der Seite, Tastaturtest (Skip-Link,
-sichtbarer und nicht verdeckter Fokus, Anmeldung und Check-in vollständig per Tastatur). Ergebnis: **232 Seitenprüfungen
+Schrift 150 % (entspricht 200 % Zoom), hell 1920 × 1080 und dunkel 844 × 390 (Smartphone quer) – Screenmatrix NFR01. Zusätzlich: kein horizontales Scrollen der Seite, Tastaturtest (Skip-Link,
+sichtbarer und nicht verdeckter Fokus, Anmeldung und Check-in vollständig per Tastatur). Ergebnis: **348 Seitenprüfungen
 ohne Befund**, nachdem folgende Verstösse behoben wurden:
 
 | Befund | Ursache | Behebung |
@@ -117,10 +117,11 @@ Konformitätsaussage erfolgt erst danach.
 
 ## Ende-zu-Ende- und Integrationstests
 
-- `npm run test:e2e`: 23 Tests grün (F01–F07, AT10, Barrierefreiheit, Tastatur) gegen den Produktions-Build.
+- `npm run test:e2e`: 29 Tests grün (F01–F07, AT10, Barrierefreiheit, Tastatur) gegen den Produktions-Build.
   Hinweis aus F04: Bei `notFound()` innerhalb einer Suspense-Grenze bleibt der HTTP-Status wegen Streaming 200; angezeigt
   wird die neutrale Seite «Diese Seite ist nicht verfügbar.» ohne Inhalte (geprüft).
-- `npm run test:db`: 26 Integrationstests gegen eine frische Datenbank «ms_test» (AT02, AT03 inkl. RLS mit Rolle ohne
-  BYPASSRLS, AT04–AT09, Audit-Hash-Kette, Belege unveränderlich, Outbox-Deduplizierung).
+- `npm run test:db`: 29 Integrationstests gegen eine frische Datenbank «ms_test» (AT02, AT03 inkl. RLS mit Rolle ohne
+  BYPASSRLS, AT04–AT09, Konflikt bei veralteter Version, Ruhezeit, archivierte Gruppe, Audit-Hash-Kette, Belege
+  unveränderlich, Outbox-Deduplizierung).
 - CI-Job `integration` (`.github/workflows/ci.yml`) mit Postgres-16-Service: `test:db`, `drill:worker`,
   `drill:restore`, `test:e2e`.

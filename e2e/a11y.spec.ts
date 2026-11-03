@@ -14,7 +14,7 @@ import { createMember } from "./support/db";
 test.describe.configure({ mode: "parallel" });
 
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
-const DEMO_MEMBER = { email: "mitglied.a@demo.ms-plattform.ch", password: "ruhiger-moment-2026-demo" };
+const DEMO_MEMBER = { email: "mitglied.a@demo.ms-plattform.ch" };
 
 const PUBLIC = [
   "/",
@@ -75,16 +75,19 @@ const STAFF: { roles: ("admin" | "ops" | "moderation_lead" | "moderator" | "edit
   { roles: ["editor"], pages: ["/verwaltung/redaktion", "/verwaltung/redaktion/neu", "/verwaltung/verzeichnis", "/verwaltung/verzeichnis/sicherheit"] },
 ];
 
-type Mode = { name: string; theme: "light" | "dark"; width: number; textScale?: number };
+type Mode = { name: string; theme: "light" | "dark"; width: number; height?: number; textScale?: number };
 const MODES: Mode[] = [
   { name: "hell 1280", theme: "light", width: 1280 },
   { name: "dunkel 1280", theme: "dark", width: 1280 },
   { name: "hell 320 (Reflow)", theme: "light", width: 320 },
   { name: "dunkel 640, Schrift 150 %", theme: "dark", width: 640, textScale: 150 },
+  // NFR01 Screenmatrix: grosse Bildschirme und Smartphone im Querformat
+  { name: "hell 1920", theme: "light", width: 1920, height: 1080 },
+  { name: "dunkel 844×390 Querformat", theme: "dark", width: 844, height: 390 },
 ];
 
 async function newPage(browser: Browser, mode: Mode): Promise<Page> {
-  const ctx = await browser.newContext({ colorScheme: mode.theme, viewport: { width: mode.width, height: 900 } });
+  const ctx = await browser.newContext({ colorScheme: mode.theme, viewport: { width: mode.width, height: mode.height ?? 900 } });
   if (mode.textScale)
     await ctx.addInitScript((scale) => {
       try {
@@ -122,7 +125,7 @@ for (const mode of MODES) {
 
     test("Mitgliederseiten", async ({ browser }) => {
       const page = await newPage(browser, mode);
-      await login(page, DEMO_MEMBER.email, undefined, DEMO_MEMBER.password);
+      await login(page, DEMO_MEMBER.email);
       const problems: string[] = [];
       for (const path of MEMBER) problems.push(...(await audit(page, path, mode)));
       expect(problems).toEqual([]);
