@@ -97,7 +97,7 @@ async function EraseHealth({ searchParams }: { searchParams: PageProps<"/konto/d
               ))}
             </dl>
           </section>
-          <ul className="flex flex-col border-t border-line text-base text-ink-2">
+          <ul className="-mt-4 flex flex-col text-base text-ink-2">
             <li className="border-b border-line py-4">
               Die Löschung wirkt sofort und lässt sich nicht rückgängig machen. Es gibt keine verdeckte Wiederherstellung.
             </li>
