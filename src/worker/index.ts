@@ -13,6 +13,8 @@ const MAX_ATTEMPTS = 6;
 const POLL_MS = Number(process.env.WORKER_POLL_MS ?? 2000);
 /** Nach dieser Zeit gilt ein «processing»-Ereignis als verwaist (Absturz) und wird erneut aufgenommen. */
 const STALE_SECONDS = Math.max(1, Number(process.env.WORKER_STALE_SECONDS ?? 300));
+/** Nur Outbox, keine periodischen Aufgaben (Übungen, Wartung); in Produktion nie setzen. */
+const PERIODIC_DISABLED = process.env.WORKER_DISABLE_PERIODIC === "1";
 let stopping = false;
 
 type Claimed = { id: string; type: string; aggregate_id: string; payload: Record<string, unknown>; attempts: number };
@@ -72,24 +74,46 @@ async function runPeriodic(lastRun: Map<string, number>) {
   for (const task of PERIODIC) {
     if (now - (lastRun.get(task.name) ?? 0) < task.everyMs) continue;
     lastRun.set(task.name, now);
+    // Advisory Lock verhindert parallele Ausführung bei mehreren Instanzen. Sperren gelten je
+    // Verbindung: Sperren und Freigeben müssen über DIESELBE reservierte Verbindung laufen –
+    // über den Pool landete die Freigabe sonst auf einer anderen Verbindung und die Sperre blieb hängen.
+    let conn: Awaited<ReturnType<typeof sql.reserve>> | null = null;
     try {
-      // Advisory Lock verhindert parallele Ausführung bei mehreren Instanzen.
-      const [row] = (await db.execute(dsql`select pg_try_advisory_lock(hashtext(${task.name})) as ok`)) as unknown as { ok: boolean }[];
+      conn = await sql.reserve();
+      const [row] = await conn<{ ok: boolean }[]>`select pg_try_advisory_lock(hashtext(${task.name})) as ok`;
       if (!row?.ok) continue;
       try {
         await task.run();
       } finally {
-        await db.execute(dsql`select pg_advisory_unlock(hashtext(${task.name}))`);
+        await conn`select pg_advisory_unlock(hashtext(${task.name}))`;
       }
     } catch (err) {
       console.error(`[worker] periodisch ${task.name} fehlgeschlagen: ${err instanceof Error ? err.name + " " + redactLogText(err, 120) : "error"}`);
+    } finally {
+      conn?.release();
     }
+  }
+}
+
+/**
+ * Periodische Aufgaben in eigener Schleife: eine langsame Aufgabe (z. B. Linkprüfung mit
+ * Netzzugriff) darf Zustellungen und Löschaufträge der Outbox nicht verzögern (NFR05, NFR19).
+ */
+async function periodicLoop() {
+  const lastRun = new Map<string, number>();
+  while (!stopping) {
+    try {
+      await runPeriodic(lastRun);
+    } catch {
+      // runPeriodic fängt Fehler je Aufgabe ab; hier nur zur Sicherheit
+    }
+    await new Promise((r) => setTimeout(r, Math.max(POLL_MS, 1000)));
   }
 }
 
 async function main() {
   console.log("[worker] gestartet");
-  const lastRun = new Map<string, number>();
+  const periodic = PERIODIC_DISABLED ? Promise.resolve() : periodicLoop();
   let failures = 0;
   while (!stopping) {
     try {
@@ -103,7 +127,6 @@ async function main() {
         }
         await processOne(batch[i]);
       }
-      await runPeriodic(lastRun);
       if (failures > 0) console.log("[worker] Datenbank wieder erreichbar");
       failures = 0;
       if (batch.length === 0) await new Promise((r) => setTimeout(r, POLL_MS));
@@ -116,6 +139,7 @@ async function main() {
       await new Promise((r) => setTimeout(r, waitMs));
     }
   }
+  await periodic;
   await sql.end({ timeout: 5 });
   console.log("[worker] beendet");
 }

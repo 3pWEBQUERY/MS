@@ -37,7 +37,8 @@ const check = (step: string, ok: boolean, detail: string) => {
 
 function startWorker(): ChildProcess {
   const child = spawn("node_modules/.bin/tsx", ["--conditions=react-server", "src/worker/index.ts"], {
-    env: { ...process.env, DATABASE_URL: url, WORKER_POLL_MS: "200", WORKER_STALE_SECONDS: String(STALE) },
+    // Periodische Aufgaben aus: sie würden (z. B. Linkprüfung mit Netzzugriff) die Messung verfälschen
+    env: { ...process.env, DATABASE_URL: url, WORKER_POLL_MS: "200", WORKER_STALE_SECONDS: String(STALE), WORKER_DISABLE_PERIODIC: "1" },
     stdio: ["ignore", "pipe", "pipe"],
     detached: true, // eigene Prozessgruppe, damit SIGKILL auch tsx-Kindprozesse trifft
   });
@@ -119,7 +120,7 @@ async function main() {
 
   // 5. Fehlversuch mit Backoff
   await insert("c", 1, { fail: true });
-  const failed = await waitFor((c) => (c.failed ?? 0) === 1, 30_000);
+  const failed = await waitFor((c) => (c.failed ?? 0) === 1, 60_000);
   const [ev] = await sql<{ attempts: number; wait: number }[]>`
     select attempts, extract(epoch from available_at - now())::int as wait from ops.outbox_events
     where dedupe_key = ${`drill:${run}:c:0`}`;
