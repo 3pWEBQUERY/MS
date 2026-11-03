@@ -143,3 +143,10 @@ Werkzeuge: `src/server/crypto.ts` liest während der Rotation ersatzweise mit `O
 6. **Exportdateien im Bucket** werden **nicht** umverschlüsselt, sondern laufen ab: Sie sind höchstens 24 Stunden abrufbar und werden danach vom Worker gelöscht (`privacy.export_jobs`, Status «abgelaufen»). Bis dahin bleiben sie dank `OLD_DATA_ENCRYPTION_KEY` herunterladbar. Darum `OLD_DATA_ENCRYPTION_KEY` frühestens **24 Stunden nach Schritt 2** entfernen; vorher prüfen: `select count(*) from privacy.export_jobs where status = 'ready' and ready_at < '<Zeitpunkt Schritt 2>';` muss 0 sein. Bei Kompromittierung können offene Exporte stattdessen sofort verworfen werden (`update privacy.export_jobs set expires_at = now() where status = 'ready';` – der Worker löscht die Dateien binnen Minuten und markiert die Aufträge als abgelaufen; Betroffene fordern bei Bedarf neu an).
 7. **Abschliessen**: `OLD_DATA_ENCRYPTION_KEY` an `web` und `worker` entfernen, beide neu ausrollen, Kurzprüfung aus Schritt 2 wiederholen. Den alten Schlüssel nach Ablauf der Backup-Aufbewahrung vernichten – ältere Backups brauchen ihn für einen Restore (R4: nach Restore Skript mit altem/neuem Schlüssel erneut ausführen). Ticket mit Zeitpunkten und Zählern schliessen, Vorfallschritt I04 protokollieren, falls Anlass R5 war.
 
+## R10 Datenbankrollen und Row-Level Security
+
+**Stand**: Web verbindet sich als `ms_app` (ohne BYPASSRLS), der Hilfe-Dienst als `ms_hilfe_ro`; Pre-Deploy `scripts/db-roles.ts` legt beide an und setzt die Rechte aus `docs/db-roles.sql` nach jeder Migration neu. Passwörter sind aus dem Postgres-Passwort abgeleitet – nach einer Passwortänderung von Postgres zuerst `web` neu deployen (führt die Rollen nach), dann `hilfe`.
+
+1. Fehler wie `permission denied for table …` im Log von `web`: fehlendes Recht in `docs/db-roles.sql` ergänzen (nie BYPASSRLS vergeben), deployen.
+2. Notfall-Rückfall (nur kurzzeitig, im Ticket begründen): Variable `APP_DB_ROLE` beim Dienst `web` entfernen → Web nutzt wieder die Eigentümerrolle; RLS ist dann nicht wirksam.
+3. Prüfen: `select usename, count(*) from pg_stat_activity group by 1` – `ms_app` für Web, `ms_hilfe_ro` für den Hilfe-Dienst.

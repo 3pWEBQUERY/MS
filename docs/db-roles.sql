@@ -1,9 +1,12 @@
 -- Getrennte Datenbankrollen (PRD 09, PRD 14, Q10)
 -- Railway Postgres stellt standardmässig den Superuser «postgres» bereit. Superuser und
 -- Tabelleneigentümer umgehen Row-Level Security. Für die volle Schutzwirkung der RLS-Policies
--- verbindet sich die Web-App mit einer nicht privilegierten Rolle. Einmalig als «postgres» ausführen
--- und anschliessend DATABASE_URL des Web-Service auf ms_app umstellen. Migrationen und der
+-- verbindet sich die Web-App mit einer nicht privilegierten Rolle. Automatisch umgesetzt durch
+-- scripts/db-roles.ts im Pre-Deploy (DB_ROLES_MANAGE=1): Rollen anlegen/nachführen, Rechte dieser Datei
+-- setzen; Passwörter aus dem Eigentümerpasswort abgeleitet (src/lib/db-role-url.ts). Web nutzt die
+-- Rolle mit APP_DB_ROLE=ms_app, der Hilfe-Dienst mit HILFE_DB_ROLE=ms_hilfe_ro. Migrationen, Seed und
 -- Hintergrundarbeiter (Löschaufträge) laufen weiter mit der Eigentümerrolle.
+-- Die Zeilen «CREATE ROLE … PASSWORD» unten dienen nur der Dokumentation (manuelle Einrichtung).
 
 CREATE ROLE ms_app LOGIN PASSWORD 'BITTE-ERSETZEN' NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;
 

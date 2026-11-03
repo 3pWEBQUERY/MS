@@ -41,6 +41,9 @@ export default defineRailway((ctx) => {
       NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: preserve(),
       // Demo-Startbestand im Pre-Deploy (idempotent); für echte Daten auf «false» setzen
       SEED_DEMO: "true",
+      // RLS wirksam: Pre-Deploy legt ms_app/ms_hilfe_ro an, Web verbindet sich zur Laufzeit als ms_app
+      DB_ROLES_MANAGE: "1",
+      APP_DB_ROLE: "ms_app",
       SEED_PASSWORD: preserve(),
       SEED_TOTP_SECRET: preserve(),
     },
@@ -62,7 +65,7 @@ export default defineRailway((ctx) => {
     start: "node_modules/.bin/tsx src/static-help/server.ts",
     healthcheck: "/health",
     replicas: { "europe-west4": 1 },
-    env: { DATABASE_URL: db.env.DATABASE_URL, PLATFORM_URL: ctx.shared.APP_URL, NODE_ENV: "production", TZ: "Europe/Zurich" },
+    env: { DATABASE_URL: db.env.DATABASE_URL, HILFE_DB_ROLE: "ms_hilfe_ro", PLATFORM_URL: ctx.shared.APP_URL, NODE_ENV: "production", TZ: "Europe/Zurich" },
   });
 
   // NFR07: stündliche, verschlüsselte Sicherung als Cron-Service (beendet sich nach jedem Lauf).

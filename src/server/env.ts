@@ -1,4 +1,5 @@
 import "server-only";
+import { isDbRole, roleUrl } from "@/lib/db-role-url";
 
 /**
  * Zentrale, serverseitige Konfiguration. Keine Geheimnisse im Client (NFR10).
@@ -19,7 +20,17 @@ const isBuild = process.env.NEXT_PHASE === "phase-production-build";
 export const env = {
   isProd,
   appUrl: read("APP_URL", process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "http://localhost:3000"),
-  databaseUrl: () => read("DATABASE_URL", isProd && !isBuild ? undefined : "postgres://postgres@localhost:5432/ms"),
+  /**
+   * Laufzeit-Verbindung. APP_DATABASE_URL (Rolle ms_app ohne BYPASSRLS) hat Vorrang, damit die
+   * Row-Level Security der Gesundheitsdaten greift; Migrationen, Seed und Arbeiter nutzen DATABASE_URL.
+   */
+  databaseUrl: () => {
+    if (process.env.APP_DATABASE_URL) return process.env.APP_DATABASE_URL;
+    const owner = read("DATABASE_URL", isProd && !isBuild ? undefined : "postgres://postgres@localhost:5432/ms");
+    // APP_DB_ROLE=ms_app: Rolle mit aus dem Eigentümerpasswort abgeleitetem Passwort (src/lib/db-role-url.ts)
+    const role = process.env.APP_DB_ROLE;
+    return isDbRole(role) && !isBuild ? roleUrl(owner, role) : owner;
+  },
   /** 32 Byte, base64. Lokal wird ein abgeleiteter Entwicklungsschlüssel verwendet. */
   dataKey: () => read("DATA_ENCRYPTION_KEY", isProd ? undefined : "ZGV2LW9ubHktZGF0YS1rZXktbm90LWZvci1wcm9kISE="),
   /** Nur während einer Schlüsselrotation gesetzt (NFR10, Runbook R9): alter Schlüssel, nur zum Lesen. */

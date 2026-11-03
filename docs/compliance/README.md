@@ -104,4 +104,6 @@ Beim Erstellen dieser Entwürfe wurden Abweichungen zwischen Datenschutzinformat
 - Moderation: nach 180 Tagen werden zusätzlich interne Notizen, Einspruchsbegründungen und Entscheidnotizen entfernt (`src/worker/handlers/moderation.ts`); die Datenschutzinformation beschreibt das verbleibende Fallprotokoll ohne Inhalte.
 - «Anonyme Nutzungsstatistik» heisst jetzt «pseudonym»/«freiwillig» (Datenschutzinformation, Einführung S07, Export).
 
-Weiterhin offen (nicht im Code lösbar oder Entscheidung nötig): Verbindung mit Rolle `ms_app`/`ms_hilfe_ro` statt Eigentümerrolle (Einrichtung in Railway), eigene Symptombezeichnungen im Klartext (Verschlüsselung würde Suche/Sortierung ändern – Entscheid D05), Fristen für `privacy.requests`, Löschjournal und Sonderzugriffe (D05), Standort Schweiz und Verträge (D04).
+Ebenfalls behoben: Web verbindet sich als `ms_app` (ohne BYPASSRLS), der Hilfe-Dienst als `ms_hilfe_ro` (`scripts/db-roles.ts`, Runbook R10) – die Row-Level Security der Gesundheitsdaten greift damit.
+
+Weiterhin offen (nicht im Code lösbar oder Entscheidung nötig): eigene Symptombezeichnungen im Klartext (Verschlüsselung würde Suche/Sortierung ändern – Entscheid D05), Fristen für `privacy.requests`, Löschjournal und Sonderzugriffe (D05), Standort Schweiz und Verträge (D04).

@@ -13,7 +13,7 @@
     "worker": "tsx --conditions=react-server src/worker/index.ts",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "db:predeploy": "npm run db:migrate && SEED_ONLY_IF_DEMO=1 npm run db:seed",
+    "db:predeploy": "npm run db:migrate && tsx scripts/db-roles.ts && SEED_ONLY_IF_DEMO=1 npm run db:seed",
     "check:lines": "node scripts/check-lines.mjs",
     "test:db:prepare": "tsx scripts/test-db/prepare.ts ms_test",
     "test:db": "npm run test:db:prepare && vitest run --config vitest.db.config.mts",

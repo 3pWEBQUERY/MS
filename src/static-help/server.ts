@@ -9,6 +9,7 @@
  */
 import { createServer } from "node:http";
 import postgres from "postgres";
+import { roleUrl } from "@/lib/db-role-url";
 import { STATIC_SAFETY_CONTACTS, type SafetyContact } from "@/lib/safety-static";
 import { site } from "@/lib/site";
 import { renderHelpPage } from "./render";
@@ -26,9 +27,9 @@ function render(contacts: SafetyContact[], source: "database" | "fallback") {
   };
 }
 
-const sql = process.env.DATABASE_URL
-  ? postgres(process.env.DATABASE_URL, { max: 1, idle_timeout: 30, connect_timeout: 5, onnotice: () => {} })
-  : null;
+// HILFE_DB_ROLE=ms_hilfe_ro: nur Lesezugriff auf die Sicherheitskontakte (Passwort abgeleitet, db-role-url.ts)
+const dbUrl = process.env.DATABASE_URL && process.env.HILFE_DB_ROLE === "ms_hilfe_ro" ? roleUrl(process.env.DATABASE_URL, "ms_hilfe_ro") : process.env.DATABASE_URL;
+const sql = dbUrl ? postgres(dbUrl, { max: 1, idle_timeout: 30, connect_timeout: 5, onnotice: () => {} }) : null;
 
 async function refresh() {
   if (!sql) return;
