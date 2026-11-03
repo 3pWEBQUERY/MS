@@ -7,8 +7,10 @@ import { fail, ok, type ActionState } from "@/lib/action-state";
 import { optStr, runAction, str, UserError } from "../../action";
 import { actionViewer, AuthError } from "../../auth/viewer";
 import { db } from "../../db";
-import { communityProfiles, userPreferences } from "../../db/schema";
+import { communityProfiles, consentRecords, userPreferences } from "../../db/schema";
 import { ANALYTICS_UI_VERSION } from "@/lib/analytics";
+import { ANALYTICS_CONSENT_VERSION } from "@/lib/catalog";
+import { audit } from "../../audit";
 import { consume } from "../../rate-limit";
 import { trackLater } from "../analytics/track";
 import {
@@ -47,10 +49,13 @@ export async function completeOnboardingAction(_prev: ActionState, formData: For
     canton: str(formData, "canton"),
     goal: str(formData, "goal"),
     interests: formData.getAll("interests").map(String),
+    analytics: str(formData, "analytics"),
   };
   return runAction(async () => {
     const viewer = await actionViewer({ allowSuspended: true });
     if (viewer.onboarded) redirect("/heute");
+    // PRI01/PRD 15: eigene, nicht vorausgewählte Entscheidung; ohne Auswahl wird nichts gespeichert (= aus).
+    const analytics = values.analytics === "granted" || values.analytics === "denied" ? values.analytics : null;
 
     const pseudonym = tidyPseudonym(values.pseudonym);
     const problem = pseudonymProblem(pseudonym, { allowRoleWords: viewer.isStaff });
@@ -88,13 +93,24 @@ export async function completeOnboardingAction(_prev: ActionState, formData: For
             },
           });
         await tx.insert(userPreferences).values({ accountId: viewer.accountId }).onConflictDoNothing();
+        if (analytics) {
+          await tx.insert(consentRecords).values({
+            accountId: viewer.accountId,
+            purpose: "analytics",
+            textVersion: ANALYTICS_CONSENT_VERSION,
+            decision: analytics,
+            channel: "web",
+          });
+          await audit({ actorId: viewer.accountId, action: `consent.analytics.${analytics}`, objectType: "account", objectId: viewer.accountId }, tx);
+        }
       });
     } catch (err) {
       if (isUniqueViolation(err)) return fail("Bitte prüfe dein Pseudonym.", { fieldErrors: { pseudonym: TAKEN }, values });
       throw err;
     }
 
-    // PRD 15: nur mit bereits erteilter Einwilligung «analytics»; keine Rolle, kein Ziel, keine Diagnose.
+    // PRD 15: nur mit erteilter Einwilligung «analytics» (eben in S07 oder früher); keine Rolle, kein Ziel, keine Diagnose.
+    // trackLater läuft nach der Antwort, also nach dem Commit der Einwilligung oben.
     trackLater(viewer.accountId, { name: "onboarding_completed", params: { variant: "standard", uiVersion: ANALYTICS_UI_VERSION } });
     // F01: Ende ist S18 bzw. bei «Etwas festhalten» die gesonderte Aktivierung (S08)
     redirect(goal === "festhalten" ? "/mein-ms/aktivieren" : "/heute");

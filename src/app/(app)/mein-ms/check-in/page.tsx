@@ -77,7 +77,7 @@ async function CheckIn({ searchParams }: { searchParams: PageProps<"/mein-ms/che
           <p id="datum-hinweis" className="-mt-2 text-sm text-ink-2">
             Bis 365 Tage rückwirkend.
           </p>
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Input
               id="datum"
               name="datum"

@@ -4,6 +4,7 @@ import { cookies, headers } from "next/headers";
 import { randomToken, sha256 } from "../crypto";
 import { db } from "../db";
 import { sessions } from "../db/schema";
+import { clearDisplayCookie } from "./display-cookie";
 import { env } from "../env";
 
 /** Mitgliedersitzungen enden spätestens nach 12 h, nach 60 min Inaktivität (ACC03). */
@@ -77,6 +78,8 @@ export async function destroyCurrentSession() {
       .where(and(eq(sessions.tokenHash, sha256(token)), isNull(sessions.revokedAt)));
   }
   await clearSessionCookie();
+  // HOM06: Darstellungs-Cookie des Kontos ebenfalls entfernen (geteilte Geräte).
+  await clearDisplayCookie();
 }
 
 export async function revokeAllSessions(accountId: string, exceptSessionId?: string) {

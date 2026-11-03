@@ -144,7 +144,7 @@ async function Entry({
           <Card className="max-w-2xl">
             <KeyValue items={items} />
           </Card>
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             {!blocked && (
               <ButtonLink href={`/mein-ms/eintrag/${entry.id}?bearbeiten=1`} icon={<Icon name="pencil" className="size-5" />}>
                 Ändern

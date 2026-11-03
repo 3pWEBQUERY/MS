@@ -80,6 +80,13 @@ export async function seedCore(db: SeedDb): Promise<SeedContext> {
     moderator: await upsertAccount(db, { email: "moderation@demo.ms-plattform.ch", pseudonym: "Team Moderation", roles: ["moderator"] }, passwordHash),
     lead: await upsertAccount(db, { email: "leitung@demo.ms-plattform.ch", pseudonym: "Team Moderationsleitung", roles: ["moderation_lead", "moderator"] }, passwordHash),
     privacy: await upsertAccount(db, { email: "datenschutz@demo.ms-plattform.ch", pseudonym: "Team Datenschutz", roles: ["privacy_officer"] }, passwordHash),
+    // ACC05/PRI08: Vieraugenprinzip bei der MFA-Wiederherstellung von Mitarbeitendenkonten braucht
+    // eine zweite, fiktive Person der Datenschutzstelle, damit der Ablauf demonstrierbar ist.
+    privacy2: await upsertAccount(
+      db,
+      { email: "datenschutz.vertretung@demo.ms-plattform.ch", pseudonym: "Team Datenschutz Vertretung", roles: ["privacy_officer"] },
+      passwordHash,
+    ),
     ops: await upsertAccount(db, { email: "betrieb@demo.ms-plattform.ch", pseudonym: "Team Betrieb", roles: ["ops"] }, passwordHash),
   };
 

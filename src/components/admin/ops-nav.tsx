@@ -1,13 +1,14 @@
 import { SegmentNav } from "@/components/ui/primitives";
 
 /** Unterbereiche von S60 Betrieb und Konfiguration. */
-export function OpsSubNav({ active }: { active: "betrieb" | "einfuehrung" | "nutzung" }) {
+export function OpsSubNav({ active }: { active: "betrieb" | "einfuehrung" | "einladungen" | "nutzung" }) {
   return (
     <SegmentNav
       label="Bereiche von Betrieb"
       items={[
         { href: "/verwaltung/betrieb", label: "Status und Schalter", active: active === "betrieb" },
         { href: "/verwaltung/betrieb/einfuehrung", label: "Einführung und Stoppkriterien", active: active === "einfuehrung" },
+        { href: "/verwaltung/betrieb/einladungen", label: "Einladungen", active: active === "einladungen" },
         { href: "/verwaltung/betrieb/nutzung", label: "Nutzungsstatistik", active: active === "nutzung" },
       ]}
     />

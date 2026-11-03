@@ -3,15 +3,38 @@
 import Link from "next/link";
 import { PasswordField } from "@/components/auth/password-field";
 import { Checkbox, Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
+import { Notice } from "@/components/ui/primitives";
 import { registerAction } from "@/server/modules/account/auth-actions";
 import { useResilientAction } from "@/components/ui/use-resilient-action";
 
-export function RegisterForm() {
+export function RegisterForm({ inviteRequired = false }: { inviteRequired?: boolean }) {
   const [state, action] = useResilientAction(registerAction);
   const fe = state.fieldErrors ?? {};
   return (
     <form action={action} className="flex flex-col gap-6" noValidate>
       <FormMessage state={state} />
+      {inviteRequired && (
+        <>
+          <Notice tone="info" title="Im Moment nur mit Einladung">
+            Die Plattform wird schrittweise geöffnet. Für ein Konto brauchst du einen Einladungscode. Wissen, Hilfsangebote und die
+            Sicherheitsseite sind ohne Konto erreichbar.
+          </Notice>
+          <Field label="Einladungscode" error={fe.invite} hint="12 Zeichen, z. B. ABCD-EFGH-JKMN. Gross- und Kleinschreibung spielt keine Rolle.">
+            {(p) => (
+              <Input
+                {...p}
+                name="invite"
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
+                maxLength={20}
+                defaultValue={(state.values?.invite as string) ?? ""}
+                required
+              />
+            )}
+          </Field>
+        </>
+      )}
       <Field label="E-Mail-Adresse" error={fe.email} hint="Wird nie in deinem Profil angezeigt.">
         {(p) => (
           <Input

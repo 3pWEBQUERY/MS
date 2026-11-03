@@ -196,6 +196,7 @@ export const FLAG_LABEL: Record<string, string> = {
   chat: "Kontaktanfragen und Chat",
   health_write: "Gesundheits-Schreiben",
   registration: "Registrierung",
+  registration_invite_only: "Nur mit Einladungscode",
 };
 
 export const INCIDENT_STEPS: { value: string; label: string; description: string }[] = [

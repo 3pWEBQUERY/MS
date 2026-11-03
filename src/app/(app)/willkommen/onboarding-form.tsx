@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { MemberProfileCard } from "@/components/account/profile-card";
 import { WhoSeesWhat } from "@/components/account/who-sees-what";
@@ -17,6 +18,7 @@ const STEPS = [
   { title: "Was interessiert dich?", eyebrow: "Freiwillige Angaben" },
   { title: "Was möchtest du zuerst tun?", eyebrow: "Freiwilliges Ziel" },
   { title: "Wer sieht was", eyebrow: "Datenschutz kurz erklärt" },
+  { title: "Hilfst du mit einer anonymen Statistik?", eyebrow: "Freiwillige Entscheidung" },
 ] as const;
 
 /**
@@ -206,6 +208,36 @@ export function OnboardingForm({ initialGoal }: { initialGoal?: string }) {
           <h2 className="text-lg font-[650] text-ink">So sehen dich andere Mitglieder</h2>
           <MemberProfileCard profile={{ pseudonym, interests, canton: canton || null }} />
         </div>
+      </section>
+
+      {/* Schritt 5: Optionale Statistik – eigene, nicht vorausgewählte Entscheidung (PRI01, PRD 15) */}
+      <section hidden={step !== 4} className="flex flex-col gap-6">
+        <p className="text-lg text-ink-2">
+          Damit wir erkennen, ob die Plattform im Alltag hilft, können wir zählen, welche Bereiche genutzt werden – zum Beispiel, ob nach der
+          Einführung ein Artikel geöffnet wird. Das ist unabhängig vom Gesundheitsbereich und von allem anderen.
+        </p>
+        <ul className="flex list-disc flex-col gap-1 pl-5 text-base text-ink-2">
+          <li>Keine Inhalte, kein Pseudonym, keine Suchtexte und keine Gesundheitswerte, keine Tracker von Dritten.</li>
+          <li>Ein zufälliger Bezug ohne Namen; Rohdaten werden nach höchstens 30 Tagen gelöscht.</li>
+          <li>Ausgewertet werden nur Summen ab zehn Personen.</li>
+        </ul>
+        <RadioCards
+          name="analytics"
+          legend="Anonyme Nutzungsstatistik (optional)"
+          hint="Ohne Auswahl bleibt die Statistik aus. Alle Funktionen sind unabhängig davon nutzbar."
+          defaultValue={state.values?.analytics as string | undefined}
+          options={[
+            { value: "denied", label: "Nein, nicht mitzählen" },
+            { value: "granted", label: "Ja, anonym mitzählen", description: "Du kannst das jederzeit ausschalten; bisher gezählte Rohdaten werden dann sofort gelöscht." },
+          ]}
+        />
+        <p className="text-base text-ink-2">
+          Ändern oder widerrufen jederzeit unter{" "}
+          <Link href="/konto/privatsphaere" className="font-medium text-ink underline underline-offset-4">
+            Privatsphäre und Einwilligungen
+          </Link>
+          .
+        </p>
       </section>
 
       <div className="flex flex-col-reverse gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">

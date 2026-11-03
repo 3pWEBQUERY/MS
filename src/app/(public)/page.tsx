@@ -100,7 +100,7 @@ export default function HomePage() {
               ))}
             </nav>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <ButtonLink href="/registrieren" size="lg">
                 Kostenlos registrieren
               </ButtonLink>
@@ -297,7 +297,7 @@ export default function HomePage() {
             <h2 className="text-3xl font-[650] tracking-[-0.025em] sm:text-4xl">Bereit, wenn du es bist.</h2>
             <p className="text-lg opacity-80">Konto mit E-Mail und Passwort. Ohne Diagnosenachweis. Jederzeit vollständig löschbar.</p>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <ButtonLink href="/registrieren" size="lg" variant="accent">
               Registrieren
             </ButtonLink>

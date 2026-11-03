@@ -2,6 +2,7 @@ import "server-only";
 import { and, count, eq, inArray, lt, notInArray, sql as dsql } from "drizzle-orm";
 import { db } from "../../db";
 import { articleVersions, featureFlags, privacyRequests, supportOffers } from "../../db/schema";
+import { RESTRICTION_FLAGS } from "../../flags";
 
 /**
  * Anzahlen für die Verwaltungsübersicht je Rolle – keine Inhalte, keine Personendaten.
@@ -45,6 +46,10 @@ export async function privacyCounts() {
 }
 
 export async function disabledFlagCount(): Promise<number> {
-  const [r] = await db.select({ c: count() }).from(featureFlags).where(eq(featureFlags.enabled, false));
+  // Einschränkende Schalter (Einladungspflicht) sind kein Teilbetrieb (HOM08).
+  const [r] = await db
+    .select({ c: count() })
+    .from(featureFlags)
+    .where(and(eq(featureFlags.enabled, false), notInArray(featureFlags.key, [...RESTRICTION_FLAGS])));
   return Number(r?.c ?? 0);
 }

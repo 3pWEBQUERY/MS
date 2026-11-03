@@ -22,6 +22,8 @@ export const env = {
   databaseUrl: () => read("DATABASE_URL", isProd && !isBuild ? undefined : "postgres://postgres@localhost:5432/ms"),
   /** 32 Byte, base64. Lokal wird ein abgeleiteter Entwicklungsschlüssel verwendet. */
   dataKey: () => read("DATA_ENCRYPTION_KEY", isProd ? undefined : "ZGV2LW9ubHktZGF0YS1rZXktbm90LWZvci1wcm9kISE="),
+  /** Nur während einer Schlüsselrotation gesetzt (NFR10, Runbook R9): alter Schlüssel, nur zum Lesen. */
+  oldDataKey: () => process.env.OLD_DATA_ENCRYPTION_KEY ?? "",
   bucket: {
     name: () => process.env.BUCKET ?? process.env.S3_BUCKET ?? "",
     endpoint: () => process.env.ENDPOINT ?? process.env.S3_ENDPOINT ?? "",

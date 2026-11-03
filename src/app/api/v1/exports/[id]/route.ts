@@ -8,12 +8,19 @@ import { db } from "@/server/db";
 import { exportJobs } from "@/server/db/schema";
 import { readExportFile, type ExportFile } from "@/server/modules/privacy/export";
 import { storageConfigured } from "@/server/storage";
+import { correlationId } from "../../_lib/http";
 
 /**
  * Sicherer Export-Download (PRI03, PRD 11): bei JEDEM Abruf werden Sitzung, Inhaberschaft,
  * erneute Anmeldung, Status und Ablauf geprüft. Kein öffentliches CDN, keine geteilten Caches.
  */
 const NO_STORE = { "Cache-Control": "private, no-store, max-age=0", "X-Content-Type-Options": "nosniff" };
+
+/** PRD 14 «API-Vertrag»: Fehlerantworten mit Korrelations-ID, ohne private Details. */
+function errorJson(request: NextRequest, error: string, status: number) {
+  const id = correlationId(request);
+  return NextResponse.json({ error, correlationId: id }, { status, headers: { ...NO_STORE, "X-Request-Id": id } });
+}
 
 function redirectTo(request: NextRequest, path: string) {
   const res = NextResponse.redirect(new URL(path, request.url), 303);
@@ -28,7 +35,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const viewer = await getViewer();
   if (!viewer) return redirectTo(request, `/anmelden?next=${encodeURIComponent(statusPage)}`);
   if (viewer.mfaEnabled && !viewer.mfaVerified) return redirectTo(request, `/anmelden/mfa?next=${encodeURIComponent(statusPage)}`);
-  if (!viewer.verified) return NextResponse.json({ error: "forbidden" }, { status: 403, headers: NO_STORE });
+  if (!viewer.verified) return errorJson(request, "forbidden", 403);
 
   const parsed = z.uuid().safeParse(id);
   const [job] = parsed.success
@@ -47,17 +54,25 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (!job) {
     // Neutral: keine Existenzangabe für fremde oder unbekannte Aufträge (AT03)
     await recordDenied("export_download_denied", viewer.accountId, "export_job", "/api/v1/exports/[id]");
-    return NextResponse.json({ error: "not_found" }, { status: 404, headers: NO_STORE });
+    return errorJson(request, "not_found", 404);
   }
 
   if (!hasRecentAuth(viewer)) return redirectTo(request, `/konto/bestaetigen?next=${encodeURIComponent(statusPage)}`);
   if (job.status !== "ready" || !job.objectKey || !job.expiresAt || job.expiresAt.getTime() <= Date.now())
     return redirectTo(request, statusPage);
-  if (!storageConfigured()) return NextResponse.json({ error: "storage_not_configured" }, { status: 503, headers: NO_STORE });
+  if (!storageConfigured()) return errorJson(request, "storage_not_configured", 503);
 
   const file: ExportFile = request.nextUrl.searchParams.get("datei") === "csv" ? "csv" : "json";
-  const data = await readExportFile(job.objectKey, file);
-  if (!data) return NextResponse.json({ error: "gone" }, { status: 410, headers: NO_STORE });
+  let data: Buffer | null;
+  try {
+    data = await readExportFile(job.objectKey, file);
+  } catch (err) {
+    // Ablage oder Entschlüsselung gestört (z. B. Schlüsselrotation, R3): nur Code und Korrelations-ID.
+    const res = errorJson(request, "export_unavailable", 503);
+    console.error(`[export-download] ${res.headers.get("X-Request-Id")}`, err instanceof Error ? err.name : "error");
+    return res;
+  }
+  if (!data) return errorJson(request, "gone", 410);
 
   await db.update(exportJobs).set({ downloadedAt: new Date() }).where(eq(exportJobs.id, job.id));
   await audit({ actorId: viewer.accountId, action: `privacy.export.downloaded.${file}`, objectType: "export_job", objectId: job.id });

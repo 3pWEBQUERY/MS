@@ -9,6 +9,7 @@ import { formatDate, formatDateTime } from "@/lib/time";
 import { audit } from "@/server/audit";
 import { requireStaff } from "@/server/auth/viewer";
 import { clearExceptionAction, retryErasureAction, updateRequestStatusAction } from "@/server/modules/privacy/admin-actions";
+import { analyticsAccessSummary } from "@/server/modules/privacy/access-summary";
 import { IDENTITY_CHECKS } from "@/server/modules/privacy/mfa-recovery";
 import { getRequestForOfficer, REQUEST_TYPE_LABEL } from "@/server/modules/privacy/requests";
 import { SYSTEM_LABEL } from "@/server/modules/privacy/tasks";
@@ -27,6 +28,7 @@ export default function PrivacyRequestPage({ params }: PageProps<"/verwaltung/da
 }
 
 const short = (id: string | null) => (id ? `${id.slice(0, 8)}…` : "–");
+const ANALYTICS_DECISION = { granted: "Erteilt", denied: "Abgelehnt", withdrawn: "Widerrufen" } as const;
 
 async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datenschutz/[id]">["params"] }) {
   const officer = await requireStaff(["privacy_officer"]);
@@ -43,6 +45,8 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
   const manual = req.type === "access" || req.type === "rectification" || req.type === "export";
   const isMfa = req.type === "mfa_recovery";
   const { overdue, exceptionDue, stale } = req;
+  // Auskunft (PRI03, PRD 15): auch die optionale Nutzungsstatistik gehört zur Antwort.
+  const analytics = req.type === "access" && req.accountId ? await analyticsAccessSummary(req.accountId) : null;
 
   return (
     <div className="flex flex-col gap-10">
@@ -133,6 +137,35 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
               Als erledigt markieren
             </ActionButton>
           </div>
+        </section>
+      )}
+
+      {analytics && (
+        <section aria-labelledby="analytics-title" className="flex max-w-3xl flex-col gap-4">
+          <SectionHeader
+            id="analytics-title"
+            title="Für die Auskunft: optionale Nutzungsstatistik"
+            description="Nur Stand und Anzahlen. Die Rohereignisse selbst erhält die Person mit ihrem Datenexport (Abschnitt «nutzungsstatistik»)."
+            className="mb-0"
+          />
+          <Card>
+            <KeyValue
+              items={[
+                [
+                  "Einwilligung",
+                  analytics.decision
+                    ? `${ANALYTICS_DECISION[analytics.decision]} am ${formatDateTime(analytics.decidedAt!, tz)} (Fassung ${analytics.textVersion})`
+                    : "Keine Entscheidung – Statistik aus",
+                ],
+                ["Analysebezug", analytics.subjectExpiresAt ? `besteht, Löschung spätestens ${formatDate(analytics.subjectExpiresAt, tz)}` : "keiner"],
+                [
+                  "Rohereignisse",
+                  analytics.events > 0 ? `${analytics.events} (Kalendertage ${analytics.firstDay} bis ${analytics.lastDay})` : "keine",
+                ],
+                ["Zweck und Empfänger", "Produktverbesserung; nur intern, Ausgabe nur als Summen ab zehn Personen, keine Weitergabe an Dritte"],
+              ]}
+            />
+          </Card>
         </section>
       )}
 

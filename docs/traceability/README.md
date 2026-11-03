@@ -7,7 +7,7 @@ Prüfung jeder Anforderungs-ID der PRD (`docs/PRD.md`, Kapitel in `docs/prd/`) g
 | Konto, Zugang, Rollen, Datenschutz (ACC, PRI, Kap. 3, 11) | [konto-datenschutz.md](konto-datenschutz.md) | 72 | 7 | 3 |
 | Heute, Mein MS, Barrierefreiheit (HOM, DIA, Kap. 4, 12) | [heute-gesundheit-barrierefreiheit.md](heute-gesundheit-barrierefreiheit.md) | 44 | 5 | 2 |
 | Community, Kommunikation, Moderation (COM, MSG, SAF, Kap. 10) | [community-kommunikation-moderation.md](community-kommunikation-moderation.md) | 83 | 9 | 2 |
-| Inhalte, Betrieb, NFR, Architektur, Analytics (CON, NFR, Kap. 13–15) | [inhalte-betrieb-nfr.md](inhalte-betrieb-nfr.md) | 50 | 27 | 3 |
+| Inhalte, Betrieb, NFR, Architektur, Analytics (CON, NFR, Kap. 13–15) | [inhalte-betrieb-nfr.md](inhalte-betrieb-nfr.md) | 54 | 23 | 3 |
 
 ## Was «teilweise» und «offen» typischerweise bedeutet
 
@@ -17,7 +17,7 @@ Prüfung jeder Anforderungs-ID der PRD (`docs/PRD.md`, Kapitel in `docs/prd/`) g
 
 ## Prüfmittel im Repository
 
-- `npm run typecheck`, `npm run lint`, `npm test` (Unit-Tests für Zeitlogik, Skalen, Fristen, Passwortregeln, Export-Format, Analytics-Allowlist, Log-Schwärzung …)
+- `npm run typecheck`, `npm run lint`, `npm test` (Unit-Tests für Zeitlogik, Skalen, Fristen, Passwortregeln, Export-Format, Analytics-Allowlist, Log-Schwärzung, Einladungscodes, Anzeige-Cookie, Schlüsselrotation …)
 - `npm run check:lines` – keine Datei über 600 Zeilen
 - `.github/workflows/ci.yml` – Pipeline mit Typen, Lint, Tests, Zeilenregel, Audit und Build
-- `docs/RUNBOOKS.md` – Betriebsabläufe für Störungen
+- `docs/RUNBOOKS.md` – Betriebsabläufe für Störungen (R1–R9, R9 Schlüsselrotation mit `scripts/rotate-data-key.ts`)

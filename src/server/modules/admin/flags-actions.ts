@@ -9,7 +9,7 @@ import { audit } from "../../audit";
 import { actionStaff } from "../../auth/viewer";
 import { db } from "../../db";
 import { deliveryJobs, featureFlags, outboxEvents } from "../../db/schema";
-import { FLAGS, type FlagKey } from "../../flags";
+import { FLAGS, RESTRICTION_FLAGS, type FlagKey } from "../../flags";
 import { actorRoleFor, isUuid } from "./common";
 import { OPS_ROLES } from "./ops";
 
@@ -32,6 +32,7 @@ export async function setFlagAction(_prev: ActionState, formData: FormData): Pro
       return fail("Bitte begründe die Änderung (mindestens 10 Zeichen).", { fieldErrors: { reason: "Bitte begründe die Änderung." }, values });
     if (reason.length > 300) return fail("Höchstens 300 Zeichen.", { fieldErrors: { reason: "Höchstens 300 Zeichen." }, values });
     const version = Number(str(formData, "version"));
+    const restriction = RESTRICTION_FLAGS.includes(key);
 
     await db.transaction(async (tx) => {
       const [current] = await tx
@@ -41,7 +42,16 @@ export async function setFlagAction(_prev: ActionState, formData: FormData): Pro
       if (current) {
         if (current.version !== version)
           throw new UserError("Dieser Schalter wurde inzwischen geändert. Bitte lade die Seite neu.");
-        if (current.enabled === enabled) throw new UserError(enabled ? "Der Bereich ist bereits aktiv." : "Der Bereich ist bereits abgeschaltet.");
+        if (current.enabled === enabled)
+          throw new UserError(
+            restriction
+              ? enabled
+                ? "Der Schalter ist bereits eingeschaltet."
+                : "Der Schalter ist bereits ausgeschaltet."
+              : enabled
+                ? "Der Bereich ist bereits aktiv."
+                : "Der Bereich ist bereits abgeschaltet.",
+          );
         await tx
           .update(featureFlags)
           .set({ enabled, reason, updatedBy: viewer.accountId, updatedAt: new Date(), version: current.version + 1 })
@@ -61,6 +71,12 @@ export async function setFlagAction(_prev: ActionState, formData: FormData): Pro
       );
     });
     refresh();
+    if (restriction)
+      return ok(
+        enabled
+          ? `«${FLAGS[key]}» ist eingeschaltet. Die Bedingung gilt serverseitig sofort.`
+          : `«${FLAGS[key]}» ist ausgeschaltet.`,
+      );
     return ok(
       enabled
         ? `«${FLAGS[key]}» ist wieder aktiv.`

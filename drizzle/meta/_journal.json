@@ -43,6 +43,13 @@
       "when": 1793688774325,
       "tag": "0003_evidence_immutable",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793690513261,
+      "tag": "0006_einladungen",
+      "breakpoints": true
     }
   ]
 }

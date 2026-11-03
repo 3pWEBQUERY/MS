@@ -186,7 +186,7 @@ export function CheckInForm({
         </Button>
       )}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <SubmitButton size="lg">{mode === "create" ? "Check-in speichern" : "Änderungen speichern"}</SubmitButton>
         {mode === "create" ? (
           <ButtonLink href="/heute" variant="ghost" size="lg" data-discard>

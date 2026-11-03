@@ -13,6 +13,8 @@ export type SeedContext = {
     moderator: string;
     lead: string;
     privacy: string;
+    /** Zweite Person der Datenschutzstelle (Vieraugenprinzip, ACC05) */
+    privacy2: string;
     ops: string;
   };
   /** Fiktive Mitglieder für Tests (Pseudonyme) */

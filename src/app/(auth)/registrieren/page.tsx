@@ -24,7 +24,7 @@ export default function RegisterPage() {
 }
 
 async function RegisterGate() {
-  const [viewer, open] = await Promise.all([getViewer(), isEnabled("registration")]);
+  const [viewer, open, inviteOnly] = await Promise.all([getViewer(), isEnabled("registration"), isEnabled("registration_invite_only")]);
   if (viewer) {
     // Kein unbemerktes Zweitkonto auf einem angemeldeten Gerät (S02-Navigationsregel)
     return (
@@ -45,5 +45,6 @@ async function RegisterGate() {
       </Notice>
     );
   }
-  return <RegisterForm />;
+  // PRD 17 «begrenzte Einladung»: Code nur verlangt, wenn der Schalter eingeschaltet ist.
+  return <RegisterForm inviteRequired={inviteOnly} />;
 }

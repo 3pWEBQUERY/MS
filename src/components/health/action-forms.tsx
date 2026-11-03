@@ -70,7 +70,7 @@ export function ConfirmDeleteForm({
         <input key={k} type="hidden" name={k} value={v} />
       ))}
       <FormMessage state={state} />
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <SubmitButton variant="danger" size="lg" pendingText="Wird gelöscht …" icon={<Icon name="trash" className="size-5" />}>
           {label}
         </SubmitButton>
@@ -88,7 +88,7 @@ export function RemoveSymptomForm({ action, id, label }: { action: Action; id: s
   return (
     <form action={formAction} className="flex flex-col items-start gap-2 sm:items-end">
       <input type="hidden" name="id" value={id} />
-      <SubmitButton variant="quiet-danger" size="sm" pendingText="Wird entfernt …" aria-label={`«${label}» aus der Auswahl entfernen`}>
+      <SubmitButton variant="quiet-danger" size="sm" pendingText="Wird entfernt …" aria-label={`Aus Auswahl entfernen: «${label}»`}>
         Aus Auswahl entfernen
       </SubmitButton>
       {state.status === "error" && <FormMessage state={state} />}

@@ -8,7 +8,20 @@ import { useSuccessKey } from "./action-button";
 import { INCIDENT_STEPS } from "./labels";
 
 /** Feature-Schalter einzeln mit Begründung schalten (HOM08, US26). */
-export function FlagForm({ flagKey, enabled, version, label }: { flagKey: string; enabled: boolean; version: number; label: string }) {
+export function FlagForm({
+  flagKey,
+  enabled,
+  version,
+  label,
+  restriction = false,
+}: {
+  flagKey: string;
+  enabled: boolean;
+  version: number;
+  label: string;
+  /** Einschränkender Schalter (z. B. Einladungspflicht): «ein» fügt eine Bedingung hinzu */
+  restriction?: boolean;
+}) {
   const [state, action] = useActionState(setFlagAction, idle);
   const resetKey = useSuccessKey(state);
   return (
@@ -18,7 +31,13 @@ export function FlagForm({ flagKey, enabled, version, label }: { flagKey: string
       <input type="hidden" name="enabled" value={enabled ? "off" : "on"} />
       <CountedTextarea
         key={resetKey}
-        label={enabled ? `Begründung für das Abschalten von «${label}»` : `Begründung für das Wiederaktivieren von «${label}»`}
+        label={
+          restriction
+            ? `Begründung für das ${enabled ? "Ausschalten" : "Einschalten"} von «${label}»`
+            : enabled
+              ? `Begründung für das Abschalten von «${label}»`
+              : `Begründung für das Wiederaktivieren von «${label}»`
+        }
         name="reason"
         maxLength={300}
         rows={2}
@@ -28,8 +47,13 @@ export function FlagForm({ flagKey, enabled, version, label }: { flagKey: string
         hint="Technischer Anlass, z. B. Störung oder Ticket. Keine Personendaten."
       />
       <FormMessage state={state} />
-      <SubmitButton variant={enabled ? "danger" : "primary"} size="sm" pendingText="Wird geschaltet …" className="self-start">
-        {enabled ? "Bereich abschalten" : "Bereich wieder aktivieren"}
+      <SubmitButton
+        variant={restriction ? "secondary" : enabled ? "danger" : "primary"}
+        size="sm"
+        pendingText="Wird geschaltet …"
+        className="self-start"
+      >
+        {restriction ? (enabled ? "Ausschalten" : "Einschalten") : enabled ? "Bereich abschalten" : "Bereich wieder aktivieren"}
       </SubmitButton>
     </form>
   );

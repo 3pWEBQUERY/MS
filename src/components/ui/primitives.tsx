@@ -141,7 +141,7 @@ export function PageHeader({
       <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex max-w-3xl flex-col gap-3">
           {eyebrow && <p className="text-sm font-semibold uppercase tracking-[0.08em] text-ink-2">{eyebrow}</p>}
-          <h1 className="text-3xl font-[650] tracking-[-0.025em] text-ink sm:text-[2.5rem] sm:leading-[1.08]">{title}</h1>
+          <h1 className="text-3xl font-[650] tracking-[-0.025em] text-ink break-words hyphens-auto sm:text-[2.5rem] sm:leading-[1.08]">{title}</h1>
           {description && <div className="text-lg text-ink-2">{description}</div>}
         </div>
         {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
@@ -261,9 +261,19 @@ export function KeyValue({ items, className }: { items: [ReactNode, ReactNode][]
 }
 
 /* ───────────────────────── Tabellen ───────────────────────── */
-export function Table({ className, ...props }: ComponentProps<"table">) {
+/**
+ * Breite Tabellen scrollen in ihrem eigenen Container (A02). Der Container ist per Tastatur
+ * erreichbar (WCAG 2.1.1, axe «scrollable-region-focusable») und positioniert, damit
+ * visuell verborgene Texte (sr-only) nicht aus dem Container herausragen.
+ */
+export function Table({ className, scrollLabel = "Tabelle", ...props }: ComponentProps<"table"> & { scrollLabel?: string }) {
   return (
-    <div className="overflow-x-auto rounded-[16px] border border-line bg-surface">
+    <div
+      role="region"
+      aria-label={scrollLabel}
+      tabIndex={0}
+      className="relative overflow-x-auto rounded-[16px] border border-line bg-surface"
+    >
       <table
         className={cn(
           "w-full border-collapse text-left text-base [&_td]:border-t [&_td]:border-line [&_td]:px-4 [&_td]:py-3 [&_th]:bg-raised [&_th]:px-4 [&_th]:py-3 [&_th]:text-sm [&_th]:font-semibold [&_th]:text-ink-2",

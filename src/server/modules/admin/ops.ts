@@ -3,7 +3,7 @@ import { and, count, desc, eq, gte, inArray, sql as dsql } from "drizzle-orm";
 import { env } from "../../env";
 import { db } from "../../db";
 import { deliveryJobs, featureFlags, outboxEvents, securityEvents } from "../../db/schema";
-import { FLAGS, type FlagKey } from "../../flags";
+import { flagDefault, FLAGS, RESTRICTION_FLAGS, type FlagKey } from "../../flags";
 import { storageConfigured, storageHealthy } from "../../storage";
 import { pseudonymsFor } from "./common";
 import { currentAlarms, lastWorkerHeartbeat } from "./ops-alarms";
@@ -33,7 +33,9 @@ export async function listFlags() {
     return {
       key,
       description: FLAGS[key],
-      enabled: r?.enabled ?? true,
+      enabled: r?.enabled ?? flagDefault(key),
+      /** Einschränkender Schalter (z. B. Einladungspflicht): «ein» ist kein Teilbetrieb */
+      restriction: RESTRICTION_FLAGS.includes(key),
       reason: r?.reason ?? null,
       updatedBy: r?.updatedBy ? (names.get(r.updatedBy) ?? "Mitarbeitende Person") : null,
       updatedAt: r?.updatedAt ?? null,

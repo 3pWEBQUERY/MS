@@ -7,6 +7,7 @@ import { fail, ok, type ActionState } from "@/lib/action-state";
 import { runAction, str, UserError } from "../../action";
 import { audit } from "../../audit";
 import { hashPassword, passwordProblem } from "../../auth/password";
+import { setDisplayCookie } from "../../auth/display-cookie";
 import { revokeAllSessions } from "../../auth/session";
 import { actionViewer, AuthError, hasRecentAuth } from "../../auth/viewer";
 import { db } from "../../db";
@@ -165,6 +166,8 @@ export async function saveDisplayPrefsAction(input: DisplayInput): Promise<Actio
         target: userPreferences.accountId,
         set: { ...set, version: dsql`${userPreferences.version} + 1` },
       });
+    // HOM06: Cookie für das Boot-Skript erneuern, damit der neue Stand auch vor der Hydration gilt.
+    await setDisplayCookie(p);
     trackLater(viewer.accountId, { name: "preference_changed", params: { type: "display" } }); // PRD 15, nur mit Einwilligung
     return ok("Gespeichert – gilt auf allen deinen Geräten.");
   });

@@ -3,6 +3,7 @@ import { recordDenied } from "@/server/audit";
 import { getViewer } from "@/server/auth/viewer";
 import { accountsUsable, isUuid, sessionStillValid } from "@/server/modules/messaging/access";
 import { getConversationAccess, listMessages, listRemovedSince } from "@/server/modules/messaging/conversations";
+import { correlationId } from "../../../_lib/http";
 
 /**
  * Echtzeitkanal für ein Einzelgespräch (PRD 14 «Echtzeit», NFR05) als Server-Sent Events.
@@ -20,16 +21,22 @@ const MAX_LIFETIME_MS = 4 * 60 * 1000;
 
 const NO_STORE = { "Cache-Control": "private, no-store" };
 
+/** PRD 14 «API-Vertrag»: Fehlerantworten mit Korrelations-ID, ohne private Details oder Existenzangabe. */
+function errorJson(request: NextRequest, error: string, status: number) {
+  const id = correlationId(request);
+  return Response.json({ error, correlationId: id }, { status, headers: { ...NO_STORE, "X-Request-Id": id } });
+}
+
 export async function GET(request: NextRequest, ctx: RouteContext<"/api/v1/conversations/[id]/stream">) {
   const viewer = await getViewer();
   if (!viewer || !viewer.verified || (viewer.mfaEnabled && !viewer.mfaVerified) || viewer.accountSuspended)
-    return new Response(null, { status: 401, headers: NO_STORE });
+    return errorJson(request, "unauthorized", 401);
 
   const { id } = await ctx.params;
   const access = isUuid(id) ? await getConversationAccess(viewer.accountId, id) : null;
   if (!access) {
     await recordDenied("conversation_stream", viewer.accountId, "conversation", "/api/v1/conversations/[id]/stream");
-    return new Response(null, { status: 404, headers: NO_STORE });
+    return errorJson(request, "not_found", 404);
   }
 
   const fromQuery = Number(request.nextUrl.searchParams.get("after") ?? "0");
@@ -99,8 +106,12 @@ export async function GET(request: NextRequest, ctx: RouteContext<"/api/v1/conve
             send(`event: reconnect\ndata: {"after":${lastSeq}}\n\n`);
             break;
           }
-        } catch {
-          // Vorübergehender Datenbankfehler: Kanal schliessen, Client verbindet neu.
+        } catch (err) {
+          // Vorübergehender Datenbankfehler: Korrelations-ID melden, Kanal schliessen, Client verbindet neu.
+          // Das Ereignis «failed» ändert im Client nichts (unbekannte Ereignisse werden ignoriert).
+          const ref = correlationId(request);
+          console.error(`[sse] ${ref}`, err instanceof Error ? err.name : "error");
+          send(`event: failed\ndata: ${JSON.stringify({ correlationId: ref })}\n\n`);
           break;
         }
         await new Promise((r) => setTimeout(r, POLL_MS));

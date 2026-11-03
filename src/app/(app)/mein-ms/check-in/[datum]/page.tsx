@@ -86,7 +86,7 @@ async function Detail({
               ]}
             />
           </Card>
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             {!blocked && (
               <ButtonLink href={`/mein-ms/check-in/${checkIn.localDate}?bearbeiten=1`} icon={<Icon name="pencil" className="size-5" />}>
                 Ändern

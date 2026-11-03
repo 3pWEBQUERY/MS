@@ -234,7 +234,7 @@ export function HistoryView({ rows, days, from }: { rows: HistoryRow[]; days: nu
       {panels.length > 0 ? (
         <div aria-hidden="true" className="flex flex-col gap-4">
           {/* Ergänzende Grafik: nicht fokussierbar, weil für Screenreader verborgen; die Datentabelle ist gleichwertig (A01). */}
-          <div className="overflow-x-auto" tabIndex={-1}>
+          <div className="relative overflow-x-auto" tabIndex={-1}>
             <div className="flex min-w-[560px] flex-col gap-5">
               {panels.map((p) => (
                 <Panel

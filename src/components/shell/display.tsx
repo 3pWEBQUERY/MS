@@ -1,24 +1,32 @@
 "use client";
 
 import { useEffect } from "react";
+import {
+  DEFAULT_DISPLAY,
+  DISPLAY_COOKIE,
+  DISPLAY_COOKIE_MAX_AGE,
+  DISPLAY_KEY,
+  serializeDisplayCookie,
+  type DisplayPrefs,
+} from "@/lib/display-prefs";
 
 /**
  * Anzeigepräferenzen (S13, HOM06): Gäste speichern sie lokal (kein Konto nötig),
- * Mitglieder geräteübergreifend in der Datenbank. Nicht sensibel, daher in localStorage.
+ * Mitglieder geräteübergreifend in der Datenbank und zusätzlich im nicht sensiblen Cookie
+ * `ms_display`, das das Boot-Skript vor localStorage liest (siehe src/lib/display-prefs.ts).
  */
-export type DisplayPrefs = {
-  theme: "system" | "light" | "dark";
-  textScale: number;
-  motion: "system" | "reduce" | "allow";
-  simple: boolean;
-};
+export type { DisplayPrefs };
+export { DEFAULT_DISPLAY, DISPLAY_KEY };
 
-export const DISPLAY_KEY = "ms-display";
-
-export const DEFAULT_DISPLAY: DisplayPrefs = { theme: "system", textScale: 100, motion: "system", simple: false };
-
-/** Vor der Hydration ausgeführt, damit kein Aufblitzen entsteht. */
-export const displayBootScript = `(function(){try{var p=JSON.parse(localStorage.getItem("${DISPLAY_KEY}")||"{}");var h=document.documentElement;var t=p.theme||"system";if(t==="system"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}h.dataset.theme=t;h.dataset.themePref=p.theme||"system";if(p.textScale&&p.textScale!==100)h.dataset.textScale=String(p.textScale);if(p.motion&&p.motion!=="system")h.dataset.motion=p.motion;if(p.simple)h.dataset.simple="true"}catch(e){document.documentElement.dataset.theme=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}})();`;
+/** Mitglieder: Cookie auf diesem Gerät mit dem Serverstand abgleichen (kein Konto, nur Darstellung). */
+function writeDisplayCookie(p: DisplayPrefs) {
+  try {
+    const secure = window.location.protocol === "https:" ? "; Secure" : "";
+    document.cookie = `${DISPLAY_COOKIE}=${serializeDisplayCookie(p)}; Path=/; Max-Age=${DISPLAY_COOKIE_MAX_AGE}; SameSite=Lax${secure}`;
+  } catch {
+    // Cookies blockiert – localStorage und Serverstand genügen.
+  }
+}
 
 export function readDisplay(): DisplayPrefs {
   try {
@@ -51,6 +59,8 @@ export function applyDisplay(p: DisplayPrefs) {
 export function DisplaySync({ prefs }: { prefs: DisplayPrefs }) {
   useEffect(() => {
     applyDisplay(prefs);
+    // Wurde die Präferenz auf einem anderen Gerät geändert, gilt sie hier ab dem nächsten Laden sofort.
+    writeDisplayCookie(prefs);
   }, [prefs]);
 
   // Systemwechsel hell/dunkel live übernehmen

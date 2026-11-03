@@ -50,7 +50,7 @@ async function Content() {
   ]);
   const now = new Date();
   const queueAgeMs = outbox.queueAgeMs;
-  const disabled = flags.filter((f) => !f.enabled);
+  const disabled = flags.filter((f) => !f.restriction && !f.enabled);
   const deadTypes = outbox.types.filter((t) => t.dead > 0);
 
   return (
@@ -160,9 +160,15 @@ async function Content() {
                       <h3 className="text-lg font-[650] text-ink">{FLAG_LABEL[f.key] ?? f.key}</h3>
                       <p className="text-sm text-ink-2">{f.description}</p>
                     </div>
-                    <Badge tone={f.enabled ? "success" : "warning"} icon={f.enabled ? "check-circle" : "ban"}>
-                      {f.enabled ? "Aktiv" : "Abgeschaltet"}
-                    </Badge>
+                    {f.restriction ? (
+                      <Badge tone={f.enabled ? "info" : "outline"} icon={f.enabled ? "check-circle" : undefined}>
+                        {f.enabled ? "Eingeschaltet" : "Ausgeschaltet"}
+                      </Badge>
+                    ) : (
+                      <Badge tone={f.enabled ? "success" : "warning"} icon={f.enabled ? "check-circle" : "ban"}>
+                        {f.enabled ? "Aktiv" : "Abgeschaltet"}
+                      </Badge>
+                    )}
                   </div>
                   {f.updatedAt && f.updatedBy && (
                     <p className="text-sm text-ink-2">
@@ -170,7 +176,7 @@ async function Content() {
                       {f.reason && <> · Anlass: {f.reason}</>}
                     </p>
                   )}
-                  <FlagForm flagKey={f.key} enabled={f.enabled} version={f.version} label={FLAG_LABEL[f.key] ?? f.key} />
+                  <FlagForm flagKey={f.key} enabled={f.enabled} version={f.version} label={FLAG_LABEL[f.key] ?? f.key} restriction={f.restriction} />
                 </Card>
               </li>
             ))}

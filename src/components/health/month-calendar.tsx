@@ -80,7 +80,7 @@ export function MonthCalendar({
           <span className="w-16" aria-hidden="true" />
         )}
       </div>
-      <div className="overflow-x-auto rounded-[16px] border border-line bg-surface p-2">
+      <div className="relative overflow-x-auto rounded-[16px] border border-line bg-surface p-2">
         <table className="w-full table-fixed border-separate border-spacing-1 text-center">
           <caption className="sr-only">Deine Einträge im {label}</caption>
           <thead>

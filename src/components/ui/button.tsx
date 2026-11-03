@@ -9,8 +9,12 @@ import { cn } from "@/lib/cn";
 export type ButtonVariant = "primary" | "accent" | "secondary" | "ghost" | "danger" | "quiet-danger";
 export type ButtonSize = "sm" | "md" | "lg";
 
+/*
+ * Reflow (A02, WCAG 1.4.10): Unter 640 CSS-Pixel (z. B. 320 px oder 200 % Zoom) darf die
+ * Beschriftung umbrechen; die Höhe ist deshalb eine Mindesthöhe.
+ */
 const base =
-  "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap font-semibold tracking-[-0.005em] transition-colors duration-150 ease-[var(--ease-calm)] disabled:cursor-not-allowed disabled:opacity-55 aria-disabled:cursor-not-allowed aria-disabled:opacity-55";
+  "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap max-sm:whitespace-normal max-sm:text-center font-semibold tracking-[-0.005em] transition-colors duration-150 ease-[var(--ease-calm)] disabled:cursor-not-allowed disabled:opacity-55 aria-disabled:cursor-not-allowed aria-disabled:opacity-55";
 
 const variants: Record<ButtonVariant, string> = {
   primary: "bg-ink text-ink-inverse hover:bg-ink/85",
@@ -22,9 +26,9 @@ const variants: Record<ButtonVariant, string> = {
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: "h-10 rounded-[10px] px-3.5 text-sm",
-  md: "h-12 rounded-[12px] px-5 text-base",
-  lg: "h-14 rounded-[14px] px-6 text-lg",
+  sm: "min-h-10 rounded-[10px] px-3.5 py-1.5 text-sm",
+  md: "min-h-12 rounded-[12px] px-5 py-2 text-base",
+  lg: "min-h-14 rounded-[14px] px-6 py-2 text-lg",
 };
 
 export function buttonClass(variant: ButtonVariant = "primary", size: ButtonSize = "md", className?: string) {

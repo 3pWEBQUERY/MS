@@ -229,6 +229,11 @@ html[data-text-scale="150"] {
     color: inherit;
   }
 
+  /* Reflow (A02): fieldset hat standardmässig min-inline-size: min-content und würde bei 320 px überlaufen */
+  fieldset {
+    min-width: 0;
+  }
+
   /* Ankerziele nicht unter fixierten Leisten verstecken (WCAG 2.4.11) */
   [id] {
     scroll-margin-top: 96px;

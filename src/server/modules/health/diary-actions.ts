@@ -11,6 +11,7 @@ import { encryptOptional } from "../../crypto";
 import type { Tx } from "../../db";
 import { withOwnerScope } from "../../db/scoped";
 import { diaryEntries, symptomObservations } from "../../db/schema";
+import { trackLater } from "../analytics/track";
 import { diaryFormValues, observationValues, parseSymptomRows, resolveDefinitions, type SymptomInput } from "./diary-input";
 import { readDiaryEntry, type DiaryDetail } from "./queries";
 import { HEALTH_LIMITS, isUuid, parseScale, resolveObservedAt, type ObservedAt } from "./validation";
@@ -75,8 +76,10 @@ export async function createSymptomEntryAction(_prev: ActionState, formData: For
       return { ok: true as const, id: entry.id };
     });
     if (!result.ok) return fail(INVALID, { fieldErrors: result.errors, values: formVals });
+    // PRD 15: «Eigener Eintrag gespeichert» – ohne Werte, Datum, Art oder Eintrags-ID, nur mit Einwilligung
+    trackLater(viewer.accountId, { name: "useful_action_completed", params: { action: "entry_saved", success: true } });
     redirect(`/mein-ms/eintrag/${result.id}?gespeichert=neu`);
-  }, formVals);
+  }, formVals, { flow: "F02" });
 }
 
 export async function createFatigueEntryAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -117,8 +120,10 @@ export async function createFatigueEntryAction(_prev: ActionState, formData: For
         .returning({ id: diaryEntries.id });
       return entry ? entry.id : (await entryIdForOp(tx, viewer.accountId, clientOpId))!;
     });
+    // PRD 15: wie beim Symptomeintrag – Ereignis ohne Wert (je Tag höchstens einmal gespeichert)
+    trackLater(viewer.accountId, { name: "useful_action_completed", params: { action: "entry_saved", success: true } });
     redirect(`/mein-ms/eintrag/${id}?gespeichert=neu`);
-  }, formVals);
+  }, formVals, { flow: "F02" });
 }
 
 /**

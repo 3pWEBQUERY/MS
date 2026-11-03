@@ -143,7 +143,7 @@ async function Display() {
 
 function Brand() {
   return (
-    <Link href="/verwaltung" className="inline-flex h-11 items-center gap-2.5 rounded-[12px] pr-2 text-ink" aria-label="Verwaltung – Übersicht">
+    <Link href="/verwaltung" className="inline-flex h-11 items-center gap-2.5 rounded-[12px] pr-2 text-ink" aria-label="MS Plattform Verwaltung – Übersicht">
       <LogoMark />
       <span className="flex flex-col leading-tight">
         <span className="text-[1.0625rem] font-bold tracking-[-0.02em]">MS Plattform</span>

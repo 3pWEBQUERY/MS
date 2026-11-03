@@ -25,7 +25,7 @@ export default function RolloutPage() {
 
 const STEPS = [
   ["Mitarbeitendentest", "Nur fiktive Daten (SEED_DEMO), alle Kernabläufe F01–F07 durchgespielt, Restore geprobt."],
-  ["Begrenzte Einladung", "Registrierung nur für eingeladene Personen; Moderation im Dienstplan verfügbar (D03)."],
+  ["Begrenzte Einladung", "Schalter «Nur mit Einladungscode» ein, Codes je Gruppe mit Kontingent und Ablauf; Moderation im Dienstplan verfügbar (D03)."],
   ["Geschlossener Pilot", "40–60 freiwillige Erwachsene, betreute Einführung, Nutzen- und Schutzreview (D06)."],
   ["Schrittweises Öffnen", "Pentest und festgelegte Releasekriterien bestanden; jeder Schritt mit verantwortlicher Freigabe."],
 ] as const;
@@ -43,6 +43,7 @@ async function Content() {
   const [inv, signals, flags] = await Promise.all([startInventory(), stopSignals(), listFlags()]);
   const tripped = signals.filter((s) => s.tripped);
   const registration = flags.find((f) => f.key === "registration");
+  const inviteOnly = flags.find((f) => f.key === "registration_invite_only");
 
   const rows: { label: string; value: string; ok: boolean; hint: string }[] = [
     { label: "Geprüfte, publizierte Artikel", value: String(inv.articles), ok: inv.articles >= START_INVENTORY_MIN.articles, hint: `mindestens ${START_INVENTORY_MIN.articles}` },
@@ -83,12 +84,15 @@ async function Content() {
 
         {tripped.length > 0 ? (
           <Notice tone="danger" title="Stoppkriterium prüfen">
-            {tripped.map((s) => s.label).join(", ")}. Neue Einladungen pausieren (Schalter «{FLAG_LABEL.registration ?? "Neue Registrierungen"}»), betroffene
-            Funktion einschränken, Incidentprozess folgen. Wiederaufnahme erst nach Behebung und Retest.
+            {tripped.map((s) => s.label).join(", ")}. Neue Einladungen pausieren (Schalter «{FLAG_LABEL.registration ?? "Neue Registrierungen"}» aus oder offene{" "}
+            <Link href="/verwaltung/betrieb/einladungen" className="font-semibold underline underline-offset-4">
+              Einladungscodes
+            </Link>{" "}
+            widerrufen), betroffene Funktion einschränken, Incidentprozess folgen. Wiederaufnahme erst nach Behebung und Retest.
           </Notice>
         ) : (
           <Notice tone="neutral" title="Keine technischen Stoppsignale">
-            Die Signale ersetzen keine fachliche Beurteilung. Unzuverlässige Kontaktfreigabe wird über Meldungen und Tests (QA05) erkannt.
+            Die Signale ersetzen keine fachliche Beurteilung. Die Prüfabfrage zur Kontaktfreigabe ergänzt Meldungen und Tests (QA05), ersetzt sie aber nicht.
           </Notice>
         )}
 
@@ -173,7 +177,14 @@ async function Content() {
           </ol>
           <p className="text-base text-ink-2">
             Neue Registrierungen sind derzeit{" "}
-            <strong className="text-ink">{registration?.enabled === false ? "abgeschaltet" : "möglich"}</strong>. Schalter ändern unter{" "}
+            <strong className="text-ink">
+              {registration?.enabled === false ? "abgeschaltet" : inviteOnly?.enabled ? "nur mit Einladungscode möglich" : "ohne Einladung möglich"}
+            </strong>
+            . Codes verwalten unter{" "}
+            <Link href="/verwaltung/betrieb/einladungen" className="font-semibold text-ink underline underline-offset-4">
+              Einladungen
+            </Link>
+            , Schalter ändern unter{" "}
             <Link href="/verwaltung/betrieb#schalter" className="font-semibold text-ink underline underline-offset-4">
               Status und Schalter
             </Link>

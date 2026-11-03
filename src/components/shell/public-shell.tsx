@@ -20,7 +20,8 @@ async function HeaderAuth() {
   }
   return (
     <div className="flex items-center gap-2">
-      <span className="hidden sm:contents">
+      {/* Reflow (A02): bei schmaler Breite oder vergrösserter Schrift nur im Menü */}
+      <span className="hidden md:contents">
         <ButtonLink href="/anmelden" size="sm" variant="ghost">
           Anmelden
         </ButtonLink>

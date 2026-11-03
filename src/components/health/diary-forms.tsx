@@ -374,7 +374,7 @@ export function FatigueEntryForm({
 
 function FormActions({ mode, entryId, label }: { mode: "create" | "edit"; entryId?: string; label: string }) {
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <SubmitButton size="lg">{label}</SubmitButton>
       <ButtonLink href={mode === "edit" && entryId ? `/mein-ms/eintrag/${entryId}` : "/mein-ms"} variant="ghost" size="lg">
         Abbrechen

@@ -1,6 +1,7 @@
 import "server-only";
 import { ENERGY_SCALE, FATIGUE_SCALE, INTENSITY_SCALE, MOOD_SCALE } from "@/lib/catalog";
 import { collectAccount } from "./export-collect-account";
+import { collectAnalytics } from "./export-collect-analytics";
 import { collectCommunity } from "./export-collect-community";
 import { collectHealth } from "./export-collect-health";
 import { collectMessaging } from "./export-collect-messaging";
@@ -10,15 +11,17 @@ import { buildDiaryCsv } from "./export-format";
  * Datenexport (PRI03, US09, AT02): eine JSON-Datei mit allen Bereichen und eine
  * Tagebuch-CSV. Jede Sammelfunktion liest ausschliesslich Daten dieses Kontos.
  * Inhalt: Konto, Profil, Präferenzen, Einwilligungsnachweise, Gesundheitsdaten,
- * eigene Beiträge und zugängliche eigene Gesprächsdaten (Rechte Dritter berücksichtigt).
+ * eigene Beiträge, zugängliche eigene Gesprächsdaten (Rechte Dritter berücksichtigt) sowie
+ * die optionale Nutzungsstatistik (eigener Analysebezug und Rohereignisse, PRD 15).
  */
 export async function buildExport(accountId: string): Promise<{ json: Buffer; csv: Buffer }> {
   const now = new Date();
   const account = await collectAccount(accountId);
-  const [health, community, messaging] = await Promise.all([
+  const [health, community, messaging, analytics] = await Promise.all([
     collectHealth(accountId),
     collectCommunity(accountId),
     collectMessaging(accountId),
+    collectAnalytics(accountId),
   ]);
 
   const data = {
@@ -53,6 +56,7 @@ export async function buildExport(accountId: string): Promise<{ json: Buffer; cs
     merkliste: account.merkliste,
     mitteilungen: account.mitteilungen,
     datenschutzauftraege: account.datenschutzauftraege,
+    nutzungsstatistik: analytics,
   };
 
   return {

@@ -30,7 +30,7 @@ export function DeleteAccountForm() {
         label="Ich habe die Folgen und Fristen gelesen und möchte mein Konto endgültig löschen."
         error={state.fieldErrors?.confirm}
       />
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <SubmitButton variant="danger" size="lg" pendingText="Konto wird deaktiviert …" icon={<Icon name="trash" className="size-5" />}>
           Konto endgültig löschen
         </SubmitButton>

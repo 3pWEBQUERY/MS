@@ -37,7 +37,7 @@ npm run dev
 npm run worker
 ```
 
-Demo-Konten (nur Testumgebungen, fiktiv): `mitglied.a@demo.ms-plattform.ch` usw., Mitarbeitende z. B. `moderation@demo.ms-plattform.ch`. Das Passwort und das TOTP-Geheimnis der Mitarbeitenden gibt `npm run db:seed` aus.
+Demo-Konten (nur Testumgebungen, fiktiv): `mitglied.a@demo.ms-plattform.ch` usw., Mitarbeitende z. B. `moderation@demo.ms-plattform.ch`; für das Vieraugenprinzip der MFA-Wiederherstellung (ACC05) gibt es zwei Personen der Datenschutzstelle (`datenschutz@…` und `datenschutz.vertretung@demo.ms-plattform.ch`). Das Passwort und das TOTP-Geheimnis der Mitarbeitenden gibt `npm run db:seed` aus.
 
 Ohne SMTP-Konfiguration schreibt der Worker Bestätigungs- und Reset-Links in die Konsole.
 

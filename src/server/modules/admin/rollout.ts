@@ -95,7 +95,20 @@ export async function stopSignals(): Promise<StopSignal[]> {
       (select count(*)::int from privacy.erasure_tasks where status in ('failed', 'escalated')) as erasure_failed,
       (select count(*)::int from privacy.requests where status = 'failed') as requests_failed,
       (select count(*)::int from moderation.cases where status not in ('decided', 'closed') and due_at < now() - interval '1 day') as cases_overdue,
-      (select count(*)::int from content.safety_contacts where active and (next_due_at is null or next_due_at < now())) as safety_overdue`)) as unknown as Record<string, number>[];
+      (select count(*)::int from content.safety_contacts where active and (next_due_at is null or next_due_at < now())) as safety_overdue,
+      (select count(*)::int from privacy.requests
+        where type in ('erasure_account', 'erasure_health') and status not in ('completed', 'rejected') and due_at < now()) as erasure_overdue,
+      (select count(*)::int from messaging.contact_relationships
+        where (status = 'active' and (low_consent_at is null or high_consent_at is null))
+           or (status in ('ended', 'declined', 'withdrawn', 'expired') and (low_consent_at is not null or high_consent_at is not null))
+           or (status = 'pending' and low_consent_at is not null and high_consent_at is not null)) as contact_inconsistent,
+      (select count(*)::int from messaging.messages m
+        join messaging.conversations c on c.id = m.conversation_id
+        join messaging.contact_relationships r on r.id = c.relationship_id
+        where m.created_at > now() - interval '30 days'
+          and ((r.status <> 'active' and m.created_at > coalesce(r.ended_at, r.requested_at, r.created_at))
+            or (r.status = 'active' and r.requested_at is not null and m.created_at > r.requested_at
+                and m.created_at < greatest(r.low_consent_at, r.high_consent_at)))) as messages_without_release`)) as unknown as Record<string, number>[];
   const v = (k: string) => Number(r?.[k] ?? 0);
   return [
     {
@@ -113,6 +126,22 @@ export async function stopSignals(): Promise<StopSignal[]> {
       tripped: v("erasure_failed") + v("requests_failed") > 0,
       href: "/verwaltung/datenschutz",
       hint: "Fehlgeschlagene oder eskalierte Lösch-Teilschritte und Datenschutzaufträge.",
+    },
+    {
+      key: "erasure_overdue",
+      label: "Löschaufträge überfällig",
+      value: v("erasure_overdue"),
+      tripped: v("erasure_overdue") > 0,
+      href: "/verwaltung/datenschutz",
+      hint: "Offene Löschaufträge (Konto oder Gesundheitsbereich), deren Frist abgelaufen ist (PRI05, R3).",
+    },
+    {
+      key: "contact_release",
+      label: "Kontaktfreigabe unzuverlässig",
+      value: v("contact_inconsistent") + v("messages_without_release"),
+      tripped: v("contact_inconsistent") + v("messages_without_release") > 0,
+      href: "/verwaltung/betrieb/einfuehrung#stopp",
+      hint: "Prüfabfrage (MSG02, MSG04): Kontaktbeziehungen mit widersprüchlichem Zustand (aktiv ohne beide Zustimmungen, beendet mit Zustimmung) und Nachrichten der letzten 30 Tage, die nach Ende oder vor Annahme der Freigabe gespeichert wurden. Muss 0 sein.",
     },
     {
       key: "moderation",

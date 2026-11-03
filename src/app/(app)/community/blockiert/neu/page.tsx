@@ -78,7 +78,7 @@ async function BlockConfirm({ searchParams }: { searchParams: PageProps<"/commun
                 Du kannst die Blockierung später aufheben. Ein früherer Kontakt wird dadurch nicht wiederhergestellt.
               </p>
             </section>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start">
               <ActionForm
                 action={blockMemberAction}
                 fields={{ targetId: target.accountId }}

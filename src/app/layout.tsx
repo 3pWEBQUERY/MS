@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { displayBootScript } from "@/components/shell/display";
+import { displayBootScript } from "@/lib/display-prefs";
 import { site } from "@/lib/site";
 import "./globals.css";
 

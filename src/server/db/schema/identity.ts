@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   index,
   integer,
   pgSchema,
@@ -226,4 +227,33 @@ export const consentRecords = identity.table(
     decidedAt: ts("decided_at").notNull().defaultNow(),
   },
   (t) => [index("consent_records_account_idx").on(t.accountId, t.purpose, t.decidedAt)],
+);
+
+/**
+ * Einladungscodes für die begrenzte Einladung (PRD 17 «Rollout», D06). Gespeichert wird nur der
+ * Hash; der Code wird beim Erzeugen genau einmal angezeigt. Bewusst ohne Bezug zu eingelösten
+ * Konten und ohne Personendaten – nur Zweck, Kontingent, Ablauf und Zähler.
+ */
+export const invitations = identity.table(
+  "invitations",
+  {
+    id: id(),
+    codeHash: text("code_hash").notNull(),
+    /** Letzte vier Zeichen zur Wiedererkennung in der Liste */
+    codeHint: text("code_hint").notNull(),
+    /** Zweck/Notiz ohne Personendaten, z. B. «Pilot Gruppe Bern» */
+    purpose: text("purpose").notNull(),
+    maxUses: integer("max_uses").notNull().default(1),
+    usedCount: integer("used_count").notNull().default(0),
+    expiresAt: ts("expires_at").notNull(),
+    createdBy: uuid("created_by").references(() => accounts.id, { onDelete: "set null" }),
+    createdAt: createdAt(),
+    lastRedeemedAt: ts("last_redeemed_at"),
+    revokedAt: ts("revoked_at"),
+    revokedBy: uuid("revoked_by").references(() => accounts.id, { onDelete: "set null" }),
+  },
+  (t) => [
+    uniqueIndex("invitations_code_hash_uq").on(t.codeHash),
+    check("invitations_uses_range", sql`${t.maxUses} between 1 and 500 and ${t.usedCount} between 0 and ${t.maxUses}`),
+  ],
 );

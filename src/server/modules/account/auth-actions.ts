@@ -9,6 +9,7 @@ import { PRIVACY_VERSION, TERMS_VERSION } from "@/lib/catalog";
 import { runAction, str, UserError } from "../../action";
 import { audit } from "../../audit";
 import { burnPasswordCheck, hashPassword, passwordProblem, verifyPassword } from "../../auth/password";
+import { setDisplayCookieFor } from "../../auth/display-cookie";
 import { createSession, destroyCurrentSession, readSessionToken, revokeAllSessions } from "../../auth/session";
 import { verifyTotp } from "../../auth/totp";
 import { AuthError, getViewer, safeNext } from "../../auth/viewer";
@@ -26,6 +27,8 @@ import {
 import { isEnabled } from "../../flags";
 import { enqueue } from "../../outbox";
 import { consume, LIMITS, peek } from "../../rate-limit";
+import { inviteCodeHash, normalizeInviteCode } from "./invite-code";
+import { INVITE_ATTEMPTS, INVITE_INVALID, redeemInvitation } from "./invitations";
 import { normalizeRecoveryCode } from "./recovery-code";
 import { findValidToken, issueEmailToken } from "./tokens";
 
@@ -44,12 +47,23 @@ const emailSchema = z
 
 /* ───────────────────────── S02 Registrierung (ACC01) ───────────────────────── */
 export async function registerAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const values = { email: str(formData, "email") };
+  const values = { email: str(formData, "email"), invite: str(formData, "invite") };
   return runAction(async () => {
     if (!(await isEnabled("registration")))
       return fail("Neue Registrierungen sind im Moment pausiert. Wissen und Hilfe bleiben ohne Konto erreichbar.", {
         values,
       });
+
+    // PRD 17 «begrenzte Einladung»: Bei eingeschaltetem Schalter braucht es einen gültigen Code.
+    // Gedrosselt je Verbindung; dieselbe neutrale Meldung für jede Art von ungültigem Code.
+    let inviteHash: string | null = null;
+    if (await isEnabled("registration_invite_only")) {
+      if (!(await consume(`invite-try:${await clientKey()}`, INVITE_ATTEMPTS.limit, INVITE_ATTEMPTS.window)))
+        return fail("Zu viele Versuche mit Einladungscodes. Bitte warte eine Stunde und versuche es dann erneut.", { values });
+      const code = normalizeInviteCode(values.invite);
+      if (!code) return fail(INVITE_INVALID, { fieldErrors: { invite: "Bitte gib deinen Einladungscode ein, z. B. ABCD-EFGH-JKMN." }, values });
+      inviteHash = inviteCodeHash(code);
+    }
 
     const parsed = z
       .object({
@@ -81,6 +95,9 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
     // Rechenzeit. Die Inhaberin der Adresse erhält einen Hinweis mit Login- und Resetweg.
     if (existing.length > 0) {
       await burnPasswordCheck(password);
+      // Auch hier wird ein Platz verbraucht – sonst liesse sich über den Code die Kontoexistenz prüfen.
+      if (inviteHash && !(await redeemInvitation(inviteHash)))
+        return fail(INVITE_INVALID, { fieldErrors: { invite: "Code ungültig." }, values });
       if (await consume(`register-dup:${sha256(email)}`, 3, 86400))
         await enqueue({
           type: "email.security_notice",
@@ -95,6 +112,8 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
     const passwordHash = await hashPassword(password);
     const now = new Date();
     const accountId = await db.transaction(async (tx) => {
+      // Einlösung atomar mit der Kontoerstellung: schlägt sie fehl, entsteht kein Konto.
+      if (inviteHash && !(await redeemInvitation(inviteHash, tx))) throw new UserError(INVITE_INVALID, { invite: "Code ungültig." });
       const [acc] = await tx
         .insert(accounts)
         .values({ email, passwordHash, status: "unverified", audienceConfirmedAt: now, termsVersion: TERMS_VERSION })
@@ -238,6 +257,8 @@ export async function loginAction(_prev: ActionState, formData: FormData): Promi
     if (previous)
       await db.update(sessions).set({ revokedAt: new Date() }).where(and(eq(sessions.tokenHash, sha256(previous)), isNull(sessions.revokedAt)));
     await createSession(acc.id);
+    // HOM06: gespeicherte Darstellung gilt auf diesem Gerät ab der ersten Seite (Cookie ms_display).
+    await setDisplayCookieFor(acc.id);
     // Anmeldung zählt als Aktivität (Aufbewahrung PRD 11: 24 Monate Inaktivität)
     await db.update(accounts).set({ lastActiveAt: new Date() }).where(eq(accounts.id, acc.id));
     await audit({ actorId: acc.id, action: "auth.login", objectType: "account", objectId: acc.id });
