@@ -1,0 +1,50 @@
+# NFR06 / NFR16: externer Prüfer ausserhalb von Railway. Prüft alle 5 Minuten die öffentlichen
+# Health-Endpunkte von web, worker (über web) und dem Hilfe-Dienst (NFR20). Ein fehlgeschlagener
+# Lauf benachrichtigt über die GitHub-Benachrichtigungen des Repositorys.
+# Übergangslösung bis zum neutralen Uptime-Anbieter im Minutentakt (Runbook «Alarmierung»).
+# Adressen über Repository-Variablen überschreibbar: MS_WEB_URL, MS_HILFE_URL.
+name: Uptime
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      WEB: ${{ vars.MS_WEB_URL || 'https://web-production-f9cbe.up.railway.app' }}
+      HILFE: ${{ vars.MS_HILFE_URL || 'https://hilfe-production.up.railway.app' }}
+    steps:
+      - name: Endpunkte prüfen
+        run: |
+          fail=0
+          check() {
+            local name="$1" url="$2" code
+            # bis zu drei Versuche, damit einzelne Netzaussetzer keinen Alarm auslösen
+            for i in 1 2 3; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' -m 15 "$url" || echo 000)
+              [ "$code" = "200" ] && break
+              sleep 10
+            done
+            if [ "$code" = "200" ]; then
+              echo "ok    $name ($code)"
+            else
+              echo "::error title=$name nicht erreichbar::$url antwortet mit $code"
+              fail=1
+            fi
+          }
+          check "web"    "$WEB/api/v1/health"
+          check "worker" "$WEB/api/v1/health/worker"
+          check "hilfe"  "$HILFE/health"
+          check "sicherheit" "$WEB/sicherheit"
+          exit $fail
