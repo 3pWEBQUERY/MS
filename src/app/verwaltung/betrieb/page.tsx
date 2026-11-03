@@ -151,7 +151,7 @@ async function Content() {
           title="Feature-Schalter"
           description="Einzeln abschaltbar (HOM08). Die Sperre gilt serverseitig sofort, bestehende Daten bleiben erhalten, keine Aktion wird nur scheinbar angenommen."
         >
-          <ul className="grid gap-3 lg:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {flags.map((f) => (
               <li key={f.key}>
                 <Card className="flex h-full flex-col gap-4">

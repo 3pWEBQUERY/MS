@@ -40,7 +40,8 @@ async function timed(op: string, cls: string, kind: Kind, run: () => Promise<boo
 const page = (u: Session, path: string) => async () => {
   const res = await fetch(`${BASE_URL}${path}`, { headers: { Cookie: u.cookie }, redirect: "manual" });
   const body = await res.text();
-  return res.status === 200 && !body.includes("Diese Seite ist nicht verfügbar.");
+  // notFound() im Streaming liefert Status 200 mit Fehler-Digest im RSC-Strom
+  return res.status === 200 && !body.includes("NEXT_HTTP_ERROR_FALLBACK");
 };
 
 /** Aktions-Antwort (RSC) ohne Fehlerzustand. */

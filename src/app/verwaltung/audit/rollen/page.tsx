@@ -58,7 +58,7 @@ async function Content() {
           {staff.length === 0 ? (
             <EmptyState icon="users" title="Keine Rollen vergeben" />
           ) : (
-            <ul className="grid gap-3 lg:grid-cols-2">
+            <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
               {staff.map((m) => {
                 const self = m.id === viewer.accountId;
                 return (
