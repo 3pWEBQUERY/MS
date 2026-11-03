@@ -15,7 +15,7 @@ Diese Runbooks gelten für die Railway-Umgebung «MS Plattform» (Services `web`
 | Signal | Quelle | Schwelle | Erste Reaktion |
 |---|---|---|---|
 | Web nicht bereit | Railway-Healthcheck und externer Prüfer auf `GET /api/v1/health` | 503 oder Timeout | Runbook «Vollständiger Wiederanlauf» |
-| Fehlerquote | Railway Observability (HTTP-Metriken des Service `web`) | > 2 % 5xx über 5 Minuten (NFR16) | Logs `web` nach `[action]` filtern, Korrelations-IDs sammeln |
+| Fehlerquote | Logzeile `[alarm] code=http_5xx_rate` (Arbeiter, aus `ops.request_metrics`), ergänzend Railway-HTTP-Metriken | > 2 % 5xx über 5 Minuten ab 50 Anfragen (NFR16) | Logs `web` nach `[action]` filtern, Korrelations-IDs sammeln |
 | Arbeiter / Warteschlange | externer Prüfer auf `GET /api/v1/health/worker`, Logzeilen `[alarm] code=…` | 503; `worker_inactive`, `queue_age` (> 15 min), `outbox_dead_letters`, `delivery_dead`, `privacy_request_failed`, `safety_verification_overdue` | jeweiliges Runbook unten |
 | Backup | Railway Postgres → Volume → Backups | letztes Backup älter als Plan (siehe «Backupfehler») | Runbook «Backupfehler» |
 | Verweigerte Zugriffe | `/verwaltung/betrieb` («Verweigerte Zugriffe in den letzten 24 Stunden») | auffälliger Anstieg | Runbook «Datenabfluss» prüfen |
