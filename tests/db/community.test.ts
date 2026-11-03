@@ -78,4 +78,19 @@ describe("AT04 Geschlossene Gruppe", () => {
       { id: other, status: "published" },
     ]);
   });
+
+  it("archivierte Gruppe: für Mitglieder lesbar, für andere nicht auffindbar (COM08)", async () => {
+    const a = await createMember();
+    const b = await createMember();
+    const group = await createGroup({ type: "open", members: [a.id] });
+    const post = await createPost(a.id, { groupId: group.id, body: "Archivierter Austausch" });
+    await rows(dsql`update community.groups set status = 'archived' where id = ${group.id}`);
+    const va = await signIn(a.id);
+    expect((await getGroupForViewer(va, group.slug))?.archived).toBe(true);
+    expect(await getPostForViewer(va, post)).not.toBeNull();
+    const vb = await signIn(b.id);
+    expect(await getGroupForViewer(vb, group.slug)).toBeNull();
+    expect((await listDiscoverableGroups(vb)).map((g) => g.slug)).not.toContain(group.slug);
+    expect(await getPostForViewer(vb, post)).toBeNull();
+  });
 });

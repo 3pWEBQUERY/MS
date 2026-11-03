@@ -1,7 +1,8 @@
 /** Stub für `next/cache`: Cache-Steuerung ist in DB-Tests wirkungslos. */
-export const cacheLife = (..._args: unknown[]): void => {};
-export const cacheTag = (..._args: unknown[]): void => {};
-export const updateTag = (..._args: unknown[]): void => {};
-export const revalidateTag = (..._args: unknown[]): void => {};
-export const revalidatePath = (..._args: unknown[]): void => {};
-export const refresh = (): void => {};
+const noop = (): void => {};
+export const cacheLife = noop;
+export const cacheTag = noop;
+export const updateTag = noop;
+export const revalidateTag = noop;
+export const revalidatePath = noop;
+export const refresh = noop;

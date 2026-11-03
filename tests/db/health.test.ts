@@ -10,7 +10,7 @@ import { describe, expect, it } from "vitest";
 import { localDateString } from "@/lib/time";
 import { TEST_ROLE } from "../../scripts/test-db/config";
 import { getDiaryEntry, getHistory } from "@/server/modules/health/queries";
-import { createCheckInAction } from "@/server/modules/health/checkin-actions";
+import { createCheckInAction, updateCheckInAction } from "@/server/modules/health/checkin-actions";
 import { createFatigueEntryAction, deleteDiaryEntryAction } from "@/server/modules/health/diary-actions";
 import { collectHealth } from "@/server/modules/privacy/export-collect-health";
 import { createMember, db, form, pgError, redirectTarget, rows, signIn, sql } from "./fixtures";
@@ -55,6 +55,21 @@ describe("AT02 Null und Wiederholung", () => {
     expect(second.data).toMatchObject({ existingDate: today });
     const [{ n }] = await rows<{ n: number }>(dsql`select count(*)::int as n from health.check_ins where account_id = ${a.id}`);
     expect(n).toBe(1);
+  });
+
+  it("Konflikt: Änderung mit veralteter Version überschreibt nichts und liefert den aktuellen Stand (DIA04, QA03)", async () => {
+    const a = await createMember({ health: true });
+    const viewer = await signIn(a.id);
+    const today = localDateString(new Date(), viewer.prefs.timezone);
+    await redirectTarget(createCheckInAction(idle, form({ clientOpId: randomUUID(), date: today, energy: "2" })));
+    // Gerät 1 speichert mit Version 1 → Version 2
+    await redirectTarget(updateCheckInAction(idle, form({ date: today, version: "1", energy: "7" })));
+    // Gerät 2 hatte noch Version 1 gelesen
+    const stale = await updateCheckInAction(idle, form({ date: today, version: "1", energy: "1" }));
+    expect(stale.status).toBe("error");
+    expect(stale.data).toMatchObject({ conflict: true, current: { version: 2, energy: 7 } });
+    const [row] = await rows<{ energy: number; version: number }>(dsql`select energy, version from health.check_ins where account_id = ${a.id}`);
+    expect(row).toEqual({ energy: 7, version: 2 });
   });
 
   it("verlangt mindestens eine Angabe und speichert ohne Angabe nichts", async () => {

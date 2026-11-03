@@ -183,6 +183,24 @@ describe("AT06 Block und Zustellqueue", () => {
     }
   });
 
+  it("Ruhezeit: wartende E-Mail wird verschoben, nicht während der Ruhezeit versendet (MSG08)", async () => {
+    const { b, va, conversationId } = await activeContact({ emailSocialB: true });
+    // Ruhezeit über den ganzen Tag ausser der letzten Minute vor Mitternacht → «jetzt» liegt darin
+    await sql`update identity.user_preferences set quiet_start = '00:00', quiet_end = '23:59' where account_id = ${b.id}`;
+    await sendMessage(va, conversationId, "In der Ruhezeit", randomUUID());
+    await backdate(b.id);
+    await notificationHandlers["notification.deliver"]!({ id: randomUUID(), aggregateId: b.id, payload: {}, attempt: 1 });
+    const [job] = await rows<{ status: string; later: boolean }>(
+      dsql`select j.status, j.next_run_at > now() as later from messaging.delivery_jobs j join messaging.notifications n on n.id = j.notification_id
+           where j.account_id = ${b.id} and n.type = 'new_message'`,
+    );
+    expect(job).toEqual({ status: "pending", later: true });
+    const [{ digests }] = await rows<{ digests: number }>(
+      dsql`select count(*)::int as digests from messaging.delivery_jobs where account_id = ${b.id} and channel = 'email_digest'`,
+    );
+    expect(digests).toBe(0);
+  });
+
   it("Blockierliste enthält nur eigene Entscheidungen; Aufheben erzeugt keine neue Freigabe", async () => {
     const { a, b, va, vb } = await activeContact();
     await blockMember(vb, a.id);
