@@ -48,7 +48,7 @@ Die Community ist kein Notfalldienst. Bei akuter Gefahr ruf den Sanitätsnotruf 
     slug: "datenschutz",
     title: "Datenschutzinformation",
     textVersion: PRIVACY_VERSION,
-    validFrom: "2026-11-03",
+    validFrom: "2026-11-04",
     body: `${DRAFT_NOTE}
 
 ## Das Wichtigste in Kürze
@@ -71,7 +71,7 @@ Kontakt für Datenschutzanliegen: über das Kontaktformular, Kategorie «Datensc
 - Gesundheitsbereich (nur nach ausdrücklicher Aktivierung): Check-ins, Symptome, Fatigue und Notizen – ausschliesslich für dich.
 - Meldungen und Moderationsfälle – um die Community zu schützen.
 - Kontaktformular: dein Anliegen und optional eine Antwortadresse – um dein Anliegen zu bearbeiten.
-- Technische Protokolle ohne Inhalte – für Sicherheit und Betrieb.
+- Technische Protokolle ohne Inhalte – für Sicherheit und Betrieb. IP-Adressen speichern wir nicht im Klartext, sondern nur als Prüfsumme zum Schutz vor Missbrauch (z. B. zu vielen Anmeldeversuchen); diese Zähler werden nach 2 Tagen gelöscht.
 - Nutzungsstatistik (nur wenn du sie selbst einschaltest): fünf grobe Ereignisse wie «Einführung abgeschlossen» oder «Artikel geöffnet», ohne Inhalte, Suchtexte, Pseudonym oder Gesundheitswerte – um die Plattform verständlicher zu machen.
 
 ## Wer Daten erhält
@@ -88,7 +88,8 @@ Die folgenden Fristen sind vorgeschlagene betriebliche Obergrenzen und werden vo
 - Check-ins und Tagebuch: bis du sie löschst oder die Einwilligung widerrufst; danach sofort gesperrt und innert 30 Tagen gelöscht
 - Beiträge und Nachrichten: bis zur Löschung des Inhalts oder Kontos
 - Einwilligungsnachweise: während der Nutzung und vorgeschlagen 3 Jahre danach
-- Meldungen und Belege: 180 Tage nach Abschluss des Falls
+- Meldungen, Belege, interne Notizen und Einspruchstexte: 180 Tage nach Abschluss des Falls; danach bleibt ein Fallprotokoll ohne Inhalte (Art, Zeitpunkt, Massnahme)
+- Kontaktformular: Anliegen und Antwortadresse 12 Monate
 - Sicherheits- und Auditprotokolle: 180 Tage, ohne Inhalte
 - Exporte: höchstens 24 Stunden ab Bereitstellung
 - Nutzungsstatistik: zufälliger Analysebezug und Rohdaten höchstens 30 Tage; danach nur Summen ab zehn Personen
@@ -100,7 +101,7 @@ Du kannst Auskunft über deine Daten verlangen, falsche Daten berichtigen lassen
 ## Einwilligungen
 Den Gesundheitsbereich aktivierst du mit einer gesonderten, freiwilligen Entscheidung. Du kannst sie jederzeit widerrufen. Ohne Gesundheitsbereich stehen dir alle anderen Bereiche offen.
 
-Die anonyme Nutzungsstatistik ist standardmässig aus. Du kannst sie am Ende der Einführung oder unter «Privatsphäre und Einwilligungen» einschalten und jederzeit wieder ausschalten; beim Ausschalten werden die Rohdaten zu deinem Konto gelöscht.
+Die pseudonyme Nutzungsstatistik ist standardmässig aus. Du kannst sie am Ende der Einführung oder unter «Privatsphäre und Einwilligungen» einschalten und jederzeit wieder ausschalten; beim Ausschalten werden die Rohdaten zu deinem Konto gelöscht.
 
 ## Sicherheit
 Freitexte wie Tagebuchnotizen und Nachrichten werden verschlüsselt gespeichert. Mitarbeitende melden sich mit einem zweiten Faktor an. Privilegierte Zugriffe werden protokolliert.`,

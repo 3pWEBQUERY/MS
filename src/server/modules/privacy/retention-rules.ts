@@ -15,6 +15,8 @@ export const RETENTION = {
   healthAfterWithdrawalRunFromDays: 28,
   /** Einwilligungsnachweise nach Ende der Nutzung */
   consentProofYears: 3,
+  /** Kontaktformular: Anliegen und Antwortadresse (Vorschlag, Freigabe D05) */
+  contactMessageMonths: 12,
 } as const;
 
 const DAY_MS = 24 * 60 * 60 * 1000;

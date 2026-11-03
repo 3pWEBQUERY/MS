@@ -33,9 +33,11 @@ import { INVITE_ATTEMPTS, INVITE_INVALID, redeemInvitation } from "./invitations
 import { normalizeRecoveryCode } from "./recovery-code";
 import { findValidToken, issueEmailToken } from "./tokens";
 
+/** Drosselungsschlüssel aus der IP-Adresse – nur als Prüfsumme gespeichert, nie im Klartext (PRI01, NFR15). */
 async function clientKey() {
   const h = await headers();
-  return (h.get("x-forwarded-for")?.split(",")[0] ?? h.get("x-real-ip") ?? "local").trim();
+  const ip = (h.get("x-forwarded-for")?.split(",")[0] ?? h.get("x-real-ip") ?? "local").trim();
+  return sha256(`ip:${ip}`).slice(0, 32);
 }
 
 const emailSchema = z

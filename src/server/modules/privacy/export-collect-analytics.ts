@@ -25,7 +25,7 @@ export async function collectAnalytics(accountId: string) {
     : [];
   return {
     hinweis:
-      "Optionale, anonyme Nutzungsstatistik. Gespeichert nur mit deiner Einwilligung «Nutzungsstatistik»; Rohdaten werden nach höchstens 30 Tagen und bei Widerruf sofort gelöscht. Ausgewertet werden nur Summen ab zehn Personen.",
+      "Optionale, pseudonyme Nutzungsstatistik (bis zur Löschung deinem Konto zugeordnet). Gespeichert nur mit deiner Einwilligung «Nutzungsstatistik»; Rohdaten werden nach höchstens 30 Tagen und bei Widerruf sofort gelöscht. Ausgewertet werden nur Summen ab zehn Personen.",
     analysebezug: subject
       ? { kennung: subject.ref, angelegt_am_utc: iso(subject.createdAt), loeschung_spaetestens_utc: iso(subject.expiresAt) }
       : null,

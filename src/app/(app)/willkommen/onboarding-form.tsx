@@ -20,7 +20,7 @@ const STEPS = [
   { lead: "Was", accent: "interessiert", tail: " dich?", eyebrow: "Freiwillige Angaben" },
   { lead: "Was möchtest du zuerst", accent: "tun?", eyebrow: "Freiwilliges Ziel" },
   { lead: "Wer sieht", accent: "was", eyebrow: "Datenschutz kurz erklärt" },
-  { lead: "Hilfst du mit einer anonymen", accent: "Statistik?", eyebrow: "Freiwillige Entscheidung" },
+  { lead: "Hilfst du mit einer freiwilligen", accent: "Statistik?", eyebrow: "Freiwillige Entscheidung" },
 ] as { lead: string; accent: string; tail?: string; eyebrow: string }[];
 
 const two = (n: number) => String(n).padStart(2, "0");
@@ -241,7 +241,7 @@ export function OnboardingForm({ initialGoal }: { initialGoal?: string }) {
           defaultValue={state.values?.analytics as string | undefined}
           options={[
             { value: "denied", label: "Nein, nicht mitzählen" },
-            { value: "granted", label: "Ja, anonym mitzählen", description: "Du kannst das jederzeit ausschalten; bisher gezählte Rohdaten werden dann sofort gelöscht." },
+            { value: "granted", label: "Ja, mitzählen", description: "Grobe Ereignisse ohne Inhalte, höchstens 30 Tage deinem Konto zugeordnet, ausgewertet nur als Summen ab zehn Personen. Jederzeit ausschaltbar; Rohdaten werden dann sofort gelöscht." },
           ]}
         />
         <p className="text-base text-ink-2">

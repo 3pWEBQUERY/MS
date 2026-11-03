@@ -23,6 +23,8 @@ export const maintenanceTasks: PeriodicTask[] = [
       await db.execute(dsql`delete from identity.sessions where expires_at < now() - interval '1 day' or revoked_at < now() - interval '1 day'`);
       await db.execute(dsql`delete from identity.email_tokens where expires_at < now() - interval '1 day'`);
       await db.execute(dsql`delete from ops.rate_limit_counters where window_start < now() - interval '2 days'`);
+      // Kontaktformular nach Frist löschen (Aufbewahrungsplan, PRI01)
+      await db.execute(dsql`delete from content.contact_messages where created_at < now() - make_interval(months => ${RETENTION.contactMessageMonths})`);
     },
   },
   {

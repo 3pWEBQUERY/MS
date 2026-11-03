@@ -55,6 +55,13 @@ export const NOT_APPLICABLE = {
   search_index:
     "Kein separater Suchdienst: der PostgreSQL-Volltextindex ist aus den Datenzeilen abgeleitet und wird mit ihnen bereinigt.",
   cache: "Keine personenbezogenen Daten in gemeinsamen Caches – gecacht werden nur öffentliche Inhalte.",
-  vendors:
-    "E-Mail-Versand speichert keine Inhalte der Plattform. Versandprotokolle beim Dienstleister gemäss Auftragsbearbeitungsvertrag.",
 };
+
+/**
+ * Beleg für den Teilschritt «Auftragsbearbeiter (E-Mail-Versand)». Nennt den tatsächlichen Stand
+ * statt einen Vertrag zu behaupten, der noch nicht existiert (Auftragsbearbeiterliste, D04).
+ */
+export function vendorReceipt(smtpHost = process.env.SMTP_HOST ?? ""): string {
+  if (!smtpHost) return "Kein E-Mail-Dienstleister angebunden: dort liegen keine Daten zu diesem Konto.";
+  return "E-Mail-Versand über einen externen Dienstleister: Die Plattform übergibt nur Empfängeradresse und Text der Konto-E-Mails. Versandprotokolle beim Dienstleister werden nach dessen Vertrag gelöscht (siehe docs/compliance/auftragsbearbeiter.md).";
+}

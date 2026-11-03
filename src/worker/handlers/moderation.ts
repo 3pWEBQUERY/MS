@@ -1,5 +1,6 @@
 import { and, eq, gt, inArray, isNull, lt, sql as dsql } from "drizzle-orm";
 import { audit } from "@/server/audit";
+import { encrypt } from "@/server/crypto";
 import { db } from "@/server/db";
 import { appeals, evidenceItems, moderationActions, moderationCases, reports } from "@/server/db/schema";
 import { staffWithRoles } from "@/server/modules/admin/common";
@@ -168,7 +169,22 @@ export const moderationTasks: PeriodicTask[] = [
             .set({ detailsEncrypted: null })
             .where(and(eq(reports.caseId, c.id), dsql`${reports.detailsEncrypted} is not null`))
             .returning({ id: reports.id });
-          if (rows.length + details.length > 0)
+          // Freitexte zum Fall ebenfalls nach Frist entfernen (Datenschutzinformation «180 Tage»).
+          // Leerer Chiffretext ist genau 43 Zeichen lang (v1.<iv>.<tag>.) – so wird nichts doppelt verschlüsselt.
+          // Entfernt werden:
+          // interne Notizen, Einspruchsbegründungen und Entscheidnotizen. Es bleibt ein Fallprotokoll
+          // ohne Inhalte (Art, Zeitpunkt, Massnahme, öffentliche Begründung) für Wiederholungsfälle.
+          const notes = await tx
+            .update(moderationActions)
+            .set({ internalNote: null })
+            .where(and(eq(moderationActions.caseId, c.id), dsql`${moderationActions.internalNote} is not null`))
+            .returning({ id: moderationActions.id });
+          const appealTexts = await tx
+            .update(appeals)
+            .set({ reasonEncrypted: encrypt(""), decisionNote: null })
+            .where(and(eq(appeals.caseId, c.id), dsql`(${appeals.decisionNote} is not null or length(${appeals.reasonEncrypted}) <> 43)`))
+            .returning({ id: appeals.id });
+          if (rows.length + details.length + notes.length + appealTexts.length > 0)
             await audit({ actorId: null, actorRole: "system", action: "case.evidence_purged", objectType: "moderation_case", objectId: c.id }, tx);
         });
       }

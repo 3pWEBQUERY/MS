@@ -103,6 +103,8 @@ export async function sendMail(to: string, template: MailTemplate): Promise<void
     host: env.mail.host(),
     port: env.mail.port(),
     secure: env.mail.port() === 465,
+    // Auf 587 nur mit STARTTLS senden – kein Rückfall auf Klartext (NFR09); lokal (Mailpit) ohne TLS
+    requireTLS: env.isProd && env.mail.port() !== 465,
     auth: env.mail.user() ? { user: env.mail.user(), pass: env.mail.pass() } : undefined,
   });
   await transport.sendMail({ from: env.mail.from(), to, subject, text });

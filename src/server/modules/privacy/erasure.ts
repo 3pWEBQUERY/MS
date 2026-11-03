@@ -39,7 +39,7 @@ import { enqueue } from "../../outbox";
 import { storageConfigured } from "../../storage";
 import { removeExportObjects } from "./export";
 import { dueDate, IDENTITY_METHODS } from "./requests";
-import { ACCOUNT_TASKS, ESCALATE_AFTER, HEALTH_TASKS, NOT_APPLICABLE, taskKey, type TaskDef } from "./tasks";
+import { ACCOUNT_TASKS, ESCALATE_AFTER, HEALTH_TASKS, NOT_APPLICABLE, taskKey, vendorReceipt, type TaskDef } from "./tasks";
 
 /**
  * Löschung (PRI04–PRI06, PRD 09 «Löschung»-Zustandsautomat, PRD 11, AT09):
@@ -407,7 +407,7 @@ const ACCOUNT_STEPS: Record<string, StepFn> = {
 
   "search_index:fulltext": async () => NOT_APPLICABLE.search_index,
   "cache:server_cache": async () => NOT_APPLICABLE.cache,
-  "vendors:mail_provider": async () => NOT_APPLICABLE.vendors,
+  "vendors:mail_provider": async () => vendorReceipt(),
 
   "database:account_record": async (accountId, ctx) => {
     await verifyAccountErased(accountId);
