@@ -8,7 +8,8 @@ import { fail, ok, type ActionState, zodFieldErrors } from "@/lib/action-state";
 import { PRIVACY_VERSION, TERMS_VERSION } from "@/lib/catalog";
 import { runAction, str, UserError } from "../../action";
 import { audit } from "../../audit";
-import { burnPasswordCheck, hashPassword, passwordProblem, verifyPassword } from "../../auth/password";
+import { burnPasswordCheck, hashPassword, verifyPassword } from "../../auth/password";
+import { passwordProblemChecked } from "../../auth/password-leak";
 import { setDisplayCookieFor } from "../../auth/display-cookie";
 import { createSession, destroyCurrentSession, readSessionToken, revokeAllSessions } from "../../auth/session";
 import { verifyTotp } from "../../auth/totp";
@@ -82,7 +83,7 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
       return fail("Bitte prüfe die markierten Angaben.", { fieldErrors: zodFieldErrors(parsed.error.issues), values });
 
     const { email, password } = parsed.data;
-    const problem = passwordProblem(password, email);
+    const problem = await passwordProblemChecked(password, email);
     if (problem) return fail("Bitte prüfe die markierten Angaben.", { fieldErrors: { password: problem }, values });
 
     const existing = await db
@@ -352,7 +353,7 @@ export async function resetPasswordAction(_prev: ActionState, formData: FormData
     const row = await findValidToken(token, "reset_password");
     if (!row) return fail("Dieser Link ist abgelaufen oder wurde bereits verwendet. Bitte fordere einen neuen an.", { data: { invalid: true } });
     const [acc] = await db.select({ email: accounts.email }).from(accounts).where(eq(accounts.id, row.accountId));
-    const problem = passwordProblem(password, acc?.email);
+    const problem = await passwordProblemChecked(password, acc?.email);
     if (problem) return fail("Bitte prüfe das neue Passwort.", { fieldErrors: { password: problem } });
     const passwordHash = await hashPassword(password);
     await db.transaction(async (tx) => {

@@ -3,8 +3,8 @@
  * (hier 128), Einfügen erlaubt, keine Kompositionsregeln. Abgewiesen werden häufige bzw.
  * bekanntermassen kompromittierte Passwörter und triviale Muster. Rein, ohne Abhängigkeiten.
  *
- * Ein Abgleich mit einem externen Leak-Dienst (z. B. k-Anonymitäts-Abfrage) ist ein neuer
- * Auftragsbearbeiter und erst nach Freigabe in D04 vorgesehen.
+ * Der Abgleich mit einem externen Leak-Dienst (k-Anonymität) liegt in password-leak.ts und ist
+ * bis zur Freigabe in D04 ausgeschaltet (PASSWORD_LEAK_CHECK).
  */
 export const PASSWORD_MIN = 15;
 export const PASSWORD_MAX = 128;

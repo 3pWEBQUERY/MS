@@ -6,7 +6,8 @@ import { z } from "zod";
 import { fail, ok, type ActionState } from "@/lib/action-state";
 import { runAction, str, UserError } from "../../action";
 import { audit } from "../../audit";
-import { hashPassword, passwordProblem } from "../../auth/password";
+import { hashPassword } from "../../auth/password";
+import { passwordProblemChecked } from "../../auth/password-leak";
 import { setDisplayCookie } from "../../auth/display-cookie";
 import { revokeAllSessions } from "../../auth/session";
 import { actionViewer, AuthError, hasRecentAuth } from "../../auth/viewer";
@@ -71,7 +72,7 @@ export async function changePasswordAction(_prev: ActionState, formData: FormDat
 
     const [me] = await db.select({ email: accounts.email }).from(accounts).where(eq(accounts.id, viewer.accountId));
     if (!me) throw new AuthError("unauthenticated");
-    const problem = passwordProblem(password, me.email);
+    const problem = await passwordProblemChecked(password, me.email);
     if (problem) return fail("Bitte prüfe das neue Passwort.", { fieldErrors: { newPassword: problem } });
     if (password !== repeat)
       return fail("Die beiden Eingaben stimmen nicht überein.", { fieldErrors: { repeatPassword: "Bitte wiederhole das neue Passwort genau." } });
