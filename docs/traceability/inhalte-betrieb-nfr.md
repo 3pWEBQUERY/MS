@@ -87,7 +87,7 @@ Status: **erfüllt** = im Code nachweisbar mit allen Abnahmesätzen · **teilwei
 | NFR17 | Versionierte Verträge, Migrationen, Rollen- und Betriebsdokumentation | `src/app/api/v1/**`, `drizzle/`, `docs/ENGINEERING.md`, **neu** `docs/RUNBOOKS.md`, **neu** CI | erfüllt | |
 | NFR18 | Entwicklung, Test, Produktion getrennt; keine echten Gesundheitsdaten im Test | `SEED_DEMO`/`SEED_ONLY_IF_DEMO` in `scripts/seed.ts`, fiktive Seeds | teilweise | Railway hat derzeit eine Umgebung; getrennte Produktionsumgebung vor echten Daten anlegen. |
 | NFR19 | Deduplizierte Jobs, begrenzte Wiederholung, Fehlerwarteschlange, Alarm nach ausgeschöpften Versuchen | `src/worker/index.ts` (6 Versuche, Backoff, `dead`), **neu** Alarmzeile `[alarm] code=outbox_dead_letter` | teilweise | Kill-/Restart-Test noch nicht protokolliert. |
-| NFR20 | Öffentliche Hilfe unabhängig bereitstellbar | `sicherheit/page.tsx` ohne Sitzung, statischer Rückfall in `safety.ts` | teilweise | Bei Ausfall des Web-Service selbst gibt es keine getrennte Auslieferung (z. B. statische Kopie auf eigenem Host); Teilabschaltung/Wiederanlauf nicht geprobt. |
+| NFR20 | Öffentliche Hilfe unabhängig bereitstellbar | `sicherheit/page.tsx` ohne Sitzung; **neu:** eigenständiger Hilfe-Dienst `src/static-help/*` (eigener Railway-Service `hilfe`, ohne Next.js, ohne JavaScript, strenge CSP), gemeinsame Rückfallliste `src/lib/safety-static.ts`, Test `render.test.ts`, Runbooks R6/R7 | erfüllt | Wiederanlauf mit ausgefallenem `web` vor dem Launch einmal proben (R6); Lesezugriff über Rolle `ms_hilfe_ro` einrichten. |
 
 ## Architektur (PRD 14)
 

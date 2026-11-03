@@ -14,7 +14,11 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "db:predeploy": "npm run db:migrate && SEED_ONLY_IF_DEMO=1 npm run db:seed",
-    "check:lines": "node scripts/check-lines.mjs"
+    "check:lines": "node scripts/check-lines.mjs",
+    "test:db:prepare": "tsx scripts/test-db/prepare.ts ms_test",
+    "test:db": "npm run test:db:prepare && vitest run --config vitest.db.config.mts",
+    "test:e2e": "playwright test",
+    "help:serve": "tsx src/static-help/server.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1161.0",

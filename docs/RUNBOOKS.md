@@ -107,7 +107,7 @@ Werkzeuge: Railway-Dashboard, Railway-CLI (`railway link`, `railway status`, `ra
 2. **Datenbank**: Postgres-Service in Railway neu starten. Ist das Volume beschädigt → R4 (Restore in neue Instanz, Löschjournal anwenden, `DATABASE_URL` an `web` und `worker` auf die neue Instanz referenzieren).
 3. **Web**: `railway redeploy --service web`. Pre-Deploy führt `npm run db:predeploy` aus (Migration; Demo-Seed nur bei `SEED_DEMO=true` – in Produktion `false`). Healthcheck muss 200 liefern.
 4. **Worker**: `railway redeploy --service worker`. Innerhalb von 5 Minuten muss `/api/v1/health/worker` ein Lebenszeichen zeigen. Liegengebliebene Ereignisse in `processing` werden nach 5 Minuten automatisch wieder aufgenommen (dedupliziert, NFR19).
-5. **Teilbetrieb**: Solange Teile fehlen, Schalter gezielt aus (HOM08). `/sicherheit`, `/hilfe` und `/wissen` bleiben öffentlich; `/sicherheit` zeigt notfalls die statische Notrufliste.
+5. **Teilbetrieb**: Solange Teile fehlen, Schalter gezielt aus (HOM08). `/sicherheit`, `/hilfe` und `/wissen` bleiben öffentlich; `/sicherheit` zeigt notfalls die statische Notrufliste. Fällt `web` ganz aus, auf die Domain des Dienstes `hilfe` verweisen (Statusmeldung, Kontaktkanäle); er braucht weder Next.js noch Sitzungen.
 6. **Prüfung**: Login mit MFA (Mitarbeitende), Wissen und Hilfe öffentlich, Check-in speichern (Testkonto), Chatnachricht zwischen Testkonten, Export anstossen. Erst dann Schalter wieder einschalten. Ergebnis im Ticket.
 
 ## R7 Krisenhilfeweg falsch oder nicht erreichbar
@@ -115,10 +115,11 @@ Werkzeuge: Railway-Dashboard, Railway-CLI (`railway link`, `railway status`, `ra
 **Auslöser**: Hinweis über Kontaktformular, Moderation oder Prüfung: eine Nummer auf `/sicherheit` ist falsch, nicht erreichbar oder die Erreichbarkeitsangabe stimmt nicht. Falscher kritischer Hilfeweg ist ein Launch-Blocker und Stoppkriterium (R04, PRD 17).
 
 1. Sofort `/verwaltung/verzeichnis/sicherheit` öffnen (Rolle Redaktion) und den betroffenen Hilfeweg **deaktivieren**. Der Sanitätsnotruf 144 bleibt als feste Schaltfläche auf der Seite, unabhängig von der gepflegten Liste.
-2. Ist die gepflegte Liste insgesamt fraglich: alle Einträge deaktivieren – die Seite zeigt dann die statische Liste aus `src/server/modules/content/safety.ts` (nur offizielle Schweizer Nummern). Diese Liste ist ebenfalls fachlich zu prüfen; Änderungen dort brauchen ein Deployment.
+2. Ist die gepflegte Liste insgesamt fraglich: alle Einträge deaktivieren – die Seite zeigt dann die statische Liste aus `src/lib/safety-static.ts` (nur offizielle Schweizer Nummern). Diese Liste ist ebenfalls fachlich zu prüfen; Änderungen dort brauchen ein Deployment.
 3. Krisenfachperson informieren; korrigierte Angaben erfassen und **fachlich verifizieren** (Verfahren «Fachprüfung Krisenintervention» oder «Fachprüfung Medizin»). Erst dann wieder aktivieren – das System lässt die Aktivierung ohne fachliche Verifikation nicht zu.
 4. Moderation informieren, damit sie in laufenden Fällen auf den korrigierten Weg verweist. Einladungen pausieren (Schalter «Registrierung»), bis die Korrektur geprüft ist.
 5. Nachbereitung: monatliche Verifikation (SAF06) im Arbeitsvorrat; Alarm `safety_verification_overdue` beobachten.
+6. Ist die Web-App selbst ausgefallen: Der Hilfe-Dienst (Railway-Service `hilfe`, `npm run help:serve`) liefert die Sicherheitsseite unabhängig aus (NFR20). Er lädt die gepflegte Liste alle 10 Minuten und behält bei einer Datenbankstörung die zuletzt geladene; ohne je geladene Liste zeigt er die statische. `GET /health` meldet `source: database|fallback`. Deaktivierte Einträge verschwinden dort spätestens nach 10 Minuten; sofort: `railway redeploy --service hilfe`.
 
 ## R8 Inhalt fehlerhaft (Artikel oder Angebot)
 

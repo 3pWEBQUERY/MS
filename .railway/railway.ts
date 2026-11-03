@@ -53,5 +53,16 @@ export default defineRailway((ctx) => {
     env: { ...shared, NODE_ENV: "production" },
   });
 
-  return project("MS Plattform", { resources: [db, media, web, worker] });
+  // NFR20: eigenständige Sicherheitsseite ohne Next.js, eigener Build und eigene Domain.
+  // Liest nur content.safety_contacts; empfohlen ist die Rolle ms_hilfe_ro (docs/db-roles.sql).
+  const hilfe = service("hilfe", {
+    source: github("3pwebquery/ms", { branch: "claude/laughing-bell-1whiqu" }),
+    build: 'echo "Hilfe-Dienst: kein Build nötig"',
+    start: "npm run help:serve",
+    healthcheck: "/health",
+    replicas: { "europe-west4": 1 },
+    env: { DATABASE_URL: db.env.DATABASE_URL, PLATFORM_URL: ctx.shared.APP_URL, NODE_ENV: "production", TZ: "Europe/Zurich" },
+  });
+
+  return project("MS Plattform", { resources: [db, media, web, worker, hilfe] });
 });

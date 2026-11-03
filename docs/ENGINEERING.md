@@ -18,6 +18,7 @@ src/server/db/schema/*    Drizzle-Schema, ein pg-Schema je Fachmodul
 src/server/modules/<modul> Fachlogik (Services, Queries, Server Actions) – gemeinsame Logik für Web und spätere Apps
 src/server/auth/*         Sitzung, Passwort, TOTP, Viewer/Guards (Data Access Layer)
 src/worker/handlers/*     Outbox-Handler und periodische Aufgaben je Modul
+src/static-help/*         eigenständiger Hilfe-Dienst ohne Next.js (NFR20, Railway-Service «hilfe»)
 src/lib/*                 clientsichere Hilfen (Kataloge, Zeit, ActionState)
 ```
 

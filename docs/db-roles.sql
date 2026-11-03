@@ -24,3 +24,8 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA identity, health, community, messaging, conte
 
 -- Wirkung testen (muss 0 Zeilen liefern):
 --   SET ROLE ms_app; SELECT count(*) FROM health.check_ins; RESET ROLE;
+
+-- NFR20: Hilfe-Dienst (src/static-help) liest nur die Sicherheitskontakte.
+CREATE ROLE ms_hilfe_ro LOGIN PASSWORD 'BITTE-ERSETZEN' NOSUPERUSER NOCREATEDB NOCREATEROLE;
+GRANT USAGE ON SCHEMA content TO ms_hilfe_ro;
+GRANT SELECT ON content.safety_contacts TO ms_hilfe_ro;

@@ -48,7 +48,7 @@ Die Community ist kein Notfalldienst. Bei akuter Gefahr ruf den Sanitätsnotruf 
     slug: "datenschutz",
     title: "Datenschutzinformation",
     textVersion: PRIVACY_VERSION,
-    validFrom: "2026-11-01",
+    validFrom: "2026-11-03",
     body: `${DRAFT_NOTE}
 
 ## Das Wichtigste in Kürze
@@ -100,7 +100,7 @@ Du kannst Auskunft über deine Daten verlangen, falsche Daten berichtigen lassen
 ## Einwilligungen
 Den Gesundheitsbereich aktivierst du mit einer gesonderten, freiwilligen Entscheidung. Du kannst sie jederzeit widerrufen. Ohne Gesundheitsbereich stehen dir alle anderen Bereiche offen.
 
-Die anonyme Nutzungsstatistik ist standardmässig aus. Du kannst sie unter «Privatsphäre und Einwilligungen» ein- und jederzeit wieder ausschalten; beim Ausschalten werden die Rohdaten zu deinem Konto gelöscht.
+Die anonyme Nutzungsstatistik ist standardmässig aus. Du kannst sie am Ende der Einführung oder unter «Privatsphäre und Einwilligungen» einschalten und jederzeit wieder ausschalten; beim Ausschalten werden die Rohdaten zu deinem Konto gelöscht.
 
 ## Sicherheit
 Freitexte wie Tagebuchnotizen und Nachrichten werden verschlüsselt gespeichert. Mitarbeitende melden sich mit einem zweiten Faktor an. Privilegierte Zugriffe werden protokolliert.`,

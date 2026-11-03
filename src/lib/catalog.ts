@@ -5,7 +5,7 @@
 
 export const SCALE_VERSION = "skalen-2026-11-v1";
 export const TERMS_VERSION = "bedingungen-2026-11-v1";
-export const PRIVACY_VERSION = "datenschutz-2026-11-v1";
+export const PRIVACY_VERSION = "datenschutz-2026-11-v2";
 export const HEALTH_CONSENT_VERSION = "gesundheit-2026-11-v1";
 export const ANALYTICS_CONSENT_VERSION = "analytics-2026-11-v1";
 export const COMMUNITY_RULES_VERSION = "regeln-2026-11-v1";
