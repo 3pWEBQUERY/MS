@@ -50,6 +50,13 @@
       "when": 1793690513261,
       "tag": "0006_einladungen",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793690573261,
+      "tag": "0007_request_metrics",
+      "breakpoints": true
     }
   ]
 }

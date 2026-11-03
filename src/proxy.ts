@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { countRequest } from "@/lib/request-counter";
 
 /**
  * Optimistische Vorprüfung (nur Cookie-Existenz). Die verbindliche Rechteprüfung
@@ -27,6 +28,7 @@ function requestId(request: NextRequest): string {
 }
 
 export function proxy(request: NextRequest) {
+  countRequest(); // NFR16: Nenner der Fehlerquote (nur Anzahl)
   const { pathname, search } = request.nextUrl;
   const isProtected = PROTECTED.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 

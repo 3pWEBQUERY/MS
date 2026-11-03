@@ -1,5 +1,6 @@
 import "server-only";
 import { sql as dsql } from "drizzle-orm";
+import { errorRatePercent } from "@/lib/request-counter";
 import { db } from "../../db";
 
 /**
@@ -18,13 +19,17 @@ export async function currentAlarms(): Promise<AlarmCheck[]> {
       count(*) filter (where status = 'dead')::int as dead,
       (select count(*)::int from messaging.delivery_jobs where status = 'dead') as delivery_dead,
       (select count(*)::int from privacy.requests where status = 'failed') as privacy_failed,
-      (select count(*)::int from content.safety_contacts where active and (next_due_at is null or next_due_at < now())) as safety_overdue
+      (select count(*)::int from content.safety_contacts where active and (next_due_at is null or next_due_at < now())) as safety_overdue,
+      (select coalesce(sum(requests), 0)::int from ops.request_metrics where minute >= now() - interval '5 minutes') as http_requests,
+      (select coalesce(sum(errors), 0)::int from ops.request_metrics where minute >= now() - interval '5 minutes') as http_errors
     from ops.outbox_events`)) as unknown as {
     queue_age_min: number;
     dead: number;
     delivery_dead: number;
     privacy_failed: number;
     safety_overdue: number;
+    http_requests: number;
+    http_errors: number;
   }[];
   if (!row) return [];
   const out: AlarmCheck[] = [];
@@ -33,6 +38,9 @@ export async function currentAlarms(): Promise<AlarmCheck[]> {
   if (row.delivery_dead > 0) out.push({ code: "delivery_dead", value: row.delivery_dead });
   if (row.privacy_failed > 0) out.push({ code: "privacy_request_failed", value: row.privacy_failed });
   if (row.safety_overdue > 0) out.push({ code: "safety_verification_overdue", value: row.safety_overdue });
+  // NFR16: > 2 % Serverfehler über 5 Minuten (ab 50 Anfragen), Wert in Prozent
+  const rate = errorRatePercent(row.http_requests, row.http_errors);
+  if (rate !== null) out.push({ code: "http_5xx_rate", value: rate });
   return out;
 }
 

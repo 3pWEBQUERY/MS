@@ -21,6 +21,8 @@ export const opsTasks: PeriodicTask[] = [
         insert into ops.worker_heartbeats (name, beat_at) values (${INSTANCE}, now())
         on conflict (name) do update set beat_at = now()`);
       await db.execute(dsql`delete from ops.worker_heartbeats where beat_at < now() - interval '7 days'`);
+      // NFR16: Anfragezähler nur 2 Tage aufbewahren (reine Anzahlen)
+      await db.execute(dsql`delete from ops.request_metrics where minute < now() - interval '2 days'`);
     },
   },
   {

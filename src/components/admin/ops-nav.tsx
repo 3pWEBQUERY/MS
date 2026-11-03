@@ -22,5 +22,6 @@ export const ALARM_LABEL: Record<string, string> = {
   delivery_dead: "Aufgegebene Zustellungen",
   privacy_request_failed: "Fehlgeschlagene Datenschutzaufträge",
   safety_verification_overdue: "Hilfewege mit überfälliger Verifikation",
+  http_5xx_rate: "Fehlerquote der Web-App über 2 % (5 Minuten)",
   worker_inactive: "Hintergrundarbeiter ohne Lebenszeichen",
 };
