@@ -49,7 +49,7 @@ Projekt «MS Plattform» (Region Amsterdam, europe-west4) mit vier Bausteinen:
 |---|---|
 | **Postgres** | Railway Postgres 18 |
 | **ms-medien** | Railway Storage Bucket (Region `ams`) für Medien und verschlüsselte Exporte |
-| **web** | Build `npm run build`, Pre-Deploy `npm run db:migrate`, Start `npm run start`, Healthcheck `/api/v1/health`, `PORT=8080` |
+| **web** | Build `npm run build`, Pre-Deploy `npm run db:predeploy` (Migration, bei `SEED_DEMO=true` zusätzlich Demo-Startbestand), Start `npm run start`, Healthcheck `/api/v1/health`, `PORT=8080` |
 | **worker** | Start `npm run worker` (kein Build), Restart immer |
 
 Die Konfiguration ist in `.railway/railway.ts` beschrieben (Railway Infrastructure as Code; `railway.json` ist bei Railway veraltet und wird für neue Services nicht mehr gelesen). Änderungen lassen sich mit der Railway-CLI prüfen und anwenden: `railway config plan`, dann `railway config apply`.
@@ -62,7 +62,9 @@ Variablen (geteilte Umgebungsvariablen, in den Services per `${{shared.…}}` re
 - `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` (nur web), `APP_URL`, `DEMO_MODE`, `TZ=Europe/Zurich`
 - Noch zu ergänzen: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` (vertraglich geprüfter Dienst). Ohne SMTP werden in Produktion keine Bestätigungsmails versendet.
 
-Startbestand für die Testumgebung (nur fiktive Daten): `railway run npm run db:seed` im Service «web».
+Startbestand für die Testumgebung (nur fiktive Daten): wird bei `SEED_DEMO=true` im Pre-Deploy idempotent angelegt. Die Demo-Konten verwenden die Railway-Variablen `SEED_PASSWORD` und `SEED_TOTP_SECRET` – nie die Standardwerte aus dem Repository. Vor echten Daten `SEED_DEMO=false` setzen und die Demo-Konten löschen.
+
+- `DATABASE_URL` und Bucket-Variablen direkt an den Services referenzieren (`${{Postgres.DATABASE_URL}}`, `${{ms-medien.BUCKET}}` …): Verschachtelte Referenzen über geteilte Variablen werden nicht aufgelöst.
 
 Für volle RLS-Wirkung: `docs/db-roles.sql` ausführen und den Web-Service mit der Rolle `ms_app` verbinden.
 

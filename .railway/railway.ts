@@ -14,7 +14,7 @@ export default defineRailway((ctx) => {
   const media = bucket("ms-medien", { region: "ams" });
 
   const shared = {
-    DATABASE_URL: db.env.DATABASE_URL,
+    DATABASE_URL: db.env.DATABASE_URL, // direkt referenzieren – verschachtelte shared-Referenzen werden nicht aufgelöst
     BUCKET: ctx.shared.BUCKET,
     ENDPOINT: ctx.shared.ENDPOINT,
     REGION: ctx.shared.REGION,
@@ -30,11 +30,19 @@ export default defineRailway((ctx) => {
     source: github("3pwebquery/ms", { branch: "claude/laughing-bell-1whiqu" }),
     build: "npm run build",
     start: "npm run start",
-    preDeploy: "npm run db:migrate",
+    preDeploy: "npm run db:predeploy",
     healthcheck: "/api/v1/health",
     healthcheckTimeout: 120,
     replicas: { "europe-west4": 1 },
-    env: { ...shared, PORT: "8080", NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: preserve() },
+    env: {
+      ...shared,
+      PORT: "8080",
+      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: preserve(),
+      // Demo-Startbestand im Pre-Deploy (idempotent); für echte Daten auf «false» setzen
+      SEED_DEMO: "true",
+      SEED_PASSWORD: preserve(),
+      SEED_TOTP_SECRET: preserve(),
+    },
   });
 
   const worker = service("worker", {
