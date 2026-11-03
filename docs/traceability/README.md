@@ -7,7 +7,7 @@ Prüfung jeder Anforderungs-ID der PRD (`docs/PRD.md`, Kapitel in `docs/prd/`) g
 | Konto, Zugang, Rollen, Datenschutz (ACC, PRI, Kap. 3, 11) | [konto-datenschutz.md](konto-datenschutz.md) | 75 | 6 | 3 |
 | Heute, Mein MS, Barrierefreiheit (HOM, DIA, Kap. 4, 12) | [heute-gesundheit-barrierefreiheit.md](heute-gesundheit-barrierefreiheit.md) | 49 | 3 | 1 |
 | Community, Kommunikation, Moderation (COM, MSG, SAF, Kap. 10) | [community-kommunikation-moderation.md](community-kommunikation-moderation.md) | 86 | 6 | 0 |
-| Inhalte, Betrieb, NFR, Architektur, Analytics (CON, NFR, Kap. 13–15) | [inhalte-betrieb-nfr.md](inhalte-betrieb-nfr.md) | 59 | 20 | 1 |
+| Inhalte, Betrieb, NFR, Architektur, Analytics (CON, NFR, Kap. 13–15) | [inhalte-betrieb-nfr.md](inhalte-betrieb-nfr.md) | 60 | 19 | 1 |
 
 ## Was «teilweise» und «offen» typischerweise bedeutet
 

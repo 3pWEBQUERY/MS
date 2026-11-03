@@ -9,6 +9,8 @@ import { db } from "../../db";
  */
 
 export const QUEUE_AGE_ALARM_MINUTES = 15;
+/** Stündliche Sicherung + Verzug des Cron-Starts: Alarm, wenn die letzte erfolgreiche älter als 2 h ist */
+export const BACKUP_STALE_MINUTES = 120;
 export type AlarmCheck = { code: string; value: number };
 
 /** Liefert alle aktuell verletzten Schwellen (rein lesend). */
@@ -21,7 +23,10 @@ export async function currentAlarms(): Promise<AlarmCheck[]> {
       (select count(*)::int from privacy.requests where status = 'failed') as privacy_failed,
       (select count(*)::int from content.safety_contacts where active and (next_due_at is null or next_due_at < now())) as safety_overdue,
       (select coalesce(sum(requests), 0)::int from ops.request_metrics where minute >= now() - interval '5 minutes') as http_requests,
-      (select coalesce(sum(errors), 0)::int from ops.request_metrics where minute >= now() - interval '5 minutes') as http_errors
+      (select coalesce(sum(errors), 0)::int from ops.request_metrics where minute >= now() - interval '5 minutes') as http_errors,
+      (select count(*)::int from ops.backup_runs) as backup_runs,
+      (select coalesce(extract(epoch from now() - max(finished_at) filter (where ok)) / 60, -1)::int from ops.backup_runs) as backup_age_min,
+      (select not ok from ops.backup_runs order by finished_at desc limit 1) as backup_last_failed
     from ops.outbox_events`)) as unknown as {
     queue_age_min: number;
     dead: number;
@@ -30,6 +35,9 @@ export async function currentAlarms(): Promise<AlarmCheck[]> {
     safety_overdue: number;
     http_requests: number;
     http_errors: number;
+    backup_runs: number;
+    backup_age_min: number;
+    backup_last_failed: boolean | null;
   }[];
   if (!row) return [];
   const out: AlarmCheck[] = [];
@@ -41,6 +49,12 @@ export async function currentAlarms(): Promise<AlarmCheck[]> {
   // NFR16: > 2 % Serverfehler über 5 Minuten (ab 50 Anfragen), Wert in Prozent
   const rate = errorRatePercent(row.http_requests, row.http_errors);
   if (rate !== null) out.push({ code: "http_5xx_rate", value: rate });
+  // NFR16/NFR07: Sicherung veraltet (stündlicher Plan + Puffer) oder letzter Lauf gescheitert.
+  // Ohne je protokollierten Lauf (z. B. lokale Entwicklung) kein Alarm.
+  if (row.backup_runs > 0) {
+    if (row.backup_age_min < 0 || row.backup_age_min > BACKUP_STALE_MINUTES) out.push({ code: "backup_stale", value: Math.max(row.backup_age_min, 0) });
+    if (row.backup_last_failed) out.push({ code: "backup_failed", value: 1 });
+  }
   return out;
 }
 

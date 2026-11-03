@@ -21,6 +21,7 @@ import { join } from "node:path";
 import { pipeline } from "node:stream/promises";
 import { DeleteObjectsCommand, GetObjectCommand, ListObjectsV2Command, PutObjectCommand } from "@aws-sdk/client-s3";
 import { MAGIC, PREFIX, RETENTION_DAYS, backupBucket, backupKey, decrypt, newCipher, objectKey } from "./format";
+import { recordBackupRun } from "./journal";
 
 const started = new Date();
 const log = (msg: string) => console.log(`[backup] ${msg}`);
@@ -95,14 +96,17 @@ async function main() {
 
     const removed = await prune(bucket);
     log(`ok objekt=${name} groesse=${size} dauer_s=${((Date.now() - started.getTime()) / 1000).toFixed(1)} geloescht=${removed}`);
+    await recordBackupRun({ ok: true, objectKey: name, sizeBytes: size, durationMs: Date.now() - started.getTime() });
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
 }
 
-main().catch((err) => {
+main().catch(async (err) => {
   const code = (err as { code?: string }).code ?? (err instanceof Error ? err.name : "error");
   console.error(`[backup] fehlgeschlagen (${code}): ${err instanceof Error ? err.message.slice(0, 200) : ""}`);
   console.error("[alarm] code=backup_failed");
+  // Lokale Offline-Kopien (--local) nicht protokollieren
+  if (!process.argv.includes("--local")) await recordBackupRun({ ok: false, errorCode: String(code).slice(0, 40), durationMs: Date.now() - started.getTime() });
   process.exit(1);
 });
