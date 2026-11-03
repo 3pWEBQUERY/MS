@@ -43,21 +43,30 @@ Ohne SMTP-Konfiguration schreibt der Worker Bestätigungs- und Reset-Links in di
 
 ## Deployment auf Railway
 
-1. **Postgres** hinzufügen (Railway Postgres).
-2. **Bucket** hinzufügen (Railway Storage Bucket). Die Variablen `BUCKET`, `ENDPOINT`, `REGION`, `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY` per Referenzvariablen an beide Services geben.
-3. **Service «web»** aus diesem Repository: nutzt `railway.json` (Build `npm run build`, Pre-Deploy `npm run db:migrate`, Start `npm run start`, Healthcheck `/api/v1/health`). Öffentliche Domain generieren.
-4. **Service «worker»** aus demselben Repository: in den Service-Einstellungen den Config-as-Code-Pfad auf `railway.worker.json` setzen (Start `npm run worker`).
-5. Variablen für beide Services:
-   - `DATABASE_URL=${{Postgres.DATABASE_URL}}`
-   - `DATA_ENCRYPTION_KEY` – `openssl rand -base64 32` (identisch in web und worker, sicher aufbewahren)
-   - `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` – `openssl rand -base64 32` (web)
-   - `APP_URL=https://<deine-domain>`
-   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` (vertraglich geprüfter Dienst)
-   - optional `DEMO_MODE=true` für Pilot-/Testumgebungen
-6. Einmalig Startbestand für Testumgebungen: `railway run npm run db:seed` (nur fiktive Daten, nie in Produktion mit echten Personen).
-7. Für volle RLS-Wirkung: `docs/db-roles.sql` ausführen und den Web-Service mit der Rolle `ms_app` verbinden.
+Projekt «MS Plattform» (Region Amsterdam, europe-west4) mit vier Bausteinen:
 
-> PRD-Vorgabe «primäre Datenhaltung in der Schweiz» (Kapitel 11, D04): Region von Postgres und Bucket sowie Zugriffsländer vor produktiven Daten prüfen.
+| Baustein | Einstellung |
+|---|---|
+| **Postgres** | Railway Postgres 18 |
+| **ms-medien** | Railway Storage Bucket (Region `ams`) für Medien und verschlüsselte Exporte |
+| **web** | Build `npm run build`, Pre-Deploy `npm run db:migrate`, Start `npm run start`, Healthcheck `/api/v1/health`, `PORT=8080` |
+| **worker** | Start `npm run worker` (kein Build), Restart immer |
+
+Die Konfiguration ist in `.railway/railway.ts` beschrieben (Railway Infrastructure as Code; `railway.json` ist bei Railway veraltet und wird für neue Services nicht mehr gelesen). Änderungen lassen sich mit der Railway-CLI prüfen und anwenden: `railway config plan`, dann `railway config apply`.
+
+Variablen (geteilte Umgebungsvariablen, in den Services per `${{shared.…}}` referenziert):
+
+- `DATABASE_URL=${{Postgres.DATABASE_URL}}`
+- `BUCKET`, `ENDPOINT`, `REGION`, `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY` als Referenzen auf den Bucket
+- `DATA_ENCRYPTION_KEY` – identisch für web und worker. **Vor dem Speichern echter Daten neu erzeugen** (`openssl rand -base64 32`); ein späterer Wechsel macht bestehende verschlüsselte Daten unlesbar.
+- `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` (nur web), `APP_URL`, `DEMO_MODE`, `TZ=Europe/Zurich`
+- Noch zu ergänzen: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` (vertraglich geprüfter Dienst). Ohne SMTP werden in Produktion keine Bestätigungsmails versendet.
+
+Startbestand für die Testumgebung (nur fiktive Daten): `railway run npm run db:seed` im Service «web».
+
+Für volle RLS-Wirkung: `docs/db-roles.sql` ausführen und den Web-Service mit der Rolle `ms_app` verbinden.
+
+> PRD-Vorgabe «primäre Datenhaltung in der Schweiz» (Kapitel 11, D04): Railway bietet keine Schweizer Region. Vor produktiven Daten ist zu entscheiden, ob Amsterdam (EU) genügt oder ein Schweizer Anbieter nötig ist.
 
 ## Struktur
 
