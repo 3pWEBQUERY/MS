@@ -335,6 +335,16 @@ export async function reviewVersionAction(_prev: ActionState, formData: FormData
     const v = await loadVersion(versionId);
     const isReviewer = viewer.roles.includes("medical_reviewer");
     if (v.isMedical && !isReviewer) throw new UserError("Medizinische Artikel können nur von der medizinischen Prüfung freigegeben werden.");
+    // CON01/US25: Wer eine frühere Fassung als medizinisch geführt hat, kann die Fachprüfung nicht durch Abwählen umgehen.
+    if (!v.isMedical && !isReviewer) {
+      const [wasMedical] = await db
+        .select({ id: articleVersions.id })
+        .from(articleVersions)
+        .where(and(eq(articleVersions.articleId, v.articleId), eq(articleVersions.isMedical, true), ne(articleVersions.id, v.id)))
+        .limit(1);
+      if (wasMedical)
+        throw new UserError("Eine frühere Fassung dieses Artikels war medizinisch. Die Einstufung als nicht medizinisch prüft die medizinische Prüfung.");
+    }
     if (v.status !== "in_review") throw new UserError("Diese Version wartet nicht auf eine Prüfung.");
     // CON02: Keine Eigenfreigabe – auch nicht durch Personen, die an der Version mitgeschrieben haben.
     if (await isVersionAuthor(v.id, v.authorId, viewer.accountId))
