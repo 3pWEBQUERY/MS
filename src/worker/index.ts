@@ -11,6 +11,8 @@ import { HANDLERS, PERIODIC } from "./registry";
 
 const MAX_ATTEMPTS = 6;
 const POLL_MS = Number(process.env.WORKER_POLL_MS ?? 2000);
+/** Nach dieser Zeit gilt ein «processing»-Ereignis als verwaist (Absturz) und wird erneut aufgenommen. */
+const STALE_SECONDS = Math.max(1, Number(process.env.WORKER_STALE_SECONDS ?? 300));
 let stopping = false;
 
 type Claimed = { id: string; type: string; aggregate_id: string; payload: Record<string, unknown>; attempts: number };
@@ -21,7 +23,7 @@ async function claimBatch(limit = 10): Promise<Claimed[]> {
     where id in (
       select id from ops.outbox_events
       where (status = 'pending' or (status = 'failed' and available_at <= now())
-             or (status = 'processing' and locked_at < now() - interval '5 minutes'))
+             or (status = 'processing' and locked_at < now() - make_interval(secs => ${STALE_SECONDS})))
         and available_at <= now()
       order by available_at
       limit ${limit}
@@ -29,6 +31,14 @@ async function claimBatch(limit = 10): Promise<Claimed[]> {
     )
     returning id, type, aggregate_id, payload, attempts
   `)) as unknown as Claimed[];
+}
+
+async function releaseClaimed(ids: string[]) {
+  if (ids.length === 0) return;
+  await db.execute(dsql`
+    update ops.outbox_events set status = 'pending', locked_at = null, attempts = greatest(attempts - 1, 0)
+    where status = 'processing' and id in (${dsql.join(ids.map((i) => dsql`${i}::uuid`), dsql`, `)})`);
+  console.log(`[worker] ${ids.length} Ereignis(se) beim Herunterfahren freigegeben`);
 }
 
 async function processOne(ev: Claimed) {
@@ -84,7 +94,15 @@ async function main() {
   while (!stopping) {
     try {
       const batch = await claimBatch();
-      for (const ev of batch) await processOne(ev);
+      for (let i = 0; i < batch.length; i++) {
+        if (stopping) {
+          // Geordnetes Herunterfahren: noch nicht begonnene Ereignisse sofort zurückgeben,
+          // statt sie bis zur Verwaisungsfrist zu blockieren (NFR19).
+          await releaseClaimed(batch.slice(i).map((e) => e.id));
+          break;
+        }
+        await processOne(batch[i]);
+      }
       await runPeriodic(lastRun);
       if (failures > 0) console.log("[worker] Datenbank wieder erreichbar");
       failures = 0;

@@ -2,7 +2,7 @@ import { hostname } from "node:os";
 import { sql as dsql } from "drizzle-orm";
 import { db } from "@/server/db";
 import { currentAlarms } from "@/server/modules/admin/ops-alarms";
-import type { PeriodicTask } from "../types";
+import type { Handler, PeriodicTask } from "../types";
 
 const INSTANCE = (process.env.RAILWAY_REPLICA_ID ?? hostname()).slice(0, 60);
 
@@ -37,3 +37,15 @@ export const opsTasks: PeriodicTask[] = [
     },
   },
 ];
+
+/**
+ * Übungsereignis für den Wiederanlauf-Test (NFR19, `scripts/drills/worker-restart.ts`):
+ * wartet höchstens 5 s und verändert keine Fachdaten. `fail: true` erzwingt einen Fehlversuch.
+ */
+export const opsHandlers: Record<string, Handler> = {
+  "ops.drill": async (job) => {
+    const ms = Math.min(5000, Math.max(0, Number(job.payload.ms ?? 0)));
+    if (ms > 0) await new Promise((r) => setTimeout(r, ms));
+    if (job.payload.fail === true) throw Object.assign(new Error("drill"), { code: "drill_failure" });
+  },
+};
