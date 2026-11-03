@@ -77,6 +77,7 @@ async function cachedHelpTopics(): Promise<HelpTopic[]> {
 
 /** Themen des Finders; ohne Datenbankeintrag gilt der Katalog (HELP_TOPICS). */
 export async function listHelpTopics(): Promise<HelpTopic[]> {
+  await connection();
   try {
     const rows = await cachedHelpTopics();
     if (rows.length > 0) return rows;
@@ -88,8 +89,8 @@ export async function listHelpTopics(): Promise<HelpTopic[]> {
 
 /** Alle aktuell sichtbaren Angebote. Innerhalb von Suspense aufrufen. */
 export async function listPublicOffers(): Promise<OfferCard[]> {
-  const all = await cachedOffers();
   await connection();
+  const all = await cachedOffers();
   const now = Date.now();
   return all.filter((o) => stillValid(o.nextReviewAt, now));
 }
@@ -154,8 +155,8 @@ export type PublicOfferResult =
 
 export async function getPublicOffer(slug: string): Promise<PublicOfferResult | null> {
   if (!/^[a-z0-9-]{1,120}$/.test(slug)) return null;
-  const row = await cachedOffer(slug);
   await connection();
+  const row = await cachedOffer(slug);
   if (!row) return null;
   if (row.status === "published" && stillValid(row.nextReviewAt)) {
     const { status: _status, ...offer } = row;

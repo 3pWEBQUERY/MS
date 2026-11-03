@@ -1,6 +1,7 @@
 import "server-only";
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
+import { connection } from "next/server";
 import { db } from "../../db";
 import { pages } from "../../db/schema";
 
@@ -12,6 +13,12 @@ export type LegalPage = { slug: string; title: string; body: string; textVersion
 
 /** Gecacht (Tag «legal»); bei Datenbankfehler null mit kurzer Lebensdauer, damit die Seite nie abbricht. */
 export async function getLegalPage(slug: LegalSlug): Promise<LegalPage | null> {
+  // Zur Anfragezeit laden (beim Build ist die Datenbank nicht erreichbar), danach gecacht.
+  await connection();
+  return cachedLegalPage(slug);
+}
+
+async function cachedLegalPage(slug: LegalSlug): Promise<LegalPage | null> {
   "use cache";
   cacheTag("legal");
   try {

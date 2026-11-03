@@ -1,5 +1,6 @@
 import "server-only";
 import { eq } from "drizzle-orm";
+import { connection } from "next/server";
 import { db } from "./db";
 import { featureFlags } from "./db/schema";
 
@@ -21,6 +22,7 @@ export class FeatureDisabledError extends Error {
 
 /** Serverseitig geprüft; fehlende Einträge gelten als aktiv. */
 export async function isEnabled(flag: FlagKey): Promise<boolean> {
+  await connection();
   const [row] = await db.select({ enabled: featureFlags.enabled }).from(featureFlags).where(eq(featureFlags.key, flag));
   return row?.enabled ?? true;
 }
@@ -30,6 +32,7 @@ export async function assertEnabled(flag: FlagKey): Promise<void> {
 }
 
 export async function allFlags(): Promise<Record<FlagKey, boolean>> {
+  await connection();
   const rows = await db.select().from(featureFlags);
   const out = Object.fromEntries(Object.keys(FLAGS).map((k) => [k, true])) as Record<FlagKey, boolean>;
   for (const r of rows) if (r.key in out) out[r.key as FlagKey] = r.enabled;

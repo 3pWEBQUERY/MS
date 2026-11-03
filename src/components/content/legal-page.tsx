@@ -1,6 +1,6 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { EmptyState, Notice, PageHeader } from "@/components/ui/primitives";
+import { Suspense, type ReactNode } from "react";
+import { EmptyState, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { formatDate } from "@/lib/time";
 import { getLegalPage, type LegalSlug } from "@/server/modules/content/legal";
 import { PageContainer } from "./page-container";
@@ -10,7 +10,21 @@ import { RichText } from "./rich-text";
  * S50 Regeln und rechtliche Seiten (PRI01, SAF07). Vollständig serverseitig gerendert und
  * gecacht – lesbar ohne Login und ohne JavaScript. Version und Gültigkeitsdatum sind sichtbar.
  */
-export async function LegalPageView({ slug, eyebrow, after }: { slug: LegalSlug; eyebrow: string; after?: ReactNode }) {
+export function LegalPageView(props: { slug: LegalSlug; eyebrow: string; after?: ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <PageContainer narrow>
+          <PageSkeleton rows={2} />
+        </PageContainer>
+      }
+    >
+      <LegalPageContent {...props} />
+    </Suspense>
+  );
+}
+
+async function LegalPageContent({ slug, eyebrow, after }: { slug: LegalSlug; eyebrow: string; after?: ReactNode }) {
   const page = await getLegalPage(slug);
   return (
     <PageContainer narrow>

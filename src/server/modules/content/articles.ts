@@ -110,8 +110,9 @@ async function cachedTopics(): Promise<Omit<TopicSummary, "articleCount">[]> {
 
 /** Alle sichtbaren Artikel, optional nach Thema. Muss innerhalb von Suspense aufgerufen werden. */
 export async function listPublicArticles(opts: { topicSlug?: string; limit?: number } = {}): Promise<ArticleCard[]> {
-  const all = await cachedPublicArticles();
+  // Erst zur Anfragezeit: Beim Build ist die Datenbank nicht erreichbar (Railway).
   await connection();
+  const all = await cachedPublicArticles();
   const now = Date.now();
   const list = all.filter((a) => stillValid(a.reviewDueAt, now) && (!opts.topicSlug || a.topicSlug === opts.topicSlug));
   return opts.limit ? list.slice(0, opts.limit) : list;
@@ -119,11 +120,13 @@ export async function listPublicArticles(opts: { topicSlug?: string; limit?: num
 
 /** Themen mit Anzahl aktuell sichtbarer Artikel (S44). */
 export async function listKnowledgeTopics(): Promise<TopicSummary[]> {
+  await connection();
   const [topics, list] = await Promise.all([cachedTopics(), listPublicArticles()]);
   return topics.map((t) => ({ ...t, articleCount: list.filter((a) => a.topicSlug === t.slug).length }));
 }
 
 export async function getKnowledgeTopic(slug: string): Promise<Omit<TopicSummary, "articleCount"> | null> {
+  await connection();
   const topics = await cachedTopics();
   return topics.find((t) => t.slug === slug) ?? null;
 }
@@ -213,8 +216,8 @@ async function cachedArticle(slug: string): Promise<ArticleDetail | null> {
 /** Artikel für S46 – null bei unbekannt, zurückgezogen oder überfällig (neutral, CON03). */
 export async function getPublicArticle(slug: string): Promise<ArticleDetail | null> {
   if (!/^[a-z0-9-]{1,120}$/.test(slug)) return null;
-  const article = await cachedArticle(slug);
   await connection();
+  const article = await cachedArticle(slug);
   if (!article || !stillValid(article.reviewDueAt)) return null;
   return article;
 }
@@ -237,6 +240,7 @@ export async function getVisibleArticleRefs(ids: string[]): Promise<Map<string, 
 /** Nur für Metadaten (Titel/Beschreibung): gecacht, ohne Laufzeitprüfung. */
 export async function getArticleMeta(slug: string): Promise<{ title: string; summary: string } | null> {
   if (!/^[a-z0-9-]{1,120}$/.test(slug)) return null;
+  await connection();
   const a = await cachedArticle(slug);
   return a ? { title: a.title, summary: a.summary } : null;
 }
