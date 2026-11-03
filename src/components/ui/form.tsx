@@ -44,7 +44,8 @@ export function Field({
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       <div className="flex items-baseline justify-between gap-3">
-        <label htmlFor={id} className="text-base font-semibold text-ink">
+        {/* Reflow (A02): lange Beschriftungen brechen um statt die Seite zu verbreitern */}
+        <label htmlFor={id} className="min-w-0 break-words text-base font-semibold text-ink">
           {label}
           {required && <span className="ml-1.5 text-sm font-normal text-ink-2">(erforderlich)</span>}
           {optional && <span className="ml-1.5 text-sm font-normal text-ink-2">(optional)</span>}

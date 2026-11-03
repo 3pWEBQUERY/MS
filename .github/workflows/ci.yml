@@ -40,3 +40,55 @@ jobs:
         run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+
+  # PRD 16: Integrationstests gegen eine echte Datenbank (Regeln, RLS, Trigger, Transaktionen, Jobs)
+  # und Ende-zu-Ende-/Barrierefreiheitstests (F01–F07, AT10, QA09) gegen den Produktions-Build.
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      TEST_ADMIN_URL: postgres://postgres@localhost:5432/postgres
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: DB-Integrationstests (frische Datenbank ms_test)
+        run: npm run test:db
+      - name: Übungsdatenbank ms_drill (migriert, Demo-Seed)
+        run: npx tsx scripts/test-db/prepare.ts ms_drill --seed
+      - name: Wiederanlauf-Übung des Arbeiters (NFR19)
+        run: npm run drill:worker
+        env:
+          DATABASE_URL: postgres://postgres@localhost:5432/ms_drill
+      - name: Restore-Übung mit Löschjournal (NFR08, AT09; pg_dump/pg_restore 16 = Service 16)
+        run: npm run drill:restore
+        env:
+          DATABASE_URL: postgres://postgres@localhost:5432/ms_drill
+      - name: Playwright-Browser
+        run: npx playwright install --with-deps chromium
+      - name: Ende-zu-Ende- und Barrierefreiheitstests (Build, ms_e2e, Port 3200)
+        run: npm run test:e2e
+      - name: Playwright-Bericht bei Fehlern
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

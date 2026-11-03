@@ -10,6 +10,9 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 import { login, loginStaff } from "./support/auth";
 import { createMember } from "./support/db";
 
+// Die Prüfungen sind unabhängig voneinander und laufen parallel.
+test.describe.configure({ mode: "parallel" });
+
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 const DEMO_MEMBER = { email: "mitglied.a@demo.ms-plattform.ch", password: "ruhiger-moment-2026-demo" };
 

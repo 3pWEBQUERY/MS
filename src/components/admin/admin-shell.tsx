@@ -81,7 +81,7 @@ function MobileExtras({ nav }: { nav: NonNullable<Awaited<ReturnType<typeof load
         className="inline-flex h-10 items-center gap-1.5 rounded-[10px] px-2.5 text-sm font-semibold text-ink-2 hover:bg-sunk hover:text-ink"
       >
         <Icon name="arrow-left" className="size-5" />
-        <span className="sr-only sm:not-sr-only">Zur Plattform</span>
+        <span className="sr-only md:not-sr-only">Zur Plattform</span>
       </Link>
       <LogoutButton compact />
       <AdminMobileNav items={nav.items} />
@@ -143,11 +143,14 @@ async function Display() {
 
 function Brand() {
   return (
-    <Link href="/verwaltung" className="inline-flex h-11 items-center gap-2.5 rounded-[12px] pr-2 text-ink" aria-label="MS Plattform Verwaltung – Übersicht">
+    // WCAG 2.5.3: Der zugängliche Name enthält die sichtbare Beschriftung (kein abweichendes aria-label).
+    <Link href="/verwaltung" className="inline-flex h-11 items-center gap-2.5 rounded-[12px] pr-2 text-ink">
       <LogoMark />
       <span className="flex flex-col leading-tight">
         <span className="text-[1.0625rem] font-bold tracking-[-0.02em]">MS Plattform</span>
+        <span className="sr-only"> </span>
         <span className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-2">Verwaltung</span>
+        <span className="sr-only"> – Übersicht</span>
       </span>
     </Link>
   );

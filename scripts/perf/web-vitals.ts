@@ -30,33 +30,28 @@ const SCREENS: Screen[] = [
   { name: "Community-Feed (S29)", path: "/community", auth: true, interact: (p) => p.getByRole("button", { name: /Profil und Einstellungen|Menü/ }).first().click() },
 ];
 
-/** Beobachter vor dem ersten Byte registrieren (LCP, CLS mit Sitzungsfenstern, Event Timing). */
-const OBSERVERS = () => {
-  const w = window as unknown as { __vitals: { lcp: number; cls: number; inp: number } };
-  w.__vitals = { lcp: 0, cls: 0, inp: 0 };
+/**
+ * Beobachter vor dem ersten Byte registrieren (LCP, CLS mit Sitzungsfenstern, Event Timing).
+ * Als Zeichenkette, damit der Transpiler (tsx/esbuild) keine Hilfsfunktionen einfügt.
+ */
+const OBSERVERS = `(() => {
+  const v = (window.__vitals = { lcp: 0, cls: 0, inp: 0 });
+  new PerformanceObserver((l) => { for (const e of l.getEntries()) v.lcp = Math.max(v.lcp, e.startTime); })
+    .observe({ type: "largest-contentful-paint", buffered: true });
+  let session = 0, last = 0, first = 0;
   new PerformanceObserver((l) => {
-    for (const e of l.getEntries()) w.__vitals.lcp = Math.max(w.__vitals.lcp, e.startTime);
-  }).observe({ type: "largest-contentful-paint", buffered: true });
-  let session = 0;
-  let last = 0;
-  let first = 0;
-  new PerformanceObserver((l) => {
-    for (const e of l.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) {
+    for (const e of l.getEntries()) {
       if (e.hadRecentInput) continue;
-      if (e.startTime - last > 1000 || e.startTime - first > 5000) {
-        session = 0;
-        first = e.startTime;
-      }
-      session += e.value;
-      last = e.startTime;
-      w.__vitals.cls = Math.max(w.__vitals.cls, session);
+      if (e.startTime - last > 1000 || e.startTime - first > 5000) { session = 0; first = e.startTime; }
+      session += e.value; last = e.startTime; v.cls = Math.max(v.cls, session);
     }
   }).observe({ type: "layout-shift", buffered: true });
-  new PerformanceObserver((l) => {
-    for (const e of l.getEntries() as (PerformanceEntry & { interactionId?: number })[])
-      if (e.interactionId) w.__vitals.inp = Math.max(w.__vitals.inp, e.duration);
-  }).observe({ type: "event", buffered: true, durationThreshold: 16 } as PerformanceObserverInit);
-};
+  new PerformanceObserver((l) => { for (const e of l.getEntries()) if (e.interactionId) v.inp = Math.max(v.inp, e.duration); })
+    .observe({ type: "event", buffered: true, durationThreshold: 16 });
+})();`;
+
+type Vitals = { lcp: number; cls: number; inp: number };
+const readVitals = (page: Page) => page.evaluate("window.__vitals") as Promise<Vitals>;
 
 async function measure(screen: Screen, cookie: string | null) {
   const browser = await chromium.launch();
@@ -65,7 +60,7 @@ async function measure(screen: Screen, cookie: string | null) {
     const [name, value] = cookie.split("=");
     await ctx.addCookies([{ name: name!, value: value!, url: BASE_URL, httpOnly: true, secure: true, sameSite: "Lax" }]);
   }
-  await ctx.addInitScript(OBSERVERS);
+  await ctx.addInitScript({ content: OBSERVERS });
   const page = await ctx.newPage();
   const cdp = await ctx.newCDPSession(page);
   await cdp.send("Network.enable");
@@ -82,14 +77,14 @@ async function measure(screen: Screen, cookie: string | null) {
   await page.waitForLoadState("networkidle").catch(() => {});
   await page.waitForTimeout(500);
   const loadMs = Date.now() - t0;
-  const lcp = await page.evaluate(() => (window as unknown as { __vitals: { lcp: number } }).__vitals.lcp);
+  const { lcp } = await readVitals(page);
   try {
     await screen.interact(page);
   } catch {
     await page.mouse.click(20, 200);
   }
   await page.waitForTimeout(800);
-  const v = await page.evaluate(() => (window as unknown as { __vitals: { cls: number; inp: number } }).__vitals);
+  const v = await readVitals(page);
   const url = page.url();
   await browser.close();
   if (screen.auth && url.includes("/anmelden")) throw new Error(`${screen.name}: Sitzung nicht akzeptiert`);
