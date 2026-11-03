@@ -9,6 +9,8 @@ import postgres from "postgres";
 export const E2E_DB_URL = process.env.E2E_DATABASE_URL ?? "postgres://postgres@localhost:5432/ms_e2e";
 export const E2E_DATA_KEY = process.env.E2E_DATA_ENCRYPTION_KEY ?? "ZGV2LW9ubHktZGF0YS1rZXktbm90LWZvci1wcm9kISE=";
 export const PASSWORD = "e2e-ruhiger-test-2026-passwort";
+/** Passwort der Demo-Konten aus dem Seed (scripts/seed/core.ts) – nur lokale/CI-Testdaten. */
+export const DEMO_PASSWORD = process.env.SEED_PASSWORD ?? "ruhiger-moment-2026-demo";
 export const TOTP_SECRET = "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP";
 
 export const sql = postgres(E2E_DB_URL, { max: 3, onnotice: () => {} });

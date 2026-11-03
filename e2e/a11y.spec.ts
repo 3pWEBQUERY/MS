@@ -8,7 +8,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { login, loginStaff } from "./support/auth";
-import { createMember } from "./support/db";
+import { DEMO_PASSWORD, createMember } from "./support/db";
 
 // Die Prüfungen sind unabhängig voneinander und laufen parallel.
 test.describe.configure({ mode: "parallel" });
@@ -125,7 +125,7 @@ for (const mode of MODES) {
 
     test("Mitgliederseiten", async ({ browser }) => {
       const page = await newPage(browser, mode);
-      await login(page, DEMO_MEMBER.email);
+      await login(page, DEMO_MEMBER.email, undefined, DEMO_PASSWORD);
       const problems: string[] = [];
       for (const path of MEMBER) problems.push(...(await audit(page, path, mode)));
       expect(problems).toEqual([]);
