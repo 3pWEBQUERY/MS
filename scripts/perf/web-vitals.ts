@@ -56,10 +56,8 @@ const readVitals = (page: Page) => page.evaluate("window.__vitals") as Promise<V
 async function measure(screen: Screen, cookie: string | null) {
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ ...devices["Pixel 5"], locale: "de-CH", timezoneId: "Europe/Zurich" });
-  if (cookie) {
-    const [name, value] = cookie.split("=");
-    await ctx.addCookies([{ name: name!, value: value!, url: BASE_URL, httpOnly: true, secure: true, sameSite: "Lax" }]);
-  }
+  // Sitzungs-Cookie als Header (das __Host-Cookie lässt sich über CDP nicht für http://localhost setzen)
+  if (cookie) await ctx.setExtraHTTPHeaders({ Cookie: cookie });
   await ctx.addInitScript({ content: OBSERVERS });
   const page = await ctx.newPage();
   const cdp = await ctx.newCDPSession(page);

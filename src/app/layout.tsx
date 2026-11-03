@@ -11,7 +11,10 @@ const atkinson = localFont({
     { path: "./fonts/ahn-latin-italic.woff2", weight: "200 800", style: "italic" },
   ],
   variable: "--font-atkinson",
-  display: "swap",
+  // NFR03: «optional» statt «swap» – kein nachträglicher Schriftwechsel, der Text verschiebt (CLS).
+  // Die Schrift wird vorgeladen; nur bei sehr langsamem Erstaufruf bleibt die metrisch angepasste
+  // Ersatzschrift, ab dem nächsten Seitenaufruf gilt Atkinson aus dem Cache (Mobil-Labortest: CLS 0,25 → 0).
+  display: "optional",
 });
 
 const atkinsonMono = localFont({
@@ -20,7 +23,7 @@ const atkinsonMono = localFont({
     { path: "./fonts/ahm-500.woff2", weight: "500", style: "normal" },
   ],
   variable: "--font-atkinson-mono",
-  display: "swap",
+  display: "optional",
 });
 
 export const metadata: Metadata = {
