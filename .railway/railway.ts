@@ -49,7 +49,7 @@ export default defineRailway((ctx) => {
   const worker = service("worker", {
     source: github("3pwebquery/ms", { branch: "claude/laughing-bell-1whiqu" }),
     build: 'echo "Worker: kein Next.js-Build nötig"',
-    start: "npm run worker",
+    start: "node_modules/.bin/tsx --conditions=react-server src/worker/index.ts", // ohne npm: SIGTERM direkt, keine npm-Warnungen im Log
     replicas: { "europe-west4": 1 },
     env: { ...shared, NODE_ENV: "production" },
   });
@@ -59,7 +59,7 @@ export default defineRailway((ctx) => {
   const hilfe = service("hilfe", {
     source: github("3pwebquery/ms", { branch: "claude/laughing-bell-1whiqu" }),
     build: 'echo "Hilfe-Dienst: kein Build nötig"',
-    start: "npm run help:serve",
+    start: "node_modules/.bin/tsx src/static-help/server.ts",
     healthcheck: "/health",
     replicas: { "europe-west4": 1 },
     env: { DATABASE_URL: db.env.DATABASE_URL, PLATFORM_URL: ctx.shared.APP_URL, NODE_ENV: "production", TZ: "Europe/Zurich" },
