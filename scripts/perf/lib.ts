@@ -61,8 +61,9 @@ export async function callAction(session: Session, path: string, name: string, a
 /** Server Action mit FormData (Formulare mit useActionState: Argumente [vorheriger Zustand, FormData]). */
 export async function callFormAction(session: Session, path: string, name: string, fields: Record<string, string>): Promise<Response> {
   const fd = new FormData();
+  // Reihenfolge wie im Browser: Felder zuerst, Wurzel «0» zuletzt (der Server liest den Strom fortlaufend)
+  for (const [k, v] of Object.entries(fields)) fd.set(`_1_${k}`, v);
   fd.set("0", JSON.stringify([{ status: "idle" }, "$K1"]));
-  for (const [k, v] of Object.entries(fields)) fd.set(`1_${k}`, v);
   return fetch(`${BASE_URL}${path}`, {
     method: "POST",
     headers: { Accept: "text/x-component", "Next-Action": actionId(name), Origin: BASE_URL, Cookie: session.cookie },
