@@ -4,10 +4,10 @@ import Link from "next/link";
 import { PasswordField } from "@/components/auth/password-field";
 import { Checkbox, Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
 import { registerAction } from "@/server/modules/account/auth-actions";
-import { useHealthAction } from "@/components/health/use-health-action";
+import { useResilientAction } from "@/components/ui/use-resilient-action";
 
 export function RegisterForm() {
-  const [state, action] = useHealthAction(registerAction);
+  const [state, action] = useResilientAction(registerAction);
   const fe = state.fieldErrors ?? {};
   return (
     <form action={action} className="flex flex-col gap-6" noValidate>

@@ -3,10 +3,10 @@
 import { PasswordField } from "@/components/auth/password-field";
 import { FormMessage, SubmitButton } from "@/components/ui/form";
 import { resetPasswordAction } from "@/server/modules/account/auth-actions";
-import { useHealthAction } from "@/components/health/use-health-action";
+import { useResilientAction } from "@/components/ui/use-resilient-action";
 
 export function ResetForm({ token }: { token: string }) {
-  const [state, action] = useHealthAction(resetPasswordAction);
+  const [state, action] = useResilientAction(resetPasswordAction);
   return (
     <form action={action} className="flex flex-col gap-6" noValidate>
       <input type="hidden" name="token" value={token} />

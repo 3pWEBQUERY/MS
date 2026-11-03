@@ -2,11 +2,11 @@
 
 import { Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
 import { resendVerificationAction, verifyEmailAction } from "@/server/modules/account/auth-actions";
-import { useHealthAction } from "@/components/health/use-health-action";
+import { useResilientAction } from "@/components/ui/use-resilient-action";
 
 /** Bestätigung per Klick, damit Link-Vorschauen in Mailprogrammen das Token nicht verbrauchen. */
 export function VerifyForm({ token }: { token: string }) {
-  const [state, action] = useHealthAction(verifyEmailAction);
+  const [state, action] = useResilientAction(verifyEmailAction);
   return (
     <form action={action} className="flex flex-col gap-5">
       <input type="hidden" name="token" value={token} />
@@ -22,7 +22,7 @@ export function VerifyForm({ token }: { token: string }) {
 }
 
 export function ResendForm({ askEmail }: { askEmail: boolean }) {
-  const [state, action] = useHealthAction(resendVerificationAction);
+  const [state, action] = useResilientAction(resendVerificationAction);
   return (
     <form action={action} className="flex flex-col gap-4">
       <FormMessage state={state} />

@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
 import { mfaVerifyAction } from "@/server/modules/account/auth-actions";
-import { useHealthAction } from "@/components/health/use-health-action";
+import { useResilientAction } from "@/components/ui/use-resilient-action";
 
 export function MfaForm({ next }: { next: string }) {
-  const [state, action] = useHealthAction(mfaVerifyAction);
+  const [state, action] = useResilientAction(mfaVerifyAction);
   const [mode, setMode] = useState<"totp" | "recovery">("totp");
   return (
     <form action={action} className="flex flex-col gap-6" noValidate>

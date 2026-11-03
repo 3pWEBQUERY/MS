@@ -7,7 +7,7 @@ import { Checkbox, Field, FormMessage, Input, SubmitButton } from "@/components/
 import { Icon } from "@/components/ui/icon";
 import { Notice } from "@/components/ui/primitives";
 import { confirmMfaAction, disableMfaAction, regenerateRecoveryCodesAction } from "@/server/modules/account/mfa-actions";
-import { useHealthAction } from "@/components/health/use-health-action";
+import { useResilientAction } from "@/components/ui/use-resilient-action";
 
 /** Einmalige Anzeige der Wiederherstellungscodes – sie werden nur als Hash gespeichert (ACC05). */
 function RecoveryCodes({ codes, onDone }: { codes: string[]; onDone: () => void }) {
@@ -68,7 +68,7 @@ function RecoveryCodes({ codes, onDone }: { codes: string[]; onDone: () => void 
 }
 
 export function MfaConfirmForm() {
-  const [state, action] = useHealthAction(confirmMfaAction);
+  const [state, action] = useResilientAction(confirmMfaAction);
   const router = useRouter();
   const codes = Array.isArray(state.data?.codes) ? (state.data.codes as string[]) : null;
   if (state.status === "success" && codes) {
@@ -104,7 +104,7 @@ export function MfaConfirmForm() {
 }
 
 export function RegenerateCodes() {
-  const [state, action] = useHealthAction(regenerateRecoveryCodesAction);
+  const [state, action] = useResilientAction(regenerateRecoveryCodesAction);
   const router = useRouter();
   const codes = Array.isArray(state.data?.codes) ? (state.data.codes as string[]) : null;
   if (state.status === "success" && codes) {
@@ -127,7 +127,7 @@ export function RegenerateCodes() {
 }
 
 export function DisableMfaForm() {
-  const [state, action] = useHealthAction(disableMfaAction);
+  const [state, action] = useResilientAction(disableMfaAction);
   return (
     <form action={action} noValidate className="flex flex-col gap-4">
       <FormMessage state={state} />

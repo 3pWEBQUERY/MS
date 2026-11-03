@@ -10,7 +10,7 @@ import { Notice } from "@/components/ui/primitives";
 import { idle } from "@/lib/action-state";
 import { CANTONS, INTERESTS, ONBOARDING_GOALS } from "@/lib/catalog";
 import { checkPseudonymAction, completeOnboardingAction } from "@/server/modules/account/profile-actions";
-import { useHealthAction } from "@/components/health/use-health-action";
+import { useResilientAction } from "@/components/ui/use-resilient-action";
 
 const STEPS = [
   { title: "Wie möchtest du in der Community heissen?", eyebrow: "Pseudonym" },
@@ -24,7 +24,7 @@ const STEPS = [
  * Alle Eingaben bleiben in einem Formular erhalten; Optionales lässt sich leer lassen.
  */
 export function OnboardingForm({ initialGoal }: { initialGoal?: string }) {
-  const [state, action] = useHealthAction(completeOnboardingAction);
+  const [state, action] = useResilientAction(completeOnboardingAction);
   const [step, setStep] = useState(0);
   const [pseudonym, setPseudonym] = useState(String(state.values?.pseudonym ?? ""));
   const [interests, setInterests] = useState<string[]>([]);

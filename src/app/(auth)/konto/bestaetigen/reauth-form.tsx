@@ -4,10 +4,10 @@ import Link from "next/link";
 import { PasswordField } from "@/components/auth/password-field";
 import { Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
 import { reauthAction } from "@/server/modules/account/auth-actions";
-import { useHealthAction } from "@/components/health/use-health-action";
+import { useResilientAction } from "@/components/ui/use-resilient-action";
 
 export function ReauthForm({ next, withCode }: { next: string; withCode: boolean }) {
-  const [state, action] = useHealthAction(reauthAction);
+  const [state, action] = useResilientAction(reauthAction);
   return (
     <form action={action} className="flex flex-col gap-6" noValidate>
       <input type="hidden" name="next" value={next} />

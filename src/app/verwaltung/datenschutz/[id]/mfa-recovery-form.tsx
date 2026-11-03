@@ -2,7 +2,7 @@
 
 import { Checkbox, Field, FormMessage, Input, RadioCards, SubmitButton } from "@/components/ui/form";
 import { decideMfaRecoveryAction } from "@/server/modules/privacy/mfa-recovery-actions";
-import { useHealthAction } from "@/components/health/use-health-action";
+import { useResilientAction } from "@/components/ui/use-resilient-action";
 
 /**
  * ACC05: kontrollierte Wiederherstellung des zweiten Faktors. Prüfverfahren als kontrollierter
@@ -17,7 +17,7 @@ export function MfaRecoveryForm({
   step: "verify" | "reset";
   checks: { value: string; label: string }[];
 }) {
-  const [state, action] = useHealthAction(decideMfaRecoveryAction);
+  const [state, action] = useResilientAction(decideMfaRecoveryAction);
   const fe = state.fieldErrors ?? {};
   return (
     <form action={action} noValidate className="flex flex-col gap-5">

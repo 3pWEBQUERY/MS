@@ -4,11 +4,11 @@ import Link from "next/link";
 import { FormMessage, OperationId, SubmitButton } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
 import { startExportAction } from "@/server/modules/privacy/actions";
-import { useHealthAction } from "@/components/health/use-health-action";
+import { useResilientAction } from "@/components/ui/use-resilient-action";
 
 /** Export starten (PRI03): idempotent über die Vorgangskennung, Erfolg erst nach Serverbestätigung. */
 export function StartExportForm({ disabled }: { disabled?: boolean }) {
-  const [state, action] = useHealthAction(startExportAction);
+  const [state, action] = useResilientAction(startExportAction);
   return (
     <form action={action} className="flex flex-col items-start gap-3">
       <OperationId />

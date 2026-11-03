@@ -2,10 +2,10 @@
 
 import { Field, FormMessage, Input, SubmitButton } from "@/components/ui/form";
 import { requestResetAction } from "@/server/modules/account/auth-actions";
-import { useHealthAction } from "@/components/health/use-health-action";
+import { useResilientAction } from "@/components/ui/use-resilient-action";
 
 export function RequestResetForm() {
-  const [state, action] = useHealthAction(requestResetAction);
+  const [state, action] = useResilientAction(requestResetAction);
   return (
     <form action={action} className="flex flex-col gap-6" noValidate>
       <FormMessage state={state} />
