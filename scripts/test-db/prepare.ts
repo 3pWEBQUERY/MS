@@ -13,9 +13,9 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import postgres from "postgres";
+import { TEST_ROLE } from "./config";
 
 const ADMIN_URL = process.env.TEST_ADMIN_URL ?? "postgres://postgres@localhost:5432/postgres";
-export const TEST_ROLE = "ms_app_test";
 
 function targetUrl(name: string): string {
   const u = new URL(ADMIN_URL);
@@ -23,7 +23,7 @@ function targetUrl(name: string): string {
   return u.toString();
 }
 
-/** Rollenrechte aus docs/db-roles.sql übernehmen (gleiche Grants, Testrollenname). */
+/** Rechte der Web-Rolle aus docs/db-roles.sql übernehmen (gleiche Grants, Testrollenname). */
 function roleStatements(root: string): string[] {
   const text = readFileSync(join(root, "docs/db-roles.sql"), "utf8")
     .split("\n")
@@ -32,7 +32,8 @@ function roleStatements(root: string): string[] {
   return text
     .split(";")
     .map((s) => s.trim())
-    .filter((s) => s.length > 0 && !/^CREATE ROLE/i.test(s))
+    // Nur die Rechte der Web-Rolle «ms_app»; weitere Rollen (z. B. Hilfe-Dienst) sind hier nicht nötig.
+    .filter((s) => s.length > 0 && !/^CREATE ROLE/i.test(s) && /\bms_app\b/.test(s))
     .map((s) => s.replace(/\bms_app\b/g, TEST_ROLE));
 }
 

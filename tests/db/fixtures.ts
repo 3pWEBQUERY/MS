@@ -136,4 +136,16 @@ export async function rows<T = Record<string, unknown>>(query: ReturnType<typeof
   return (await db.execute(query)) as unknown as T[];
 }
 
+/** Fehlertext der Datenbank (Meldung + Constraint), auch wenn drizzle den Fehler umhüllt. */
+export async function pgError(run: Promise<unknown>): Promise<string> {
+  try {
+    await run;
+  } catch (err) {
+    const e = err as { message?: string; constraint_name?: string; cause?: { message?: string; constraint_name?: string } };
+    const src = e.cause ?? e;
+    return `${src.message ?? ""} ${src.constraint_name ?? ""}`.trim();
+  }
+  throw new Error("Datenbankfehler erwartet, Anweisung war erfolgreich");
+}
+
 export { db, sql };

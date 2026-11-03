@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   resolve: {
@@ -8,5 +8,10 @@ export default defineConfig({
       "server-only": fileURLToPath(new URL("./tests/server-only-stub.ts", import.meta.url)),
     },
   },
-  test: { environment: "node", include: ["src/**/*.test.ts", "tests/**/*.test.ts"] },
+  test: {
+    environment: "node",
+    include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
+    // DB-Integrationstests laufen separat mit Datenbank: `npm run test:db` (vitest.db.config.mts)
+    exclude: [...configDefaults.exclude, "tests/db/**"],
+  },
 });
