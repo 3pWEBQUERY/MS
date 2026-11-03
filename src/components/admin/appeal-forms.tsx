@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { Checkbox, CountedTextarea, Field, FormMessage, RadioCards, Select, SubmitButton } from "@/components/ui/form";
 import { idle } from "@/lib/action-state";
-import { assignAppealAction, decideAppealAction } from "@/server/modules/moderation/actions";
+import { assignAppealAction, decideAppealAction } from "@/server/modules/moderation/appeal-actions";
 
 /** Zuweisung an eine andere Person als die Entscheidende (SAF05, AT07). */
 export function AssignAppealForm({

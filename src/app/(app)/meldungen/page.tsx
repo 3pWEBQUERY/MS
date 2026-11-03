@@ -13,6 +13,7 @@ import {
   REPORT_STATUS_LABELS,
   type DecisionAboutMe,
 } from "@/server/modules/moderation/member-cases";
+import { formatServiceStart, nextServiceStart, OPERATING_HOURS_LABEL } from "@/server/modules/moderation/operating-hours";
 import { REPORT_TARGET_LABELS } from "@/server/modules/moderation/reports";
 
 export const metadata: Metadata = { title: "Meine Meldungen" };
@@ -106,6 +107,8 @@ async function MyReports({ searchParams }: { searchParams: PageProps<"/meldungen
   const viewer = await requireViewer({ allowSuspended: true });
   const [{ status }, reports, decisions] = await Promise.all([searchParams, listMyReports(viewer), listDecisionsAboutMe(viewer)]);
   const tz = viewer.prefs.timezone;
+  // Kapitel 10: ausserhalb der Betriebszeit nächsten Dienstbeginn nennen (nach requireViewer → keine Vorrenderung).
+  const nextStart = nextServiceStart(new Date());
 
   return (
     <div className="flex max-w-3xl flex-col">
@@ -116,6 +119,13 @@ async function MyReports({ searchParams }: { searchParams: PageProps<"/meldungen
       />
       <div className="flex flex-col gap-10">
         <StatusNotice code={status} />
+
+        {nextStart && (
+          <Notice tone="info" icon="clock" title="Die Moderation ist gerade nicht im Dienst">
+            Die Moderation ist {OPERATING_HOURS_LABEL} im Dienst. Neue Meldungen werden ab {formatServiceStart(nextStart)} (Schweizer
+            Zeit) bearbeitet. Bei akuter Gefahr nicht warten: Notruf 144 und <Link href="/sicherheit">Sicherheit und akute Hilfe</Link>.
+          </Notice>
+        )}
 
         <section aria-labelledby="entscheidungen">
           <SectionHeader

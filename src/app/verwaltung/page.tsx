@@ -55,7 +55,7 @@ async function Content() {
 
 async function ModerationOverview({ viewer }: { viewer: Viewer }) {
   const [c, q] = await Promise.all([caseCounts(viewer), viewer.roles.includes("moderation_lead") ? moderationQuality() : Promise.resolve(null)]);
-  const share = q && q.decided > 0 ? Math.round((q.inTarget / q.decided) * 100) : null;
+  const share = q && q.measured > 0 ? Math.round((q.inTarget / q.measured) * 100) : null;
   return (
     <AdminSectionBlock
       id="moderation"
@@ -84,7 +84,7 @@ async function ModerationOverview({ viewer }: { viewer: Viewer }) {
             value={c.approvalsPending}
             icon="gavel"
             tone={c.approvalsOverdue > 0 ? "danger" : c.approvalsPending > 0 ? "warning" : "neutral"}
-            hint={c.approvalsOverdue > 0 ? `${c.approvalsOverdue} länger als 24 Stunden offen` : undefined}
+            hint={c.approvalsOverdue > 0 ? `${c.approvalsOverdue} länger als 24 Betriebsstunden offen` : undefined}
             href="/verwaltung/moderation?ansicht=approvals"
           />
         )}
@@ -101,10 +101,10 @@ async function ModerationOverview({ viewer }: { viewer: Viewer }) {
         <p className="text-sm text-ink-2">
           Moderationsqualität der letzten 30 Tage:{" "}
           {share === null ? (
-            "noch keine entschiedenen Fälle."
+            "noch keine auswertbaren Fälle."
           ) : (
             <>
-              <span className="tabular font-semibold text-ink">{share} %</span> von {q.decided} Entscheiden innerhalb der Frist (Ziel ≥ 95 %)
+              <span className="tabular font-semibold text-ink">{share} %</span> von {q.measured} Fällen innerhalb des Reaktionsziels (Ziel ≥ 95 %)
               {q.appealsDecided > 0 && (
                 <>
                   , <span className="tabular font-semibold text-ink">{q.overturned}</span> von {q.appealsDecided} Einsprüchen gutgeheissen

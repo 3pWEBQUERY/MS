@@ -67,7 +67,7 @@ async function NewPost({ searchParams }: { searchParams: PageProps<"/community/n
     return (
       <div className="max-w-2xl">
         {header}
-        <RulesGate version={COMMUNITY_RULES_VERSION} updated={viewer.rulesAcceptedVersion !== null} />
+        <RulesGate version={COMMUNITY_RULES_VERSION} acceptedVersion={viewer.rulesAcceptedVersion} />
       </div>
     );
 

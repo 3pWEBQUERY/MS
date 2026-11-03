@@ -6,3 +6,4 @@ export * from "./content";
 export * from "./moderation";
 export * from "./privacy";
 export * from "./ops";
+export * from "./analytics";

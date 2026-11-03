@@ -20,6 +20,12 @@ const PROTECTED = [
 
 const COOKIE = process.env.NODE_ENV === "production" ? "__Host-ms_session" : "ms_session";
 
+/** Korrelations-ID je Anfrage (PRD 14 «API-Vertrag»): übernommen, wenn gültig, sonst neu. */
+function requestId(request: NextRequest): string {
+  const incoming = request.headers.get("x-request-id");
+  return incoming && /^[A-Za-z0-9-]{8,64}$/.test(incoming) ? incoming : crypto.randomUUID();
+}
+
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const isProtected = PROTECTED.some((p) => pathname === p || pathname.startsWith(`${p}/`));
@@ -31,9 +37,12 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  const rid = requestId(request);
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-ms-path", pathname + search);
+  requestHeaders.set("x-request-id", rid);
   const response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set("X-Request-Id", rid);
 
   if (isProtected) {
     // Geschützte Inhalte nie in gemeinsam genutzten Caches (PRD 11, PRD 14).

@@ -1,26 +1,28 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { FatigueEntryForm } from "@/components/health/diary-forms";
+import { ActivatedNotice } from "@/components/health/health-notices";
 import { writeBlocker } from "@/components/health/write-gate";
 import { PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { addDays, localDateString, localTimeString } from "@/lib/time";
-import { createFatigueEntryAction } from "@/server/modules/health/actions";
+import { createFatigueEntryAction } from "@/server/modules/health/diary-actions";
 import { requireHealthViewer, timezoneLabel } from "@/server/modules/health/guard";
 import { HEALTH_LIMITS } from "@/server/modules/health/validation";
 
 export const metadata: Metadata = { title: "Fatigue notieren" };
 
 /** S24 Fatigue-Eintrag (DIA03, US06): subjektive Skala, optional Schlaf und Beobachtungen. */
-export default function NewFatiguePage() {
+export default function NewFatiguePage({ searchParams }: PageProps<"/mein-ms/fatigue/neu">) {
   return (
     <Suspense fallback={<PageSkeleton rows={2} />}>
-      <NewFatigue />
+      <NewFatigue searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function NewFatigue() {
+async function NewFatigue({ searchParams }: { searchParams: PageProps<"/mein-ms/fatigue/neu">["searchParams"] }) {
   const viewer = await requireHealthViewer();
+  const activated = (await searchParams).aktiviert === "1";
   const header = (
     <PageHeader
       eyebrow="Mein MS"
@@ -44,6 +46,11 @@ async function NewFatigue() {
   return (
     <div className="flex flex-col gap-2">
       {header}
+      {activated && (
+        <div className="mb-6 max-w-2xl">
+          <ActivatedNotice />
+        </div>
+      )}
       <FatigueEntryForm
         mode="create"
         action={createFatigueEntryAction}

@@ -37,6 +37,7 @@ async function Content({ params }: { params: PageProps<"/verwaltung/gruppen/[id]
           description: group.description,
           rules: group.rules,
           rulesVersion: group.rulesVersion,
+          rulesChangeNote: group.rulesChangeNote ?? "",
           type: group.type,
           discoverable: group.discoverable,
           moderatorAccountId: group.moderatorAccountId ?? "",

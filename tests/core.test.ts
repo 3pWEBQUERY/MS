@@ -41,7 +41,7 @@ describe("Mein Moment (HOM02)", () => {
   });
   it("führt ohne Entscheidung zur Aktivierung", () => {
     const r = resolveMoment(DEFAULT_MOMENT_CONFIG, "record", { healthActive: false, healthDeclined: false });
-    expect(r.every((t) => t.href === "/mein-ms/aktivieren")).toBe(true);
+    expect(r.every((t) => t.href.startsWith("/mein-ms/aktivieren?weiter=%2Fmein-ms%2F"))).toBe(true);
   });
 });
 

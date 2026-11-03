@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { EntryList } from "@/components/health/entry-list";
-import { HealthInactiveNotice, PrivacyHint, WriteDisabledNotice } from "@/components/health/health-notices";
+import { ActivatedNotice, HealthInactiveNotice, PrivacyHint, WriteDisabledNotice } from "@/components/health/health-notices";
 import { MonthCalendar } from "@/components/health/month-calendar";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon, type IconName } from "@/components/ui/icon";
@@ -33,13 +33,7 @@ const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 function StatusNotices({ sp }: { sp: Record<string, string | string[] | undefined> }) {
   const deleted = one(sp.geloescht);
-  if (one(sp.aktiviert) === "1")
-    return (
-      <Notice tone="success" role="status" title="Der Gesundheitsbereich ist aktiviert">
-        Nur du siehst deine Einträge. Du kannst die Einwilligung jederzeit unter{" "}
-        <Link href="/konto/privatsphaere">Privatsphäre</Link> widerrufen.
-      </Notice>
-    );
+  if (one(sp.aktiviert) === "1") return <ActivatedNotice />;
   if (one(sp.entscheidung) === "abgelehnt")
     return (
       <Notice tone="success" role="status" title="Deine Entscheidung ist gespeichert">
@@ -180,7 +174,8 @@ async function Overview({ searchParams }: { searchParams: PageProps<"/mein-ms">[
         </Link>
       </section>
 
-      <section aria-labelledby="kalender" id="kalender-bereich" className="flex flex-col gap-4">
+      {/* Optionale Ansicht: in der einfachen Ansicht ausgeblendet; Liste und Verlauf bleiben (HOM06). */}
+      <section aria-labelledby="kalender" id="kalender-bereich" className="flex flex-col gap-4" data-optional>
         <SectionHeader id="kalender" title="Kalender" description="Tage, an denen du etwas festgehalten hast." />
         <MonthCalendar
           month={month}

@@ -234,3 +234,18 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export function isUuid(value: unknown): value is string {
   return typeof value === "string" && UUID_RE.test(value);
 }
+
+const RETURN_PATHS = ["/mein-ms/check-in", "/mein-ms/eintrag/neu", "/mein-ms/fatigue/neu"] as const;
+
+/**
+ * Rückkehrziel nach der Zustimmung in S08 (F02 «S18 → S20, nach ggf. S08»): nur die
+ * Erfassungsseiten von Mein MS (Check-in optional mit Datum). Alles andere → null, kein offener Redirect.
+ */
+export function healthReturnPath(raw: unknown): string | null {
+  if (typeof raw !== "string" || raw.length > 60) return null;
+  const [path, query] = raw.split("?", 2);
+  if (!(RETURN_PATHS as readonly string[]).includes(path)) return null;
+  if (query === undefined) return path;
+  if (path === "/mein-ms/check-in" && /^datum=\d{4}-\d{2}-\d{2}$/.test(query) && isDateString(query.slice(6))) return raw;
+  return path;
+}

@@ -5,6 +5,7 @@ import { sanitizeFilename, sniffImageType } from "./media";
 import { isInternalPath, parseMomentConfig } from "./moment";
 import { DEFAULT_MOMENT_CONFIG } from "@/lib/moment";
 import { normalizeQuery } from "./search";
+import { missingExpertMethods, requiredExpertMethods } from "./shared";
 
 describe("Textformat (CON01)", () => {
   it("erkennt Absätze, Zwischentitel und Listen ohne HTML", () => {
@@ -57,5 +58,19 @@ describe("Suche (CON07)", () => {
   it("normalisiert Suchbegriffe", () => {
     expect(normalizeQuery(["  Fatigue \n im  Alltag "])).toBe("Fatigue im Alltag");
     expect(normalizeQuery(undefined)).toBe("");
+  });
+});
+
+describe("Fachprüfung für Leistungsangaben (CON05)", () => {
+  it("verlangt je nach Thema die passende Fachprüfung", () => {
+    expect(requiredExpertMethods(["beratung", "selbsthilfe"])).toEqual([]);
+    expect(requiredExpertMethods(["recht", "finanzen"])).toEqual(["expert_social"]);
+    expect(requiredExpertMethods(["therapie", "recht"])).toEqual(["expert_medical", "expert_social"]);
+  });
+
+  it("meldet fehlende gültige Prüfungen", () => {
+    expect(missingExpertMethods(["recht"], ["website"])).toEqual(["expert_social"]);
+    expect(missingExpertMethods(["recht", "therapie"], ["expert_social", "website"])).toEqual(["expert_medical"]);
+    expect(missingExpertMethods(["recht"], ["expert_social"])).toEqual([]);
   });
 });

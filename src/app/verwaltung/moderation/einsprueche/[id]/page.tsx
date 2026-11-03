@@ -16,7 +16,6 @@ import { AdminSectionBlock, DateTime, Deadline } from "@/components/admin/ui";
 import { Badge, Card, KeyValue, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
 import { requireStaff } from "@/server/auth/viewer";
 import { getAppealForStaff } from "@/server/modules/moderation/appeals";
-import { APPEAL_TARGET_MS } from "@/server/modules/moderation/cases";
 
 export const metadata: Metadata = { title: "Einspruch" };
 
@@ -55,7 +54,7 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/e
                 Entschieden <DateTime date={a.decidedAt} />
               </span>
             ) : (
-              <Deadline dueAt={a.answerBy} now={now} total={APPEAL_TARGET_MS} />
+              <Deadline dueAt={a.answerBy} now={now} total={a.answerBy.getTime() - a.createdAt.getTime()} />
             )}
           </div>
         }

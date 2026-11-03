@@ -6,8 +6,10 @@ import { cleanText, runAction, str, UserError } from "@/server/action";
 import { actionViewer } from "@/server/auth/viewer";
 import { consume, LIMITS } from "@/server/rate-limit";
 import { submitAppeal } from "@/server/modules/moderation/member-cases";
+import { formatServiceStart, OPERATING_HOURS_LABEL } from "@/server/modules/moderation/operating-hours";
 import { createReport, REPORT_DETAILS_MAX, type ReportReason, type ReportTargetType } from "@/server/modules/moderation/reports";
 import { REPORT_REASONS } from "@/lib/catalog";
+import { recordLimitHit } from "@/server/modules/community/limit-hits";
 import { isUuid } from "./access";
 
 /** Melden (SAF02) und Einspruch (SAF05) – Mitgliederseite. */
@@ -33,11 +35,13 @@ export async function createReportAction(_prev: ActionState, formData: FormData)
     const details = cleanText(values.details);
     if (details.length > REPORT_DETAILS_MAX)
       return fail("Die Erläuterung ist zu lang.", { fieldErrors: { details: "Höchstens 1 000 Zeichen." }, values });
-    if (!(await consume(`report:${viewer.accountId}`, LIMITS.reportsPerHour.limit, LIMITS.reportsPerHour.window)))
+    if (!(await consume(`report:${viewer.accountId}`, LIMITS.reportsPerHour.limit, LIMITS.reportsPerHour.window))) {
+      await recordLimitHit("report", viewer.accountId, LIMITS.reportsPerHour.window);
       return fail(
-        "Du hast in der letzten Stunde sehr viele Meldungen gesendet. Bitte versuche es später erneut. Bei akuter Gefahr: Notruf 144.",
+        "Du hast in der letzten Stunde sehr viele Meldungen gesendet. Bitte versuche es später erneut oder schreib uns über das Kontaktformular. Bei akuter Gefahr: Notruf 144.",
         { values },
       );
+    }
     const result = await createReport(viewer, {
       type,
       id: isUuid(id) ? id : null,
@@ -52,6 +56,9 @@ export async function createReportAction(_prev: ActionState, formData: FormData)
         receipt: result.receiptNumber,
         subjectAccountId: result.subjectAccountId && result.subjectAccountId !== viewer.accountId ? result.subjectAccountId : null,
         acute: reason === "acute_danger",
+        // Kapitel 10: Eingang ausserhalb der Betriebszeit → nächster Dienstbeginn und Verweis auf S49.
+        nextServiceStart: result.nextServiceStart ? formatServiceStart(result.nextServiceStart) : null,
+        operatingHours: OPERATING_HOURS_LABEL,
       },
     });
   }, values);

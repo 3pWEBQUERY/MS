@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { RemoveSymptomForm } from "@/components/health/action-forms";
 import { EmptyState, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
-import { removeOwnSymptomAction } from "@/server/modules/health/actions";
+import { removeOwnSymptomAction } from "@/server/modules/health/symptom-actions";
 import { requireHealthViewer } from "@/server/modules/health/guard";
 import { listOwnSymptoms } from "@/server/modules/health/queries";
 

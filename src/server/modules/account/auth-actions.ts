@@ -11,7 +11,7 @@ import { audit } from "../../audit";
 import { burnPasswordCheck, hashPassword, passwordProblem, verifyPassword } from "../../auth/password";
 import { createSession, destroyCurrentSession, readSessionToken, revokeAllSessions } from "../../auth/session";
 import { verifyTotp } from "../../auth/totp";
-import { getViewer, safeNext } from "../../auth/viewer";
+import { AuthError, getViewer, safeNext } from "../../auth/viewer";
 import { decrypt, encrypt, sha256 } from "../../crypto";
 import { db } from "../../db";
 import {
@@ -26,6 +26,7 @@ import {
 import { isEnabled } from "../../flags";
 import { enqueue } from "../../outbox";
 import { consume, LIMITS, peek } from "../../rate-limit";
+import { normalizeRecoveryCode } from "./recovery-code";
 import { findValidToken, issueEmailToken } from "./tokens";
 
 async function clientKey() {
@@ -76,9 +77,18 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
       .where(dsql`lower(${accounts.email}) = ${email}`)
       .limit(1);
 
-    // Neutrale Rückmeldung, ohne Kontoexistenz offenzulegen (F01).
+    // Neutrale Rückmeldung, ohne Kontoexistenz offenzulegen (F01, ACC02): gleiche Antwort, gleiche
+    // Rechenzeit. Die Inhaberin der Adresse erhält einen Hinweis mit Login- und Resetweg.
     if (existing.length > 0) {
       await burnPasswordCheck(password);
+      if (await consume(`register-dup:${sha256(email)}`, 3, 86400))
+        await enqueue({
+          type: "email.security_notice",
+          aggregateType: "account",
+          aggregateId: existing[0].id,
+          payload: { what: "registration_attempt" },
+          dedupeKey: `security:register-dup:${existing[0].id}:${Math.floor(Date.now() / 3600_000)}`,
+        });
       redirect("/email-bestaetigen?status=gesendet");
     }
 
@@ -97,7 +107,9 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
       await issueEmailToken({ accountId: acc.id, purpose: "verify_email", sendTo: email }, tx);
       return acc.id;
     });
-    await createSession(accountId);
+    // Bewusst ohne Sitzung: Neu- und Doppelregistrierung sind von aussen nicht unterscheidbar.
+    // Nach der Bestätigung meldet sich die Person an (S03 → S04 → S07).
+    await audit({ actorId: accountId, action: "account.registered", objectType: "account", objectId: accountId });
     redirect("/email-bestaetigen?status=gesendet");
   }, values);
 }
@@ -121,6 +133,12 @@ export async function verifyEmailAction(_prev: ActionState, formData: FormData):
       if (used.length === 0) throw new UserError("Dieser Link wurde bereits verwendet.");
 
       if (row.purpose === "change_email" && row.newEmail) {
+        const [taken] = await tx
+          .select({ id: accounts.id })
+          .from(accounts)
+          .where(dsql`lower(${accounts.email}) = ${row.newEmail.toLowerCase()}`)
+          .limit(1);
+        if (taken) throw new UserError("Diese Adresse kann nicht verwendet werden. Deine bisherige Adresse bleibt gültig.");
         const [acc] = await tx.select({ email: accounts.email }).from(accounts).where(eq(accounts.id, row.accountId));
         await tx
           .update(accounts)
@@ -158,21 +176,26 @@ export async function verifyEmailAction(_prev: ActionState, formData: FormData):
 export async function resendVerificationAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   return runAction(async () => {
     const viewer = await getViewer();
-    let target: { id: string; email: string } | undefined;
+    let address: string;
     if (viewer && !viewer.verified) {
-      [target] = await db.select({ id: accounts.id, email: accounts.email }).from(accounts).where(eq(accounts.id, viewer.accountId));
+      const [own] = await db.select({ email: accounts.email }).from(accounts).where(eq(accounts.id, viewer.accountId));
+      if (!own) throw new AuthError("unauthenticated");
+      address = own.email.toLowerCase();
     } else {
       const email = emailSchema.safeParse(formData.get("email"));
       if (!email.success) return fail("Bitte gib eine gültige E-Mail-Adresse ein.", { fieldErrors: { email: email.error.issues[0].message } });
-      [target] = await db
-        .select({ id: accounts.id, email: accounts.email })
-        .from(accounts)
-        .where(and(dsql`lower(${accounts.email}) = ${email.data}`, isNull(accounts.emailVerifiedAt)));
+      address = email.data;
     }
+    // ACC02: höchstens drei Links pro Stunde je Adresse. Gezählt wird VOR der Kontosuche, damit die
+    // Drosselung für bekannte und unbekannte Adressen gleich wirkt (keine Kontoaufzählung).
+    const allowed = await consume(`verify-resend:${sha256(address)}`, LIMITS.verificationResend.limit, LIMITS.verificationResend.window);
+    if (!allowed) return fail("Für diese Adresse wurden in der letzten Stunde bereits drei Links angefordert. Bitte versuche es später erneut.");
     const neutral = ok("Falls ein unbestätigtes Konto zu dieser Adresse besteht, haben wir einen neuen Link gesendet.");
+    const [target] = await db
+      .select({ id: accounts.id, email: accounts.email })
+      .from(accounts)
+      .where(and(dsql`lower(${accounts.email}) = ${address}`, isNull(accounts.emailVerifiedAt), eq(accounts.status, "unverified")));
     if (!target) return neutral;
-    const allowed = await consume(`verify-resend:${sha256(target.email.toLowerCase())}`, LIMITS.verificationResend.limit, LIMITS.verificationResend.window);
-    if (!allowed) return fail("Du hast in der letzten Stunde bereits drei Links angefordert. Bitte versuche es später erneut.");
     await issueEmailToken({ accountId: target.id, purpose: "verify_email", sendTo: target.email });
     return neutral;
   });
@@ -210,7 +233,13 @@ export async function loginAction(_prev: ActionState, formData: FormData): Promi
       return fail("E-Mail-Adresse oder Passwort stimmen nicht.", { values });
     }
 
+    // Eine noch bestehende Sitzung auf diesem Gerät wird serverseitig beendet (keine Sitzungsfixierung).
+    const previous = await readSessionToken();
+    if (previous)
+      await db.update(sessions).set({ revokedAt: new Date() }).where(and(eq(sessions.tokenHash, sha256(previous)), isNull(sessions.revokedAt)));
     await createSession(acc.id);
+    // Anmeldung zählt als Aktivität (Aufbewahrung PRD 11: 24 Monate Inaktivität)
+    await db.update(accounts).set({ lastActiveAt: new Date() }).where(eq(accounts.id, acc.id));
     await audit({ actorId: acc.id, action: "auth.login", objectType: "account", objectId: acc.id });
     if (acc.mfaEnabled) redirect(`/anmelden/mfa?next=${encodeURIComponent(next)}`);
     redirect(next);
@@ -231,7 +260,7 @@ export async function mfaVerifyAction(_prev: ActionState, formData: FormData): P
 
     let okCode = false;
     if (mode === "recovery") {
-      const normalized = code.toLowerCase();
+      const normalized = normalizeRecoveryCode(code);
       const used = await db
         .update(recoveryCodes)
         .set({ usedAt: new Date() })
@@ -314,7 +343,13 @@ export async function resetPasswordAction(_prev: ActionState, formData: FormData
       if (used.length === 0) throw new UserError("Dieser Link wurde bereits verwendet.");
       await tx
         .update(accounts)
-        .set({ passwordHash, emailVerifiedAt: dsql`coalesce(${accounts.emailVerifiedAt}, now())`, version: dsql`${accounts.version} + 1` })
+        .set({
+          passwordHash,
+          // Der Reset-Link beweist den Zugang zur Adresse: unbestätigte Konten gelten danach als bestätigt.
+          emailVerifiedAt: dsql`coalesce(${accounts.emailVerifiedAt}, now())`,
+          status: dsql`case when ${accounts.status} = 'unverified' then 'active'::identity.account_status else ${accounts.status} end`,
+          version: dsql`${accounts.version} + 1`,
+        })
         .where(eq(accounts.id, row.accountId));
       await enqueue(
         { type: "email.security_notice", aggregateType: "account", aggregateId: row.accountId, payload: { what: "password_changed" }, dedupeKey: `security:pw:${row.id}` },

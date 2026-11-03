@@ -2,6 +2,7 @@ import "server-only";
 import { and, eq, or } from "drizzle-orm";
 import { db, type Executor } from "@/server/db";
 import {
+  accounts,
   comments,
   contactRelationships,
   conversations,
@@ -17,27 +18,27 @@ import { isBlockedBetween } from "./access";
  * (MSG07, MSG08: Ziel-Links und Zustellung). Framework-frei – auch im Worker nutzbar.
  */
 
-/** Darf accountId den Beitrag sehen? (veröffentlicht; Gruppe offen oder aktive Mitgliedschaft) */
+/**
+ * Darf accountId den Beitrag sehen? Gleiche Regeln wie der Feed (postVisibleTo, COM01/COM07/SAF01):
+ * veröffentlicht, Gruppeninhalte nur mit aktiver Mitgliedschaft (offen wie geschlossen),
+ * Autor nicht in Löschung und keine Blockierung zwischen den beiden Konten.
+ */
 export async function canSeePost(accountId: string, postId: string, executor: Executor = db): Promise<boolean> {
   const [p] = await executor
-    .select({ status: posts.status, groupId: posts.groupId, authorId: posts.authorId })
+    .select({ status: posts.status, groupId: posts.groupId, authorId: posts.authorId, authorStatus: accounts.status })
     .from(posts)
+    .innerJoin(accounts, eq(accounts.id, posts.authorId))
     .where(eq(posts.id, postId));
   if (!p || p.status !== "published") return false;
+  if (p.authorStatus === "deleted" || p.authorStatus === "deletion_pending") return false;
   if (p.groupId) {
-    const [g] = await executor
-      .select({ type: groups.type, status: groups.status })
-      .from(groups)
-      .where(eq(groups.id, p.groupId));
-    if (!g) return false;
-    if (g.type === "closed") {
-      const [m] = await executor
-        .select({ status: groupMemberships.status })
-        .from(groupMemberships)
-        .where(and(eq(groupMemberships.groupId, p.groupId), eq(groupMemberships.accountId, accountId)));
-      if (m?.status !== "active") return false;
-    }
+    const [m] = await executor
+      .select({ status: groupMemberships.status })
+      .from(groupMemberships)
+      .where(and(eq(groupMemberships.groupId, p.groupId), eq(groupMemberships.accountId, accountId)));
+    if (m?.status !== "active") return false;
   }
+  if (p.authorId !== accountId && (await isBlockedBetween(accountId, p.authorId, executor))) return false;
   return true;
 }
 
@@ -47,6 +48,7 @@ export async function canSeeComment(accountId: string, commentId: string, execut
     .from(comments)
     .where(eq(comments.id, commentId));
   if (!c || c.status !== "published") return false;
+  if (c.authorId !== accountId && (await isBlockedBetween(accountId, c.authorId, executor))) return false;
   return canSeePost(accountId, c.postId, executor);
 }
 
@@ -57,11 +59,13 @@ export async function canSeeGroup(accountId: string, groupId: string, executor: 
     .from(groups)
     .where(eq(groups.id, groupId));
   if (!g) return false;
-  if (g.type === "open" || g.discoverable) return true;
   const [m] = await executor
     .select({ status: groupMemberships.status })
     .from(groupMemberships)
     .where(and(eq(groupMemberships.groupId, groupId), eq(groupMemberships.accountId, accountId)));
+  // Archivierte Gruppen bleiben nur für aktive Mitglieder erreichbar (COM08, wie getGroupForViewer).
+  if (g.status === "archived") return m?.status === "active";
+  if (g.type === "open" || g.discoverable) return true;
   return Boolean(m);
 }
 

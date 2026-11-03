@@ -8,8 +8,9 @@ import { runAction, str, UserError } from "../../action";
 import { audit } from "../../audit";
 import { actionViewer } from "../../auth/viewer";
 import { db } from "../../db";
-import { consentRecords } from "../../db/schema";
+import { analyticsSubjects, consentRecords } from "../../db/schema";
 import { consume } from "../../rate-limit";
+import { trackLater } from "../analytics/track";
 import { recordHealthDecision } from "../health/consent";
 
 /**
@@ -67,9 +68,17 @@ export async function setAnalyticsConsentAction(_prev: ActionState, formData: Fo
         decision,
         channel: "web",
       });
+      // PRI02: Widerruf wirkt sofort – der zufällige Analysebezug samt Rohereignissen wird entfernt (Kaskade).
+      if (decision === "withdrawn") await tx.delete(analyticsSubjects).where(eq(analyticsSubjects.accountId, viewer.accountId));
       await audit({ actorId: viewer.accountId, action: `consent.analytics.${decision}`, objectType: "account", objectId: viewer.accountId }, tx);
     });
+    // PRD 15: erst nach gespeicherter Einwilligung erfasst (preference_changed, Typ «analytics»).
+    if (decision === "granted") trackLater(viewer.accountId, { name: "preference_changed", params: { type: "analytics" } });
     refresh();
-    return ok(decision === "granted" ? "Danke. Anonyme Nutzungsstatistik ist eingeschaltet." : "Anonyme Nutzungsstatistik ist ausgeschaltet.");
+    return ok(
+      decision === "granted"
+        ? "Danke. Anonyme Nutzungsstatistik ist eingeschaltet."
+        : "Anonyme Nutzungsstatistik ist ausgeschaltet. Bisher gezählte Rohdaten zu deinem Konto sind gelöscht.",
+    );
   });
 }

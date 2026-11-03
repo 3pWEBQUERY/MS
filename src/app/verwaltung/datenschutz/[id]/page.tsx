@@ -9,9 +9,11 @@ import { formatDate, formatDateTime } from "@/lib/time";
 import { audit } from "@/server/audit";
 import { requireStaff } from "@/server/auth/viewer";
 import { clearExceptionAction, retryErasureAction, updateRequestStatusAction } from "@/server/modules/privacy/admin-actions";
+import { IDENTITY_CHECKS } from "@/server/modules/privacy/mfa-recovery";
 import { getRequestForOfficer, REQUEST_TYPE_LABEL } from "@/server/modules/privacy/requests";
 import { SYSTEM_LABEL } from "@/server/modules/privacy/tasks";
 import { ExceptionForm } from "./exception-form";
+import { MfaRecoveryForm } from "./mfa-recovery-form";
 
 export const metadata: Metadata = { title: "Datenschutzauftrag" };
 
@@ -39,6 +41,7 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
   const problems = req.tasks.filter((t) => t.status === "failed" || t.status === "escalated").length;
   const open = req.tasks.filter((t) => t.status !== "done").length;
   const manual = req.type === "access" || req.type === "rectification" || req.type === "export";
+  const isMfa = req.type === "mfa_recovery";
   const { overdue, exceptionDue, stale } = req;
 
   return (
@@ -80,10 +83,42 @@ async function RequestDetail({ params }: { params: PageProps<"/verwaltung/datens
           />
         </Card>
         <p className="text-sm text-ink-2">
-          Identität verhältnismässig geprüft über bestehende Sitzung und bestätigte E-Mail-Adresse; keine Ausweiskopien.
+          {isMfa
+            ? "Die Anfrage wurde nach erfolgreicher Passwort-Anmeldung gestellt. Die Identität prüft die Datenschutzstelle verhältnismässig – keine Ausweiskopien, nie allein über eine Profilangabe."
+            : "Identität verhältnismässig geprüft über bestehende Sitzung und bestätigte E-Mail-Adresse; keine Ausweiskopien."}{" "}
           Antworten gehen ausschliesslich an die bestätigte Adresse des Kontos.
         </p>
       </section>
+
+      {isMfa && (req.status === "requested" || req.status === "verified") && (
+        <section aria-labelledby="mfa-title" className="flex max-w-3xl flex-col gap-4">
+          <SectionHeader
+            id="mfa-title"
+            title={req.status === "requested" ? "Identität prüfen" : "Zweite Freigabe"}
+            description={
+              req.status === "requested"
+                ? "Nach der Bestätigung werden Geheimnis und Wiederherstellungscodes entfernt und alle Sitzungen beendet. Bei Konten mit Mitarbeitendenrolle setzt erst eine zweite Person zurück."
+                : "Konto mit Mitarbeitendenrolle: Die Identität ist geprüft. Das Zurücksetzen gibt eine andere Person der Datenschutzstelle frei."
+            }
+            className="mb-0"
+          />
+          {req.accountId === officer.accountId ? (
+            <Notice tone="neutral" title="Eigener Auftrag">
+              Eigene Aufträge bearbeitet eine andere Person der Datenschutzstelle.
+            </Notice>
+          ) : req.status === "verified" && req.handledBy === officer.accountId ? (
+            <Notice tone="neutral" title="Vieraugenprinzip">
+              Du hast die Identität geprüft. Die zweite Freigabe erteilt eine andere Person der Datenschutzstelle.
+            </Notice>
+          ) : (
+            <MfaRecoveryForm
+              requestId={req.id}
+              step={req.status === "requested" ? "verify" : "reset"}
+              checks={IDENTITY_CHECKS.map((c) => ({ value: c.value, label: c.label }))}
+            />
+          )}
+        </section>
+      )}
 
       {manual && req.status !== "completed" && req.status !== "rejected" && (
         <section aria-labelledby="handle-title" className="flex max-w-3xl flex-col gap-4">

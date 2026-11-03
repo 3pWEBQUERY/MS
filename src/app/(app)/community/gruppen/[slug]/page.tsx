@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ActionForm } from "@/components/community/action-form";
@@ -68,6 +69,14 @@ async function Group({
           </Badge>
         )}
         {group.moderator && <span className="text-sm text-ink-2">Betreut von {group.moderator}</span>}
+        {/* SAF02: Gruppen sind meldbar – der Server prüft, dass die Gruppe für dich sichtbar ist. */}
+        <Link
+          href={`/melden?typ=group&id=${group.id}`}
+          className="inline-flex h-10 items-center gap-1.5 rounded-[10px] px-2 text-sm font-medium text-ink-2 underline-offset-4 hover:bg-sunk hover:text-ink hover:underline"
+        >
+          <Icon name="flag" className="size-4" />
+          Gruppe melden
+        </Link>
       </div>
       {group.membership === "active" ? (
         <GroupRoom group={group} viewer={viewer} cursor={cursor} />
@@ -165,6 +174,19 @@ async function GroupRoom({ group, viewer, cursor }: { group: GroupDetail; viewer
             <CardHeading
               title="Die Gruppenregeln wurden aktualisiert"
               description={`Bitte lies die neue Fassung ${group.rulesVersion} und bestätige sie, bevor du weiter schreibst.`} />
+            {/* SAF07: Regeländerung nachvollziehbar – bisherige Fassung und Zusammenfassung der Änderung. */}
+            <div className="flex flex-col gap-1 rounded-[12px] bg-sunk p-4">
+              <p className="text-sm text-ink-2">
+                Zuletzt bestätigt: {group.memberRulesVersion ? `Fassung ${group.memberRulesVersion}` : "keine Fassung"} · Neu: Fassung{" "}
+                {group.rulesVersion}
+              </p>
+              {group.rulesChangeNote && (
+                <>
+                  <p className="text-base font-semibold text-ink">Was sich geändert hat</p>
+                  <PlainText text={group.rulesChangeNote} className="text-base text-ink" />
+                </>
+              )}
+            </div>
             <PlainText text={group.rules} className="text-base text-ink" />
             <ActionForm
               action={acceptGroupRulesAction}

@@ -18,6 +18,7 @@ import {
 } from "@/server/db/schema";
 import { interestLabel, cantonName } from "@/lib/catalog";
 import { canSeeComment, canSeeGroup, canSeePost } from "@/server/modules/messaging/targets";
+import { addOperatingTime, nextServiceStart, PRIORITY_OPERATING_MS } from "./operating-hours";
 
 /**
  * Melden (SAF02, F06, Kapitel 10) – wiederverwendbarer Service für Web und spätere Apps.
@@ -58,13 +59,11 @@ export function priorityForReason(reason: ReportReason): Priority {
   }
 }
 
-/** Reaktionsziele: P0 30 min, P1 2 h, P2 24 h, P3 72 h (Kapitel 10). */
-export const PRIORITY_DUE_MS: Record<Priority, number> = {
-  P0: 30 * 60 * 1000,
-  P1: 2 * 60 * 60 * 1000,
-  P2: 24 * 60 * 60 * 1000,
-  P3: 72 * 60 * 60 * 1000,
-};
+/**
+ * Reaktionsziele in Betriebszeit (Kapitel 10): P0 30 Minuten, P1 2 Betriebsstunden,
+ * P2 1 Betriebstag, P3 3 Betriebstage. Zeit ausserhalb der Dienstfenster zählt nicht.
+ */
+export const PRIORITY_DUE_MS: Record<Priority, number> = PRIORITY_OPERATING_MS;
 
 const PRIORITY_RANK: Record<Priority, number> = { P0: 0, P1: 1, P2: 2, P3: 3 };
 const OPEN_STATUSES = ["new", "triaged", "in_progress", "escalated"] as const;
@@ -308,6 +307,8 @@ export type CreateReportResult = {
   receiptNumber: string;
   subjectAccountId: string | null;
   priority: Priority;
+  /** Eingang ausserhalb der Betriebszeit: nächster Dienstbeginn (Kapitel 10), sonst null */
+  nextServiceStart: Date | null;
 };
 
 /**
@@ -333,7 +334,7 @@ export async function createReport(viewer: Viewer, input: CreateReportInput): Pr
 
   const priority = priorityForReason(input.reason);
   const now = new Date();
-  const dueAt = new Date(now.getTime() + PRIORITY_DUE_MS[priority]);
+  const dueAt = addOperatingTime(now, PRIORITY_DUE_MS[priority]);
 
   // Fallziel: bei Chatmeldungen die zuerst ausgewählte Nachricht der Gegenseite (sonst die erste).
   let caseTargetId = target.id;
@@ -432,6 +433,6 @@ export async function createReport(viewer: Viewer, input: CreateReportInput): Pr
       })),
     );
 
-    return { receiptNumber: receipt, subjectAccountId: target.subjectAccountId, priority };
+    return { receiptNumber: receipt, subjectAccountId: target.subjectAccountId, priority, nextServiceStart: nextServiceStart(now) };
   });
 }

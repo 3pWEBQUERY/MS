@@ -10,7 +10,7 @@ import { Icon } from "@/components/ui/icon";
 import { Card, KeyValue, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
 import { addDays, formatDate, formatDateTime, localDateString } from "@/lib/time";
 import { recordDenied } from "@/server/audit";
-import { updateDiaryEntryAction } from "@/server/modules/health/actions";
+import { updateDiaryEntryAction } from "@/server/modules/health/diary-actions";
 import { requireHealthViewer, timezoneLabel } from "@/server/modules/health/guard";
 import { getDiaryEntry, listSymptomOptions } from "@/server/modules/health/queries";
 import { formatOffset, HEALTH_LIMITS } from "@/server/modules/health/validation";

@@ -65,6 +65,8 @@ export const accounts = identity.table(
     termsVersion: text("terms_version").notNull(),
     mfaEnabled: boolean("mfa_enabled").notNull().default(false),
     lastActiveAt: ts("last_active_at"),
+    /** Vorwarnung vor Löschung wegen 24 Monaten Inaktivität (PRD 11 Aufbewahrung, Frist 30 Tage) */
+    inactivityNoticeAt: ts("inactivity_notice_at"),
     deactivatedAt: ts("deactivated_at"),
     deletionScheduledAt: ts("deletion_scheduled_at"),
     createdAt: createdAt(),

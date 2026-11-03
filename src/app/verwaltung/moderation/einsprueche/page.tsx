@@ -7,7 +7,6 @@ import { AdminSectionBlock, DateTime, Deadline } from "@/components/admin/ui";
 import { Badge, EmptyState, PageHeader, PageSkeleton, SegmentNav, Table } from "@/components/ui/primitives";
 import { requireStaff } from "@/server/auth/viewer";
 import { listAppeals, type AppealScope } from "@/server/modules/moderation/appeals";
-import { APPEAL_TARGET_MS } from "@/server/modules/moderation/cases";
 
 export const metadata: Metadata = { title: "Einsprüche" };
 
@@ -96,7 +95,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
                             Entschieden <DateTime date={a.decidedAt} />
                           </span>
                         ) : (
-                          <Deadline dueAt={a.answerBy} now={now} total={APPEAL_TARGET_MS} />
+                          <Deadline dueAt={a.answerBy} now={now} total={a.answerBy.getTime() - a.createdAt.getTime()} />
                         )}
                       </td>
                       <td className="text-sm">

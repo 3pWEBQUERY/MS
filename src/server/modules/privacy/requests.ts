@@ -13,13 +13,15 @@ export const IDENTITY_METHODS = {
   session: "Bestehende Sitzung und bestätigte E-Mail",
   session_reauth: "Bestehende Sitzung, bestätigte E-Mail und erneute Anmeldung",
   automatic: "Automatisch nach Widerruf (Inhaberkonto)",
+  inactivity: "Automatisch nach 24 Monaten Inaktivität und Vorwarnung an die bestätigte E-Mail-Adresse",
+  mfa_pending: "Passwort-Anmeldung; Identitätsprüfung durch die Datenschutzstelle ausstehend",
 } as const;
 
 /** Arbeitsfrist der Datenschutzstelle; gesetzliche Fristen führt sie gesondert (PRD 11). */
 export const REQUEST_DUE_DAYS = 30;
 export const dueDate = (from = new Date()) => new Date(from.getTime() + REQUEST_DUE_DAYS * 24 * 60 * 60 * 1000);
 
-export type RequestType = "access" | "export" | "erasure_health" | "erasure_account" | "rectification";
+export type RequestType = "access" | "export" | "erasure_health" | "erasure_account" | "rectification" | "mfa_recovery";
 export type RequestStatus = "requested" | "deactivated" | "in_progress" | "verified" | "completed" | "failed" | "rejected";
 
 export const REQUEST_TYPE_LABEL: Record<RequestType, string> = {
@@ -28,6 +30,7 @@ export const REQUEST_TYPE_LABEL: Record<RequestType, string> = {
   erasure_health: "Gesundheitsdaten löschen",
   erasure_account: "Konto löschen",
   rectification: "Berichtigung",
+  mfa_recovery: "Zweiten Faktor wiederherstellen",
 };
 
 export const REQUEST_STATUS_LABEL: Record<RequestStatus, string> = {

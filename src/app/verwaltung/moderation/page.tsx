@@ -18,11 +18,12 @@ import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Badge, EmptyState, Notice, PageHeader, PageSkeleton, SegmentNav, Table } from "@/components/ui/primitives";
 import { requireStaff } from "@/server/auth/viewer";
+import { reactionDone } from "@/server/modules/moderation/operating-hours";
 import {
   caseCounts,
   listCases,
   pendingApprovals,
-  PRIORITY_WINDOW_MS,
+  secondApprovalDueAt,
   type CaseScope,
 } from "@/server/modules/moderation/cases";
 
@@ -204,7 +205,11 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
                     <td>{a.kind === "account_suspend" ? "Kontosperre" : a.kind === "write_suspend" ? "Schreibsperre" : "Inhalt ausgeblendet"}</td>
                     <td>{a.actorId === viewer.accountId ? "Du (Freigabe durch andere Person nötig)" : a.actor}</td>
                     <td>
-                      <Deadline dueAt={new Date(a.createdAt.getTime() + 24 * 60 * 60 * 1000)} now={now} total={24 * 60 * 60 * 1000} />
+                      <Deadline
+                        dueAt={secondApprovalDueAt(a.createdAt)}
+                        now={now}
+                        total={secondApprovalDueAt(a.createdAt).getTime() - a.createdAt.getTime()}
+                      />
                     </td>
                   </tr>
                 ))}
@@ -234,7 +239,8 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
             </thead>
             <tbody>
               {list.rows.map((c) => {
-                const done = !["new", "triaged", "in_progress", "escalated"].includes(c.status);
+                // Kapitel 10: Reaktionsziel – P0–P2 mit der Triage, P3 mit dem Entscheid erreicht.
+                const done = reactionDone(c.priority, c.status);
                 return (
                   <tr key={c.id}>
                     <td>
@@ -257,7 +263,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/verwaltung/
                       </div>
                     </td>
                     <td>
-                      <Deadline dueAt={c.dueAt} now={now} total={PRIORITY_WINDOW_MS[c.priority]} done={done} />
+                      <Deadline dueAt={c.dueAt} now={now} total={c.dueAt.getTime() - c.createdAt.getTime()} done={done} />
                     </td>
                     <td className="text-sm text-ink-2">
                       {c.reasons.map((r) => REPORT_REASON_LABEL[r] ?? r).join(", ") || "–"}

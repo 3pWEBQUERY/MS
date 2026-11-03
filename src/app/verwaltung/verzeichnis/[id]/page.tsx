@@ -12,7 +12,7 @@ import { formatDate } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
 import { publishOfferAction } from "@/server/modules/content/directory-actions";
 import { getOfferForStaff, offerDueState } from "@/server/modules/content/directory-queries";
-import { verifyMethodLabel } from "@/server/modules/content/shared";
+import { missingExpertMethods, verifyMethodLabel } from "@/server/modules/content/shared";
 import { addMonths, EDITOR_ROLES } from "@/server/modules/content/staff";
 
 export const metadata: Metadata = { title: "Angebot" };
@@ -52,7 +52,9 @@ async function StaffOffer({
   const { offer: o, records } = data;
   const now = new Date();
   const due = offerDueState(o, now);
-  const canPublish = o.status !== "published" && due !== "unverified" && due !== "overdue";
+  // CON05: passende Fachprüfung für medizinische und sozialrechtliche Leistungsangaben
+  const missingExpert = missingExpertMethods(o.topicSlugs, records.filter((r) => r.nextDueAt > now).map((r) => r.method));
+  const canPublish = o.status !== "published" && due !== "unverified" && due !== "overdue" && missingExpert.length === 0;
 
   return (
     <>
@@ -77,6 +79,12 @@ async function StaffOffer({
       />
       <div className="flex flex-col gap-10">
         <StatusNotice code={one(sp.status)} messages={MESSAGES} />
+        {missingExpert.length > 0 && (
+          <Notice tone="warning" icon="shield" title="Fachprüfung erforderlich">
+            Für die gewählten Themen braucht es vor der Publikation zusätzlich: {missingExpert.map(verifyMethodLabel).join(", ")} (CON05). Erfasse sie unten
+            als eigene Prüfung.
+          </Notice>
+        )}
         {o.changeFlag && (
           <Notice tone="warning" icon="flag" title="Offener Änderungshinweis">
             {o.changeNote ?? "Bitte das Angebot beim Anbieter prüfen."}{" "}

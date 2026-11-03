@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { RulesGate } from "@/components/community/rules-gate";
 import { ContactRequestForm } from "@/components/messaging/contact-request-form";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { Card, Monogram, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { COMMUNITY_RULES_VERSION } from "@/lib/catalog";
 import { formatDate } from "@/lib/time";
 import { requireViewer } from "@/server/auth/viewer";
 import { isEnabled } from "@/server/flags";
@@ -78,6 +80,7 @@ async function ContactRequest({ params }: { params: PageProps<"/community/mitgli
               ["lock", "Erst wenn die andere Person annimmt, könnt ihr einander Nachrichten schreiben."],
               ["clock", "Unbeantwortete Anfragen verfallen nach 14 Tagen. Du kannst sie jederzeit zurückziehen."],
               ["shield", "Ihr könnt den Kontakt jederzeit beenden, blockieren oder melden."],
+              ["lock", "Nachrichten werden verschlüsselt gespeichert, aber nicht Ende-zu-Ende-verschlüsselt. Die Moderation sieht nur gemeldete Nachrichten."],
               ] as [IconName, string][]
             ).map(([icon, text]) => (
               <li key={text} className="flex items-start gap-3">
@@ -134,6 +137,9 @@ async function ContactRequest({ params }: { params: PageProps<"/community/mitgli
           <Notice tone="neutral" title="Zurzeit ist keine neue Anfrage möglich">
             Eine neue Anfrage an diese Person ist frühestens ab {formatDate(state.until, viewer.prefs.timezone)} möglich.
           </Notice>
+        ) : viewer.rulesAcceptedVersion !== COMMUNITY_RULES_VERSION ? (
+          // SAF07: Eine Kontaktanfrage ist Community-Schreiben – zuerst die aktuellen Regeln bestätigen.
+          <RulesGate version={COMMUNITY_RULES_VERSION} acceptedVersion={viewer.rulesAcceptedVersion} />
         ) : (
           <ContactRequestForm targetId={target.accountId} disabled={!chatEnabled || viewer.writeSuspended} />
         )}

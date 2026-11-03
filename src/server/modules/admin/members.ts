@@ -4,6 +4,7 @@ import { audit } from "../../audit";
 import type { Viewer } from "../../auth/viewer";
 import { db } from "../../db";
 import { accounts, appeals, communityProfiles, moderationCases, roleAssignments, sanctions } from "../../db/schema";
+import { limitHitsFor } from "../community/limit-hits";
 import { activeRoleCondition, actorRoleFor, isUuid, maskEmail } from "./common";
 
 /**
@@ -73,7 +74,7 @@ export async function getMemberForStaff(viewer: Viewer, accountId: string) {
     objectId: acc.id,
   });
 
-  const [sanctionRows, caseRows, appealRows, roleRows] = await Promise.all([
+  const [sanctionRows, caseRows, appealRows, roleRows, limitHits] = await Promise.all([
     db
       .select({
         id: sanctions.id,
@@ -119,6 +120,8 @@ export async function getMemberForStaff(viewer: Viewer, accountId: string) {
       .select({ role: roleAssignments.role })
       .from(roleAssignments)
       .where(and(eq(roleAssignments.accountId, acc.id), activeRoleCondition())),
+    // SAF08: ausgelöste Limits (nur Art, Anzahl, Zeitpunkt) – falsche Treffer sind überprüfbar.
+    limitHitsFor(acc.id),
   ]);
 
   const now = new Date();
@@ -138,6 +141,7 @@ export async function getMemberForStaff(viewer: Viewer, accountId: string) {
     })),
     cases: caseRows,
     appeals: appealRows,
+    limitHits,
     viewerIsAdmin: isAdmin,
     isSelf: acc.id === viewer.accountId,
   };

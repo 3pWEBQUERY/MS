@@ -27,7 +27,7 @@ export function ExceptionForm({ requestId, hasException }: { requestId: string; 
           {(p) => <Input {...p} type="date" name="until" defaultValue={state.values?.until as string | undefined} />}
         </Field>
         <Field label="Ticket" required error={state.fieldErrors?.ticket}>
-          {(p) => <Input {...p} name="ticket" maxLength={60} defaultValue={state.values?.ticket as string | undefined} />}
+          {(p) => <Input {...p} name="ticket" maxLength={40} defaultValue={state.values?.ticket as string | undefined} />}
         </Field>
       </div>
       <div>

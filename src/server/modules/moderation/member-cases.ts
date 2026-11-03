@@ -5,6 +5,7 @@ import { UserError } from "@/server/action";
 import { encrypt } from "@/server/crypto";
 import { db } from "@/server/db";
 import { appeals, moderationActions, moderationCases, reports } from "@/server/db/schema";
+import { APPEAL_WINDOW_MS } from "./cases";
 import type { ReportReason, ReportTargetType } from "./reports";
 
 /**
@@ -12,7 +13,7 @@ import type { ReportReason, ReportTargetType } from "./reports";
  * Zeigt nie die Identität anderer Personen (weder Meldende noch Betroffene).
  */
 
-export const APPEAL_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+export { APPEAL_WINDOW_MS };
 export const APPEAL_MAX = 2000;
 
 /** Neutraler Bearbeitungsstand für Meldende (ohne Details zur Gegenseite). */

@@ -235,6 +235,17 @@ html[data-text-scale="150"] {
   }
 }
 
+/*
+ * Fokus nie unter der fixierten Kopfzeile oder unteren Navigation (Mobil) verdeckt (A03, WCAG 2.4.11):
+ * Browser halten diesen Abstand ein, wenn sie fokussierte Elemente in den sichtbaren Bereich rollen.
+ */
+@media (width < 64rem) {
+  html {
+    scroll-padding-top: 5rem;
+    scroll-padding-bottom: 6.5rem;
+  }
+}
+
 /* Bewegung: Systemeinstellung, Mitgliederpräferenz und einfache Ansicht (HOM06, PRD 12) */
 @media (prefers-reduced-motion: reduce) {
   html:not([data-motion="allow"]) *,

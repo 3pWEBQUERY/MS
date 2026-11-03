@@ -7,15 +7,16 @@ import { Icon, type IconName } from "@/components/ui/icon";
 import { Card, Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { HEALTH_CONSENT_VERSION } from "@/lib/catalog";
 import { requireViewer } from "@/server/auth/viewer";
-import { decideHealthAction } from "@/server/modules/health/actions";
+import { decideHealthAction } from "@/server/modules/health/activation-actions";
+import { healthReturnPath } from "@/server/modules/health/validation";
 
 export const metadata: Metadata = { title: "Gesundheitsbereich aktivieren" };
 
 /** S08 Gesundheitsbereich aktivieren (PRI01, US10, AT01): gesonderte, freiwillige Entscheidung. */
-export default function ActivatePage() {
+export default function ActivatePage({ searchParams }: PageProps<"/mein-ms/aktivieren">) {
   return (
     <Suspense fallback={<PageSkeleton rows={2} />}>
-      <Activate />
+      <Activate searchParams={searchParams} />
     </Suspense>
   );
 }
@@ -43,8 +44,10 @@ const POINTS: { icon: IconName; title: string; text: string }[] = [
   },
 ];
 
-async function Activate() {
+async function Activate({ searchParams }: { searchParams: PageProps<"/mein-ms/aktivieren">["searchParams"] }) {
   const viewer = await requireViewer();
+  const sp = await searchParams;
+  const next = healthReturnPath(typeof sp.weiter === "string" ? sp.weiter : null);
 
   if (viewer.healthActive)
     return (
@@ -53,8 +56,8 @@ async function Activate() {
         <Notice tone="success" title="Du hast den Gesundheitsbereich bereits aktiviert">
           Widerrufen kannst du die Einwilligung unter <Link href="/konto/privatsphaere">Privatsphäre</Link>.
         </Notice>
-        <ButtonLink href="/mein-ms" className="w-fit" iconRight={<Icon name="arrow-right" className="size-5" />}>
-          Zu Mein MS
+        <ButtonLink href={next ?? "/mein-ms"} className="w-fit" iconRight={<Icon name="arrow-right" className="size-5" />}>
+          {next ? "Weiter" : "Zu Mein MS"}
         </ButtonLink>
       </div>
     );
@@ -93,7 +96,7 @@ async function Activate() {
       {alreadyDeclined && (
         <Notice tone="neutral">Du hast den Gesundheitsbereich bisher nicht aktiviert. Du kannst das hier jederzeit ändern.</Notice>
       )}
-      <HealthDecisionForms action={decideHealthAction} alreadyDeclined={alreadyDeclined} />
+      <HealthDecisionForms action={decideHealthAction} alreadyDeclined={alreadyDeclined} next={next} />
       <p className="text-sm text-ink-2">Textfassung: {HEALTH_CONSENT_VERSION}</p>
     </div>
   );

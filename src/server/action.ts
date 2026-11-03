@@ -2,8 +2,11 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { unstable_rethrow } from "next/navigation";
 import { fail, type ActionState } from "@/lib/action-state";
-import { AuthError } from "./auth/viewer";
+import type { CoreFlow } from "@/lib/analytics";
+import { redactLogText } from "@/lib/log-safety";
+import { AuthError, getViewer } from "./auth/viewer";
 import { FeatureDisabledError } from "./flags";
+import { trackFlowFailureLater } from "./modules/analytics/track";
 
 /** Fachlicher Fehler mit verständlicher Meldung (wird unverändert angezeigt). */
 export class UserError extends Error {
@@ -21,10 +24,12 @@ export class UserError extends Error {
  * – keine Inhalte oder personenbezogenen Daten in Logs
  * – Korrelations-ID für Support
  * – Eingaben werden für defaultValue zurückgegeben
+ * – optional: technischer Fehler eines Kernablaufs als core_flow_failed (nur mit Einwilligung, PRD 15)
  */
 export async function runAction(
   fn: () => Promise<ActionState>,
   values?: Record<string, string | string[] | undefined>,
+  meta?: { flow?: CoreFlow },
 ): Promise<ActionState> {
   try {
     return await fn();
@@ -35,7 +40,8 @@ export async function runAction(
     if (err instanceof FeatureDisabledError)
       return fail(`${err.message}. Bestehende Daten bleiben erhalten.`, { values, data: { flag: err.flag } });
     const correlationId = randomUUID().slice(0, 8);
-    console.error(`[action] ${correlationId}`, err instanceof Error ? err.name + ": " + err.message.slice(0, 200) : "unknown");
+    console.error(`[action] ${correlationId}`, err instanceof Error ? err.name + ": " + redactLogText(err, 200) : "unknown");
+    if (meta?.flow) trackFlowFailureLater((await getViewer().catch(() => null))?.accountId, meta.flow);
     return fail("Das hat leider nicht geklappt. Es wurde nichts gespeichert. Bitte versuche es erneut.", {
       values,
       correlationId,

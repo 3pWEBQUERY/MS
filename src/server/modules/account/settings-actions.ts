@@ -13,6 +13,7 @@ import { db } from "../../db";
 import { accounts, sessions, userPreferences } from "../../db/schema";
 import { enqueue } from "../../outbox";
 import { consume } from "../../rate-limit";
+import { trackLater } from "../analytics/track";
 import { issueEmailToken } from "./tokens";
 
 /* ───────────────────────── E-Mail ändern (ACC07) ───────────────────────── */
@@ -164,6 +165,7 @@ export async function saveDisplayPrefsAction(input: DisplayInput): Promise<Actio
         target: userPreferences.accountId,
         set: { ...set, version: dsql`${userPreferences.version} + 1` },
       });
+    trackLater(viewer.accountId, { name: "preference_changed", params: { type: "display" } }); // PRD 15, nur mit Einwilligung
     return ok("Gespeichert – gilt auf allen deinen Geräten.");
   });
 }

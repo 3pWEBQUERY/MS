@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { Monogram } from "@/components/ui/primitives";
 import { logoutAction } from "@/server/modules/account/auth-actions";
 
-/** Profilmenü: Konto, Privatsphäre, Anzeige (PRD 04). Tastaturbedienbar, Escape schliesst. */
+/**
+ * Profilmenü: Konto, Privatsphäre, Anzeige (PRD 04). Aufklappbereich mit Links (Disclosure,
+ * kein ARIA-Menü): aria-expanded/aria-controls, Escape schliesst und gibt den Fokus zurück (A03).
+ */
 export function UserMenu({
   pseudonym,
   isStaff,
@@ -24,6 +27,7 @@ export function UserMenu({
   const ref = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
+  const menuId = useId();
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setOpen(false), [pathname]);
@@ -62,11 +66,11 @@ export function UserMenu({
         ref={buttonRef}
         type="button"
         aria-expanded={open}
-        aria-haspopup="true"
+        aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "flex items-center gap-3 rounded-[12px] text-left transition-colors hover:bg-sunk",
-          placement === "sidebar" ? "h-14 w-full px-2" : "size-10 justify-center",
+          placement === "sidebar" ? "h-14 w-full px-2" : "size-[44px] justify-center",
         )}
         aria-label={placement === "topbar" ? `Profilmenü für ${pseudonym}` : undefined}
       >
@@ -83,8 +87,9 @@ export function UserMenu({
       </button>
       {open && (
         <div
+          id={menuId}
           className={cn(
-            "absolute z-50 w-72 rounded-[20px] border border-line-2 bg-surface p-2",
+            "absolute z-50 w-72 max-w-[calc(100vw-2rem)] rounded-[20px] border border-line-2 bg-surface p-2",
             placement === "sidebar" ? "bottom-full left-0 mb-2" : "right-0 top-full mt-2",
           )}
         >

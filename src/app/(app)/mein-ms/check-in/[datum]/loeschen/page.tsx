@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { ConfirmDeleteForm } from "@/components/health/action-forms";
 import { Card, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { formatDate } from "@/lib/time";
-import { deleteCheckInAction } from "@/server/modules/health/actions";
+import { deleteCheckInAction } from "@/server/modules/health/checkin-actions";
 import { requireHealthViewer } from "@/server/modules/health/guard";
 import { getCheckInByDate } from "@/server/modules/health/queries";
 

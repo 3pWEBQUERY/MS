@@ -9,6 +9,7 @@ import { audit } from "../../audit";
 import { actionStaff, type Viewer } from "../../auth/viewer";
 import { db } from "../../db";
 import { groupMemberships, groups, roleAssignments, topics } from "../../db/schema";
+import { retireGroupNotifications } from "../messaging/access";
 import { notify } from "../messaging/notify";
 import { isUuid, qcol } from "./queries";
 
@@ -30,6 +31,7 @@ export async function saveGroupAction(_prev: ActionState, formData: FormData): P
   for (const k of GROUP_FIELDS) values[k] = str(formData, k);
   values.description = cleanText(String(formData.get("description") ?? ""));
   values.rules = cleanText(String(formData.get("rules") ?? ""));
+  values.rulesChangeNote = cleanText(String(formData.get("rulesChangeNote") ?? ""));
   values.discoverable = formData.get("discoverable") === "on" ? "on" : "";
 
   return runAction(async () => {
@@ -95,7 +97,11 @@ export async function saveGroupAction(_prev: ActionState, formData: FormData): P
       // SAF07: Regeländerung nachvollziehbar – geänderter Text braucht neue Fassung.
       if (current.rules !== values.rules && current.rulesVersion === values.rulesVersion)
         fieldErrors.rulesVersion = "Die Regeln wurden geändert. Bitte gib eine neue Fassung an.";
+      // Mitglieder sehen vor der erneuten Bestätigung, was sich geändert hat.
+      if (current.rulesVersion !== values.rulesVersion && values.rulesChangeNote.length < 10)
+        fieldErrors.rulesChangeNote = "Bitte fasse für die Mitglieder kurz zusammen, was sich geändert hat (mindestens 10 Zeichen).";
     }
+    if (values.rulesChangeNote.length > 600) fieldErrors.rulesChangeNote = "Höchstens 600 Zeichen.";
 
     if (Object.keys(fieldErrors).length > 0) return fail("Bitte prüfe die markierten Angaben.", { fieldErrors, values });
 
@@ -109,6 +115,8 @@ export async function saveGroupAction(_prev: ActionState, formData: FormData): P
       type,
       discoverable,
       moderatorAccountId: values.moderatorAccountId,
+      // Neue Fassung → neue Zusammenfassung; sonst bleibt die bisherige Notiz erhalten.
+      ...(current && current.rulesVersion !== values.rulesVersion ? { rulesChangeNote: values.rulesChangeNote } : {}),
     };
 
     let id: string;
@@ -236,6 +244,8 @@ export async function removeMemberAction(_prev: ActionState, formData: FormData)
         .where(and(eq(groupMemberships.id, membershipId), eq(groupMemberships.status, "active")))
         .returning({ id: groupMemberships.id, accountId: groupMemberships.accountId, groupId: groupMemberships.groupId, version: groupMemberships.version });
       if (!m) return null;
+      // MSG08: Gruppenentzug invalidiert wartende Hinweise und Zustellaufträge zu Gruppenbeiträgen.
+      await retireGroupNotifications(tx, m.accountId, m.groupId);
       await audit(
         { actorId: viewer.accountId, actorRole: "admin", action: "group.membership.removed", objectType: "group_membership", objectId: m.id },
         tx,

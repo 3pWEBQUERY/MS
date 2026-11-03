@@ -10,6 +10,7 @@ import { actionStaff } from "../../auth/viewer";
 import { db } from "../../db";
 import { erasureTasks, privacyRequests } from "../../db/schema";
 import { enqueue } from "../../outbox";
+import { TICKET_RE } from "./mfa-recovery";
 
 /**
  * S58 Datenschutzaufträge (PRI06, PRI08): getrennte Berechtigung «privacy_officer»,
@@ -74,7 +75,8 @@ export async function setExceptionAction(_prev: ActionState, formData: FormData)
     if (!until || Number.isNaN(until.getTime()) || until.getTime() <= Date.now())
       errors.until = "Bitte wähle ein Enddatum in der Zukunft.";
     else if (until.getTime() > max) errors.until = "Ausnahmen gelten höchstens ein Jahr und werden danach erneut geprüft.";
-    if (!values.ticket) errors.ticket = "Bitte gib die Vorgangs- oder Ticketnummer an.";
+    // Ticket-Referenz statt Freitext im Audit (PRI07)
+    if (!TICKET_RE.test(values.ticket)) errors.ticket = "Ticket-Referenz: 3–40 Zeichen, ohne Leerzeichen (z. B. DS-2026-014).";
     if (Object.keys(errors).length > 0) return fail("Bitte prüfe die markierten Angaben.", { fieldErrors: errors, values });
 
     await db.transaction(async (tx) => {
@@ -83,7 +85,7 @@ export async function setExceptionAction(_prev: ActionState, formData: FormData)
         .set({ exceptionNote: note, exceptionUntil: until, handledBy: officer.accountId })
         .where(eq(privacyRequests.id, req.id));
       await audit(
-        { actorId: officer.accountId, actorRole: ROLE, action: "privacy.exception.set", objectType: "privacy_request", objectId: req.id, ticket: values.ticket.slice(0, 60) },
+        { actorId: officer.accountId, actorRole: ROLE, action: "privacy.exception.set", objectType: "privacy_request", objectId: req.id, ticket: values.ticket },
         tx,
       );
     });

@@ -451,7 +451,16 @@ export function FormMessage({ state, className }: { state: ActionState; classNam
   );
 }
 
-/** Warnt beim Verlassen mit ungespeicherten Eingaben (PRD 04). */
+/** Ereignis, mit dem z. B. die Sitzungswarnung Entwürfe bewusst verwirft (keine Rückfrage beim Abmelden). */
+export const DISCARD_DRAFTS_EVENT = "ms:discard-drafts";
+
+const LEAVE_PROMPT = "Du hast ungespeicherte Eingaben. Möchtest du die Seite trotzdem verlassen? Nicht gespeicherte Eingaben gehen verloren.";
+
+/**
+ * Warnt beim Verlassen mit ungespeicherten Eingaben (PRD 04 «Gemeinsame Zustände»): beim Schliessen
+ * oder Neuladen (beforeunload) und bei Links innerhalb der Plattform. Nach dem Absenden oder bei
+ * automatischer Abmeldung (DISCARD_DRAFTS_EVENT) entfällt die Rückfrage.
+ */
 export function UnsavedChangesGuard({ formId }: { formId: string }) {
   const dirty = useRef(false);
   useEffect(() => {
@@ -461,14 +470,34 @@ export function UnsavedChangesGuard({ formId }: { formId: string }) {
     const clear = () => (dirty.current = false);
     form.addEventListener("input", mark);
     form.addEventListener("submit", clear);
+    document.addEventListener(DISCARD_DRAFTS_EVENT, clear);
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
       if (dirty.current) e.preventDefault();
     };
+    // Vor dem Link-Handler von Next.js (Capture-Phase am Dokument): Navigation nur nach Bestätigung.
+    const onClick = (e: MouseEvent) => {
+      if (!dirty.current || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const link = (e.target as Element | null)?.closest?.("a[href]");
+      if (!(link instanceof HTMLAnchorElement)) return;
+      if (link.target === "_blank" || link.hasAttribute("download") || link.origin !== window.location.origin) return;
+      // Bewusstes Verwerfen ohne Rückfrage, z. B. «Überspringen» beim Check-in (US03: keine Warnung).
+      if (link.hasAttribute("data-discard")) return;
+      if (link.pathname === window.location.pathname && link.search === window.location.search) return;
+      if (window.confirm(LEAVE_PROMPT)) {
+        dirty.current = false;
+        return;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    };
     window.addEventListener("beforeunload", onBeforeUnload);
+    document.addEventListener("click", onClick, true);
     return () => {
       form.removeEventListener("input", mark);
       form.removeEventListener("submit", clear);
+      document.removeEventListener(DISCARD_DRAFTS_EVENT, clear);
       window.removeEventListener("beforeunload", onBeforeUnload);
+      document.removeEventListener("click", onClick, true);
     };
   }, [formId]);
   return null;

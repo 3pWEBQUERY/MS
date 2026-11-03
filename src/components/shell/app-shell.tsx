@@ -72,20 +72,32 @@ async function ShellUser({ placement }: { placement: "sidebar" | "topbar" }) {
   );
 }
 
+/**
+ * Mobil: Nachrichtenindikator führt direkt zu den Gesprächen, Glocke zu den Mitteilungen (PRD 04
+ * «Informationsarchitektur»). Touchflächen 44 × 44px (A03); Anzahl als Text für Screenreader.
+ */
 async function MobileCounts() {
   const viewer = await getViewer();
   if (!viewer?.verified) return null;
   const counts = await getShellCounts(viewer);
-  const total = counts.notifications;
+  const items = [
+    { href: "/community/gespraeche", icon: "chat" as const, count: counts.conversations, label: "Gespräche", unread: "mit neuen Nachrichten" },
+    { href: "/mitteilungen", icon: "bell" as const, count: counts.notifications, label: "Mitteilungen", unread: "ungelesen" },
+  ];
   return (
-    <Link
-      href="/mitteilungen"
-      className="relative inline-flex size-10 items-center justify-center rounded-[10px] text-ink hover:bg-sunk"
-      aria-label={total > 0 ? `Mitteilungen, ${total} ungelesen` : "Mitteilungen"}
-    >
-      <Icon name="bell" className="size-5" />
-      {total > 0 && <span className="absolute right-2 top-2 size-2.5 rounded-full bg-accent" aria-hidden="true" />}
-    </Link>
+    <>
+      {items.map((i) => (
+        <Link
+          key={i.href}
+          href={i.href}
+          className="relative inline-flex size-[44px] shrink-0 items-center justify-center rounded-[11px] text-ink hover:bg-sunk"
+          aria-label={i.count > 0 ? `${i.label}, ${i.count} ${i.unread}` : i.label}
+        >
+          <Icon name={i.icon} className="size-5" />
+          {i.count > 0 && <span className="absolute right-2 top-2 size-2.5 rounded-full bg-accent" aria-hidden="true" />}
+        </Link>
+      ))}
+    </>
   );
 }
 
@@ -124,20 +136,21 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-col">
         <DemoBanner />
         {/* Kopfzeile – Mobil */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-line bg-bg px-4 lg:hidden">
-          <Logo href="/heute" />
-          <div className="flex items-center gap-1">
+        {/* Ab 320px ohne horizontales Scrollen (A02): Bedienelemente in festen 44px, Wortmarke weicht zuerst. */}
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-2 border-b border-line bg-bg px-4 lg:hidden">
+          <Logo href="/heute" className="min-w-0 shrink overflow-hidden max-[419px]:[&>span]:sr-only" />
+          <div className="flex shrink-0 items-center gap-1">
             <Link
               href="/sicherheit"
-              className="inline-flex h-10 items-center gap-1.5 rounded-[10px] px-2.5 text-sm font-semibold text-danger hover:bg-danger-soft"
+              className="inline-flex h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-[11px] px-2.5 text-sm font-semibold text-danger hover:bg-danger-soft"
             >
               <Icon name="lifebuoy" className="size-5" />
               <span className="sr-only sm:not-sr-only">Akute Hilfe</span>
             </Link>
-            <Suspense fallback={<div className="size-10" />}>
+            <Suspense fallback={<div className="h-[44px] w-[92px]" />}>
               <MobileCounts />
             </Suspense>
-            <Suspense fallback={<div className="size-10 rounded-[10px] bg-sunk" />}>
+            <Suspense fallback={<div className="size-[44px] rounded-[11px] bg-sunk" />}>
               <ShellUser placement="topbar" />
             </Suspense>
           </div>

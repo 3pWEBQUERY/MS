@@ -60,6 +60,29 @@ export const VERIFY_METHODS = [
 ] as const;
 export const verifyMethodLabel = (c: string) => VERIFY_METHODS.find(([k]) => k === c)?.[1] ?? c;
 
+/**
+ * CON05: Medizinische und sozialrechtliche Leistungsangaben brauchen die passende Fachprüfung.
+ * Themen «Recht/Sozialversicherungen» und «Finanzen/Versicherungen» → Fachprüfung Sozialversicherungen
+ * und Recht; «Therapie und Rehabilitation» → Fachprüfung Medizin.
+ */
+const EXPERT_BY_TOPIC: Record<string, "expert_social" | "expert_medical"> = {
+  recht: "expert_social",
+  finanzen: "expert_social",
+  therapie: "expert_medical",
+};
+
+export function requiredExpertMethods(topicSlugs: readonly string[]): ("expert_social" | "expert_medical")[] {
+  return [...new Set(topicSlugs.map((t) => EXPERT_BY_TOPIC[t]).filter((m): m is "expert_social" | "expert_medical" => Boolean(m)))].sort();
+}
+
+/** Fehlende Fachprüfungen anhand gültiger Prüfnachweise (Verfahren mit nächstem Termin in der Zukunft). */
+export function missingExpertMethods(topicSlugs: readonly string[], validMethods: readonly string[]): string[] {
+  return requiredExpertMethods(topicSlugs).filter((m) => !validMethods.includes(m));
+}
+
+/** SAF06/PRD 09: Kritische Kontaktwege nur mit fachlicher Verifikation (Krisenintervention oder Medizin). */
+export const SAFETY_EXPERT_METHODS = ["expert_crisis", "expert_medical"] as const;
+
 /** Fristen */
 export const ARTICLE_REVIEW_MAX_MONTHS = 12; // CON03
 export const OFFER_REVIEW_MAX_MONTHS = 6; // CON05

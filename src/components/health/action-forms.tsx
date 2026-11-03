@@ -1,10 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
 import { ButtonLink } from "@/components/ui/button";
 import { FormMessage, SubmitButton } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
-import { idle, type ActionState } from "@/lib/action-state";
+import type { ActionState } from "@/lib/action-state";
+import { useHealthAction } from "./use-health-action";
 
 type Action = (prev: ActionState, formData: FormData) => Promise<ActionState>;
 
@@ -12,14 +12,24 @@ type Action = (prev: ActionState, formData: FormData) => Promise<ActionState>;
  * S08: zwei gleichwertige Aktionen (PRI01, US10). Gleiche Gestaltung, keine Vorauswahl,
  * kein Druck. Getrennte Formulare, damit jeweils nur der gedrückte Button «lädt».
  */
-export function HealthDecisionForms({ action, alreadyDeclined }: { action: Action; alreadyDeclined: boolean }) {
-  const [state, formAction] = useActionState(action, idle);
+export function HealthDecisionForms({
+  action,
+  alreadyDeclined,
+  next,
+}: {
+  action: Action;
+  alreadyDeclined: boolean;
+  /** Geprüftes Rückkehrziel nach der Zustimmung (z. B. Check-in) */
+  next?: string | null;
+}) {
+  const [state, formAction] = useHealthAction(action);
   return (
     <div className="flex flex-col gap-4">
       <FormMessage state={state} />
       <div className="grid gap-3 sm:grid-cols-2">
         <form action={formAction}>
           <input type="hidden" name="decision" value="granted" />
+          {next && <input type="hidden" name="weiter" value={next} />}
           <SubmitButton variant="secondary" size="lg" className="w-full" pendingText="Wird aktiviert …">
             Aktivieren
           </SubmitButton>
@@ -53,7 +63,7 @@ export function ConfirmDeleteForm({
   label: string;
   cancelHref: string;
 }) {
-  const [state, formAction] = useActionState(action, idle);
+  const [state, formAction] = useHealthAction(action);
   return (
     <form action={formAction} className="flex flex-col gap-4">
       {Object.entries(hidden).map(([k, v]) => (
@@ -74,7 +84,7 @@ export function ConfirmDeleteForm({
 
 /** Eigene Symptombezeichnung aus der Auswahl entfernen (DIA05). */
 export function RemoveSymptomForm({ action, id, label }: { action: Action; id: string; label: string }) {
-  const [state, formAction] = useActionState(action, idle);
+  const [state, formAction] = useHealthAction(action);
   return (
     <form action={formAction} className="flex flex-col items-start gap-2 sm:items-end">
       <input type="hidden" name="id" value={id} />

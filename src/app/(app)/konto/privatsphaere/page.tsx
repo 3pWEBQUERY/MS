@@ -8,6 +8,7 @@ import { formatDate, formatDateTime } from "@/lib/time";
 import { requireViewer } from "@/server/auth/viewer";
 import { getConsentOverview, healthWithdrawnAt, type ConsentEntry, type ConsentPurpose } from "@/server/modules/account/consents";
 import { healthScope } from "@/server/modules/privacy/erasure";
+import { healthDeleteBy } from "@/server/modules/privacy/retention-rules";
 import { AnalyticsConsentForm, HealthConsentForm } from "./consent-forms";
 
 export const metadata: Metadata = { title: "Privatsphäre und Einwilligungen", robots: { index: false } };
@@ -102,7 +103,7 @@ async function Privacy() {
   const withdrawnAt = healthWithdrawnAt(entries);
   const scope = withdrawnAt ? await healthScope(viewer.accountId) : null;
   const hasHealthData = scope ? scope.checkIns + scope.entries + scope.definitions > 0 : false;
-  const deleteBy = withdrawnAt ? new Date(withdrawnAt.getTime() + 30 * 864e5) : null;
+  const deleteBy = withdrawnAt ? healthDeleteBy(withdrawnAt) : null;
 
   return (
     <div className="flex flex-col gap-10">

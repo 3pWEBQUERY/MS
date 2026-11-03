@@ -83,7 +83,7 @@ export const PRIORITY_TARGET: Record<Priority, string> = {
   P3: "Bearbeitung binnen 3 Betriebstagen",
 };
 
-export const OPERATING_HOURS_NOTE = "Betriebszeit täglich 09–18 Uhr (Europe/Zurich). Fristen werden vereinfacht in Kalenderzeit berechnet.";
+export const OPERATING_HOURS_NOTE = "Betriebszeit täglich 09–18 Uhr (Europe/Zurich). Fristen zählen nur Betriebszeit; Eingänge ausserhalb beginnen mit dem nächsten Dienstbeginn.";
 
 export const REPORT_REASON_LABEL: Record<string, string> = {
   harassment: "Belästigung",

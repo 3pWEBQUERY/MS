@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
+import { UsefulActionSlot } from "@/components/analytics/useful-action-slot";
 import { BookmarkSlot } from "@/components/content/bookmark-slot";
 import { ArticleCardLink, VerifiedBadge } from "@/components/content/cards";
 import { PageContainer } from "@/components/content/page-container";
@@ -162,6 +163,10 @@ async function ArticleContent({ params }: { params: PageProps<"/wissen/[slug]">[
           <Card className="flex flex-col gap-4">
             <Suspense fallback={<Skeleton className="h-10 w-40 rounded-[10px]" />}>
               <BookmarkSlot targetType="article" targetId={article.id} returnTo={returnTo} />
+            </Suspense>
+            <Suspense fallback={null}>
+              {/* PRD 15: nur mit Einwilligung, ohne Objekt-ID */}
+              <UsefulActionSlot action="article_opened" />
             </Suspense>
             <Link
               href={`/kontakt?ref=article&id=${article.id}`}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { ButtonLink, Button } from "@/components/ui/button";
 import {
   CountedTextarea,
@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
 import { Notice } from "@/components/ui/primitives";
-import { idle, type ActionState } from "@/lib/action-state";
+import type { ActionState } from "@/lib/action-state";
+import { useHealthAction } from "./use-health-action";
 import { ENERGY_SCALE, FATIGUE_SCALE, MOOD_SCALE } from "@/lib/catalog";
 import { formatDate } from "@/lib/time";
 import { HEALTH_LIMITS } from "@/server/modules/health/validation";
@@ -60,7 +61,7 @@ export function CheckInForm({
   minDate: string;
   timezoneLabel: string;
 }) {
-  const [state, formAction] = useActionState(action, idle);
+  const [state, formAction] = useHealthAction(action);
   const fe = state.fieldErrors ?? {};
   const v = state.values ?? {};
   const [showNote, setShowNote] = useState(Boolean(initial.note));
@@ -188,7 +189,7 @@ export function CheckInForm({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <SubmitButton size="lg">{mode === "create" ? "Check-in speichern" : "Änderungen speichern"}</SubmitButton>
         {mode === "create" ? (
-          <ButtonLink href="/heute" variant="ghost" size="lg">
+          <ButtonLink href="/heute" variant="ghost" size="lg" data-discard>
             Überspringen
           </ButtonLink>
         ) : (

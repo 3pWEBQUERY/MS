@@ -54,7 +54,7 @@ export function MonthCalendar({
       <div className="flex items-center justify-between gap-3">
         <Link
           href={hrefForMonth(prev)}
-          className="inline-flex h-10 items-center gap-1.5 rounded-[10px] px-2 text-sm font-semibold text-ink-2 hover:bg-sunk hover:text-ink"
+          className="inline-flex h-11 items-center gap-1.5 rounded-[11px] px-2 text-sm font-semibold text-ink-2 hover:bg-sunk hover:text-ink"
         >
           <Icon name="arrow-left" className="size-4" />
           <span>
@@ -68,7 +68,7 @@ export function MonthCalendar({
         {hasNext ? (
           <Link
             href={hrefForMonth(next)}
-            className="inline-flex h-10 items-center gap-1.5 rounded-[10px] px-2 text-sm font-semibold text-ink-2 hover:bg-sunk hover:text-ink"
+            className="inline-flex h-11 items-center gap-1.5 rounded-[11px] px-2 text-sm font-semibold text-ink-2 hover:bg-sunk hover:text-ink"
           >
             <span>
               <span className="sr-only">Nächster Monat: </span>

@@ -37,7 +37,12 @@ export function EntryList({ entries, compact = false }: { entries: EntrySummary[
               {e.values.length > 0 && (
                 <span className="break-words text-base text-ink-2">{e.values.join(" · ")}</span>
               )}
-              {e.hasNote && <span className="text-sm text-ink-2">Mit Notiz</span>}
+              {e.hasNote && (
+                // Optionale Metadaten – in der einfachen Ansicht ausgeblendet (HOM06)
+                <span className="text-sm text-ink-2" data-optional>
+                  Mit Notiz
+                </span>
+              )}
             </span>
             <Icon name="chevron-right" className="mt-2.5 size-5 shrink-0 text-ink-3 group-hover:text-ink" />
           </Link>

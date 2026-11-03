@@ -9,7 +9,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Card, KeyValue, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
 import { addDays, formatDate, formatDateTime, localDateString } from "@/lib/time";
-import { updateCheckInAction } from "@/server/modules/health/actions";
+import { updateCheckInAction } from "@/server/modules/health/checkin-actions";
 import { requireHealthViewer, timezoneLabel } from "@/server/modules/health/guard";
 import { getCheckInByDate } from "@/server/modules/health/queries";
 import { formatOffset, HEALTH_LIMITS } from "@/server/modules/health/validation";

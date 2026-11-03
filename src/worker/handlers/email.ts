@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { decrypt } from "@/server/crypto";
 import { db } from "@/server/db";
 import { accounts } from "@/server/db/schema";
-import { sendMail } from "@/server/mailer";
+import { sendMail, type SecurityNoticeWhat } from "@/server/mailer";
 import type { Handler } from "../types";
 
 /** Transaktionsmails aus der Outbox. Empfänger und Link liegen verschlüsselt im Payload. */
@@ -22,12 +22,27 @@ export const emailHandlers: Record<string, Handler> = {
     let to: string | null = payload.toEncrypted ? decrypt(String(payload.toEncrypted)) : null;
     if (!to) {
       const [acc] = await db.select({ email: accounts.email, status: accounts.status }).from(accounts).where(eq(accounts.id, aggregateId));
-      if (!acc || acc.status === "deleted") return;
+      // ACC08: Status vor dem Versand erneut prüfen – keine Hinweise an deaktivierte Konten
+      if (!acc || acc.status === "deleted" || acc.status === "deletion_pending") return;
       to = acc.email;
     }
     await sendMail(to, {
       kind: "security_notice",
-      what: (payload.what as "email_changed" | "password_changed" | "mfa_changed" | "new_login") ?? "password_changed",
+      what: (payload.what as SecurityNoticeWhat | undefined) ?? "password_changed",
+    });
+  },
+  // PRD 11: Vorwarnung vor Löschung wegen Inaktivität – nur solange das Konto weiterhin inaktiv ist
+  "email.inactivity_notice": async ({ aggregateId, payload }) => {
+    const [acc] = await db
+      .select({ status: accounts.status, lastActiveAt: accounts.lastActiveAt, noticeAt: accounts.inactivityNoticeAt })
+      .from(accounts)
+      .where(eq(accounts.id, aggregateId));
+    if (!acc || acc.status === "deleted" || acc.status === "deletion_pending" || !acc.noticeAt) return;
+    if (acc.lastActiveAt && acc.lastActiveAt > acc.noticeAt) return;
+    await sendMail(decrypt(String(payload.toEncrypted)), {
+      kind: "inactivity_notice",
+      deleteOn: String(payload.deleteOn ?? ""),
+      link: String(payload.link ?? ""),
     });
   },
   "email.deletion_receipt": async ({ payload }) => {

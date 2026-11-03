@@ -40,10 +40,28 @@ export const DEFAULT_MOMENT_CONFIG: MomentConfig = {
   ],
 };
 
-/** Liefert höchstens drei gültige Ziele für eine Absicht. */
-export function resolveMoment(config: MomentConfig, intent: MomentIntent, opts: { healthActive: boolean; healthDeclined: boolean }) {
+export type MomentOptions = {
+  healthActive: boolean;
+  healthDeclined: boolean;
+  /** Gesundheits-Schreiben eingeschaltet (HOM08); false blendet Erfassungsziele aus */
+  healthWritable?: boolean;
+};
+
+/**
+ * Liefert höchstens drei gültige Ziele für eine Absicht (HOM02). Nicht gültig sind Ziele, die
+ * den abgelehnten bzw. widerrufenen Gesundheitsbereich voraussetzen oder deren Funktion im
+ * Teilbetrieb abgeschaltet ist – sie erscheinen nicht, statt ins Leere zu führen. Ohne
+ * Entscheidung führt ein Gesundheitsziel zuerst zu S08 und danach direkt zum Ziel.
+ */
+export function resolveMoment(config: MomentConfig, intent: MomentIntent, opts: MomentOptions): MomentTarget[] {
   return (config[intent] ?? [])
-    .filter((t) => (t.requires === "health" ? !opts.healthDeclined || opts.healthActive : true))
+    .filter((t) => {
+      if (t.requires !== "health") return true;
+      if (opts.healthActive) return opts.healthWritable !== false;
+      return !opts.healthDeclined;
+    })
     .slice(0, 3)
-    .map((t) => (t.requires === "health" && !opts.healthActive ? { ...t, href: "/mein-ms/aktivieren" } : t));
+    .map((t) =>
+      t.requires === "health" && !opts.healthActive ? { ...t, href: `/mein-ms/aktivieren?weiter=${encodeURIComponent(t.href)}` } : t,
+    );
 }

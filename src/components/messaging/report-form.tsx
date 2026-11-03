@@ -62,6 +62,9 @@ export function ReportForm({
             Person erfährt nicht, wer gemeldet hat.
           </p>
         </div>
+        {typeof state.data.nextServiceStart === "string" && (
+          <OutsideHoursNotice next={state.data.nextServiceStart} hours={String(state.data.operatingHours ?? "")} />
+        )}
         <div className="flex flex-wrap gap-2">
           <ButtonLink href="/meldungen" variant="primary">
             Meine Meldungen
@@ -199,6 +202,25 @@ const REASON_HINTS: Record<string, string> = {
   acute_danger: "Jemand ist unmittelbar in Gefahr",
   other: "Etwas anderes, das gegen die Regeln verstösst",
 };
+
+/**
+ * Kapitel 10: Ausserhalb der Betriebszeit nennt die automatische Eingangsbestätigung den nächsten
+ * Dienstbeginn und verweist unabhängig davon auf Sicherheit und akute Hilfe (S49).
+ */
+function OutsideHoursNotice({ next, hours }: { next: string; hours: string }) {
+  return (
+    <Notice tone="info" icon="clock" title="Die Moderation ist gerade nicht im Dienst">
+      <p>
+        Deine Meldung ist sicher eingegangen. Die Moderation ist {hours || "zu festen Zeiten"} im Dienst. Nächster Dienstbeginn:{" "}
+        <strong>{next}</strong> (Schweizer Zeit).
+      </p>
+      <p className="mt-1">
+        Wenn jemand in Gefahr ist, warte nicht: Ruf <a href="tel:144">144</a> an. Weitere sofort erreichbare Hilfewege findest du
+        unter <Link href="/sicherheit">Sicherheit und akute Hilfe</Link>.
+      </p>
+    </Notice>
+  );
+}
 
 function AcuteNotice() {
   return (

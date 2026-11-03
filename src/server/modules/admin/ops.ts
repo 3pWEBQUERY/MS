@@ -6,6 +6,7 @@ import { deliveryJobs, featureFlags, outboxEvents, securityEvents } from "../../
 import { FLAGS, type FlagKey } from "../../flags";
 import { storageConfigured, storageHealthy } from "../../storage";
 import { pseudonymsFor } from "./common";
+import { currentAlarms, lastWorkerHeartbeat } from "./ops-alarms";
 
 /**
  * S60 Betrieb und Konfiguration (HOM08, MSG08, NFR16, NFR19, US26).
@@ -158,7 +159,8 @@ export async function systemStatus() {
   const configured = storageConfigured();
   const storageOk = configured ? await withTimeout(storageHealthy(), 3000, false) : false;
 
-  // Näherung: jüngste Statusänderung durch den Arbeiter (Sperre oder Abschluss).
+  // Lebenszeichen des Arbeiters (NFR16); Rückfall: jüngste Statusänderung in der Outbox.
+  const [heartbeat, alarms] = await Promise.all([lastWorkerHeartbeat().catch(() => null), currentAlarms().catch(() => [])]);
   const [worker] = await db
     .select({
       last: dsql<Date | null>`greatest(max(${outboxEvents.lockedAt}), max(${outboxEvents.updatedAt}) filter (where ${outboxEvents.status} <> 'pending'))`,
@@ -175,7 +177,9 @@ export async function systemStatus() {
     storageConfigured: configured,
     storageOk,
     smtpConfigured: Boolean(env.mail.host()),
-    lastWorkerActivity: worker?.last ? new Date(worker.last) : null,
+    lastWorkerActivity: heartbeat?.beatAt ?? (worker?.last ? new Date(worker.last) : null),
+    workerHeartbeat: Boolean(heartbeat),
+    alarms,
     deniedLast24h: Number(sec?.c ?? 0),
   };
 }

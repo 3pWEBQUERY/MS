@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { RulesGate } from "@/components/community/rules-gate";
 import { ConfirmAction } from "@/components/messaging/action-form";
 import { ChatView } from "@/components/messaging/chat-view";
 import { StatusNotice } from "@/components/messaging/status-notice";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
+import { COMMUNITY_RULES_VERSION } from "@/lib/catalog";
 import { recordDenied } from "@/server/audit";
 import { requireViewer } from "@/server/auth/viewer";
 import { isEnabled } from "@/server/flags";
@@ -55,7 +57,8 @@ async function Conversation({
 
   // Die blockierte Seite sieht nur «nicht mehr aktiv» – keine Offenlegung der Blockierung (SAF01).
   const shownState = access.state === "blocked" && !access.blockedByMe ? "closed" : access.state;
-  const canSend = access.state === "active" && chatEnabled && !viewer.writeSuspended && !beforeSeq;
+  const rulesCurrent = viewer.rulesAcceptedVersion === COMMUNITY_RULES_VERSION;
+  const canSend = access.state === "active" && chatEnabled && !viewer.writeSuspended && !beforeSeq && rulesCurrent;
   const reportHref = `/melden?typ=message&gespraech=${access.id}`;
 
   return (
@@ -122,6 +125,11 @@ async function Conversation({
           </Notice>
         )}
 
+        {access.state === "active" && !rulesCurrent && (
+          // SAF07: vor dem Schreiben aktuelle Community-Regeln bestätigen; Lesen bleibt möglich.
+          <RulesGate version={COMMUNITY_RULES_VERSION} acceptedVersion={viewer.rulesAcceptedVersion} />
+        )}
+
         {(hasOlder || beforeSeq) && (
           <div className="flex flex-wrap gap-2">
             {hasOlder && items[0] && (
@@ -152,6 +160,24 @@ async function Conversation({
             keine Lesebestätigungen oder Online-Anzeigen.
           </p>
         )}
+
+        {/* MSG05: keine Ende-zu-Ende-Verschlüsselung verständlich erklärt; MSG06: Screenshots nicht rückholbar. */}
+        <Notice tone="neutral" icon="lock" title="Wie vertraulich ist dieses Gespräch?">
+          <ul className="flex list-disc flex-col gap-1 pl-5">
+            <li>
+              Nachrichten werden verschlüsselt übertragen und verschlüsselt gespeichert. Es gibt aber keine
+              Ende-zu-Ende-Verschlüsselung: Die Schlüssel verwaltet die Plattform, nicht dein Gerät.
+            </li>
+            <li>
+              Mitarbeitende können Gespräche nicht durchsuchen. Die Moderation sieht nur Nachrichten, die gemeldet wurden – höchstens
+              zehn ausgewählte.
+            </li>
+            <li>
+              Du kannst eigene Nachrichten für beide Seiten entfernen. Screenshots oder Kopien, die jemand bereits gemacht hat, lassen
+              sich technisch nicht zurückholen.
+            </li>
+          </ul>
+        </Notice>
       </div>
     </div>
   );

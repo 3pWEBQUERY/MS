@@ -21,6 +21,16 @@ export function HealthInactiveNotice({ hasData }: { hasData: boolean }) {
   );
 }
 
+/** Bestätigung nach S08 (erst nach Serverbestätigung, HOM07). */
+export function ActivatedNotice() {
+  return (
+    <Notice tone="success" role="status" title="Der Gesundheitsbereich ist aktiviert">
+      Nur du siehst deine Einträge. Du kannst die Einwilligung jederzeit unter{" "}
+      <Link href="/konto/privatsphaere">Privatsphäre</Link> widerrufen.
+    </Notice>
+  );
+}
+
 /** Teilbetrieb (HOM08): Gesundheits-Schreiben abgeschaltet, Lesen bleibt möglich. */
 export function WriteDisabledNotice() {
   return (

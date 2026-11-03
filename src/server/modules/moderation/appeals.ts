@@ -6,7 +6,7 @@ import { decrypt } from "../../crypto";
 import { db } from "../../db";
 import { appeals, moderationActions, moderationCases } from "../../db/schema";
 import { isUuid, pseudonymsFor, staffWithRoles } from "../admin/common";
-import { APPEAL_TARGET_MS, caseDeciders, isLead, moderationRole } from "./cases";
+import { appealAnswerBy, caseDeciders, isLead, moderationRole } from "./cases";
 
 /**
  * Einsprüche – Mitarbeitendenseite (SAF05, US20, AT07). Die Prüfung erfolgt durch eine andere
@@ -44,7 +44,7 @@ export async function listAppeals(viewer: Viewer, scope: AppealScope) {
     rows: rows.map((r) => ({
       ...r,
       reviewer: r.assignedReviewerId ? (names.get(r.assignedReviewerId) ?? "Mitarbeitende Person") : null,
-      answerBy: new Date(r.createdAt.getTime() + APPEAL_TARGET_MS),
+      answerBy: appealAnswerBy(r.createdAt),
     })),
   };
 }
@@ -138,7 +138,7 @@ export async function getAppealForStaff(viewer: Viewer, appealId: string, route?
     decisionNote: a.decisionNote,
     decidedAt: a.decidedAt,
     createdAt: a.createdAt,
-    answerBy: new Date(a.createdAt.getTime() + APPEAL_TARGET_MS),
+    answerBy: appealAnswerBy(a.createdAt),
     reviewerId: a.assignedReviewerId,
     reviewer: a.assignedReviewerId ? (names.get(a.assignedReviewerId) ?? "Mitarbeitende Person") : null,
     viewerIsReviewer: assigned,

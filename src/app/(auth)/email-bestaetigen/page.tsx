@@ -62,7 +62,7 @@ async function VerifyContent({ searchParams }: { searchParams: PageProps<"/email
       </div>
       <AuthHeading title="Schau in dein Postfach">
         Wir haben dir einen Bestätigungslink gesendet, sofern zu dieser Adresse noch kein Konto besteht. Der Link ist 24
-        Stunden gültig.
+        Stunden gültig. Danach meldest du dich mit E-Mail-Adresse und Passwort an.
       </AuthHeading>
       <div className="flex flex-col gap-6">
         <Notice tone="neutral" title="Keine E-Mail erhalten?">

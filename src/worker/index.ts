@@ -5,6 +5,7 @@
  * – prüft Rechte und aktuellen Status vor jeder Ausführung erneut (in den Handlern)
  */
 import { sql as dsql } from "drizzle-orm";
+import { redactLogText } from "@/lib/log-safety";
 import { db, sql } from "@/server/db";
 import { HANDLERS, PERIODIC } from "./registry";
 
@@ -51,6 +52,8 @@ async function processOne(ev: Claimed) {
       where id = ${ev.id}`);
     // Nur technischer Fehlercode, keine Inhalte (NFR15)
     console.error(`[worker] ${ev.type} ${ev.id} Versuch ${ev.attempts} fehlgeschlagen: ${code}${dead ? " → Fehlerwarteschlange" : ""}`);
+    // NFR19: Alarm nach ausgeschöpften Versuchen (zusätzlich zur periodischen Prüfung in handlers/ops.ts)
+    if (dead) console.error(`[alarm] code=outbox_dead_letter typ=${ev.type}`);
   }
 }
 
@@ -69,7 +72,7 @@ async function runPeriodic(lastRun: Map<string, number>) {
         await db.execute(dsql`select pg_advisory_unlock(hashtext(${task.name}))`);
       }
     } catch (err) {
-      console.error(`[worker] periodisch ${task.name} fehlgeschlagen: ${err instanceof Error ? err.name + " " + err.message.slice(0, 120) : "error"}`);
+      console.error(`[worker] periodisch ${task.name} fehlgeschlagen: ${err instanceof Error ? err.name + " " + redactLogText(err, 120) : "error"}`);
     }
   }
 }

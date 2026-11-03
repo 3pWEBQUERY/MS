@@ -18,7 +18,7 @@ import {
   sanctions,
 } from "../../db/schema";
 import { actorRoleFor, isUuid, pseudonymsFor, staffWithRoles } from "../admin/common";
-import { PRIORITY_DUE_MS } from "./reports";
+import { addOperatingTime, APPEAL_TARGET_OPERATING_MS, PRIORITY_OPERATING_MS, SECOND_APPROVAL_OPERATING_MS } from "./operating-hours";
 
 /**
  * Fallbearbeitung für Mitarbeitende (SAF03, S52, S53, Kapitel 10).
@@ -28,17 +28,22 @@ import { PRIORITY_DUE_MS } from "./reports";
 
 /* ───────────── Fristen und Prioritäten (Kapitel 10) ───────────── */
 
-/** Reaktionsziele je Priorität (P0 30 min, P1 2 h, P2 24 h, P3 72 h) – gemeinsame Quelle mit reports.ts. */
-export const PRIORITY_WINDOW_MS: Record<Priority, number> = PRIORITY_DUE_MS;
+/** Reaktionsziele je Priorität in Betriebszeit (P0 30 min, P1 2 h, P2 1 Tag, P3 3 Tage) – gemeinsame Quelle mit reports.ts. */
+export const PRIORITY_WINDOW_MS: Record<Priority, number> = PRIORITY_OPERATING_MS;
 
+/** Frist ab Eingang, gezählt in Betriebszeit (Kapitel 10). */
 export function computeDueAt(priority: Priority, from: Date = new Date()): Date {
-  return new Date(from.getTime() + PRIORITY_WINDOW_MS[priority]);
+  return addOperatingTime(from, PRIORITY_WINDOW_MS[priority]);
 }
 
 /** Schwere Massnahmen: zweite Prüfung binnen 24 Betriebsstunden (SAF04). */
-export const SECOND_APPROVAL_WINDOW_MS = 24 * 60 * 60 * 1000;
+export const SECOND_APPROVAL_WINDOW_MS = SECOND_APPROVAL_OPERATING_MS;
+export const secondApprovalDueAt = (createdAt: Date) => addOperatingTime(createdAt, SECOND_APPROVAL_WINDOW_MS);
 /** Einspruch: vorgeschlagenes Antwortziel 5 Betriebstage (SAF05). */
-export const APPEAL_TARGET_MS = 5 * 24 * 60 * 60 * 1000;
+export const APPEAL_TARGET_MS = APPEAL_TARGET_OPERATING_MS;
+export const appealAnswerBy = (createdAt: Date) => addOperatingTime(createdAt, APPEAL_TARGET_MS);
+/** Einspruch bis 30 Tage nach dem Entscheid über die Oberfläche (SAF05). */
+export const APPEAL_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 /** Fristgebundene Beweislöschung nach Abschluss (Kapitel 10 «Verhältnismässiger Ablauf»). */
 export const EVIDENCE_RETENTION_MS = 180 * 24 * 60 * 60 * 1000;
 
@@ -161,7 +166,8 @@ export async function caseCounts(viewer: Viewer) {
     .select({
       priority: moderationCases.priority,
       total: count(),
-      overdue: dsql<number>`count(*) filter (where ${moderationCases.dueAt} < ${now.toISOString()}::timestamptz)`,
+      // Fristverletzung nur, solange das Reaktionsziel offen ist (P0–P2: noch im Eingang, P3: nicht entschieden).
+      overdue: dsql<number>`count(*) filter (where ${moderationCases.dueAt} < ${now.toISOString()}::timestamptz and (${moderationCases.priority} = 'P3' or ${moderationCases.status} = 'new'))`,
     })
     .from(moderationCases)
     .where(and(inArray(moderationCases.status, OPEN_STATUSES), scopeCond))
@@ -175,21 +181,26 @@ export async function caseCounts(viewer: Viewer) {
     .select({ c: count() })
     .from(moderationCases)
     .where(and(inArray(moderationCases.status, OPEN_STATUSES), isNull(moderationCases.assigneeId)));
-  const [approvals] = await db
-    .select({
-      c: count(),
-      overdue: dsql<number>`count(*) filter (where ${moderationActions.createdAt} < ${new Date(now.getTime() - SECOND_APPROVAL_WINDOW_MS).toISOString()}::timestamptz)`,
-    })
+  // Fristen in Betriebszeit lassen sich nicht in SQL ausdrücken – die offenen Vorgänge sind wenige.
+  const approvalRows = await db
+    .select({ createdAt: moderationActions.createdAt })
     .from(moderationActions)
-    .where(and(eq(moderationActions.requiresSecondApproval, 1), isNull(moderationActions.approvedAt)));
+    .where(and(eq(moderationActions.requiresSecondApproval, 1), isNull(moderationActions.approvedAt)))
+    .limit(1000);
   const appealScope = lead ? undefined : eq(appeals.assignedReviewerId, viewer.accountId);
-  const [openAppeals] = await db
-    .select({
-      c: count(),
-      overdue: dsql<number>`count(*) filter (where ${appeals.createdAt} < ${new Date(now.getTime() - APPEAL_TARGET_MS).toISOString()}::timestamptz)`,
-    })
+  const appealRows = await db
+    .select({ createdAt: appeals.createdAt })
     .from(appeals)
-    .where(and(inArray(appeals.status, ["open", "in_review"]), appealScope));
+    .where(and(inArray(appeals.status, ["open", "in_review"]), appealScope))
+    .limit(1000);
+  const approvals = {
+    c: approvalRows.length,
+    overdue: approvalRows.filter((a) => secondApprovalDueAt(a.createdAt) < now).length,
+  };
+  const openAppeals = {
+    c: appealRows.length,
+    overdue: appealRows.filter((a) => appealAnswerBy(a.createdAt) < now).length,
+  };
 
   const prio = Object.fromEntries((["P0", "P1", "P2", "P3"] as Priority[]).map((p) => [p, { total: 0, overdue: 0 }])) as Record<
     Priority,
@@ -225,16 +236,28 @@ export async function openP0Count(viewer: Viewer): Promise<number> {
   return Number(r?.c ?? 0);
 }
 
-/** Moderationsqualität (PRD 15): Anteil fristgerecht bearbeiteter Fälle der letzten 30 Tage. */
-export async function moderationQuality(): Promise<{ decided: number; inTarget: number; appealsDecided: number; overturned: number }> {
+/**
+ * Moderationsqualität (PRD 15): Anteil der Fälle der letzten 30 Tage, deren Reaktionsziel
+ * (Kapitel 10, in Betriebszeit) eingehalten wurde – P0–P2 gemessen an der ersten Bearbeitung
+ * (Triage, Statuswechsel oder Massnahme laut Audit), P3 am Entscheid. Gezählt werden Fälle mit
+ * Reaktion oder abgelaufener Frist. Dazu Einspruchskorrekturen. Keine Personen- oder Gesundheitsprofile.
+ */
+export async function moderationQuality(): Promise<{ measured: number; inTarget: number; appealsDecided: number; overturned: number }> {
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const [c] = await db
-    .select({
-      decided: count(),
-      inTarget: dsql<number>`count(*) filter (where ${moderationCases.decidedAt} <= ${moderationCases.dueAt})`,
-    })
-    .from(moderationCases)
-    .where(gt(moderationCases.decidedAt, since));
+  const rows = await db.execute<{ measured: number; in_target: number }>(dsql`
+    select count(*)::int as measured,
+           count(*) filter (where r.reacted_at is not null and r.reacted_at <= c.due_at)::int as in_target
+    from moderation.cases c
+    left join lateral (
+      select case when c.priority = 'P3' then c.decided_at else (
+        select min(e.occurred_at) from ops.audit_events e
+        where e.object_type = 'moderation_case' and e.object_id = c.id::text
+          and (e.action = 'case.triaged' or e.action like 'case.status.%'
+               or (e.action like 'case.action.%' and e.action <> 'case.action.note'))
+      ) end as reacted_at
+    ) r on true
+    where c.created_at > ${since.toISOString()}::timestamptz and (r.reacted_at is not null or c.due_at < now())
+  `);
   const [a] = await db
     .select({
       decided: count(),
@@ -243,8 +266,8 @@ export async function moderationQuality(): Promise<{ decided: number; inTarget: 
     .from(appeals)
     .where(gt(appeals.decidedAt, since));
   return {
-    decided: Number(c?.decided ?? 0),
-    inTarget: Number(c?.inTarget ?? 0),
+    measured: Number(rows[0]?.measured ?? 0),
+    inTarget: Number(rows[0]?.in_target ?? 0),
     appealsDecided: Number(a?.decided ?? 0),
     overturned: Number(a?.overturned ?? 0),
   };

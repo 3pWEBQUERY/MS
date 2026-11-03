@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, gt, inArray } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -11,7 +11,7 @@ import { audit } from "../../audit";
 import { actionStaff } from "../../auth/viewer";
 import { db } from "../../db";
 import { contactMessages, safetyContacts, supportOffers, verificationRecords } from "../../db/schema";
-import { LANGUAGES, OFFER_REVIEW_MAX_MONTHS, SAFETY_REVIEW_MAX_DAYS, VERIFY_METHODS } from "./shared";
+import { LANGUAGES, missingExpertMethods, OFFER_REVIEW_MAX_MONTHS, SAFETY_EXPERT_METHODS, SAFETY_REVIEW_MAX_DAYS, verifyMethodLabel, VERIFY_METHODS } from "./shared";
 import { actingRole, addDaysTo, addMonths, EDITOR_ROLES, isUuid, parseDateInput } from "./staff";
 
 /**
@@ -174,13 +174,21 @@ export async function publishOfferAction(_prev: ActionState, formData: FormData)
     const viewer = await actionStaff(EDITOR_ROLES);
     if (!isUuid(offerId)) throw new UserError("Dieses Angebot ist nicht verfügbar.");
     const [o] = await db
-      .select({ status: supportOffers.status, reviewedAt: supportOffers.reviewedAt, nextReviewAt: supportOffers.nextReviewAt })
+      .select({ status: supportOffers.status, reviewedAt: supportOffers.reviewedAt, nextReviewAt: supportOffers.nextReviewAt, topicSlugs: supportOffers.topicSlugs })
       .from(supportOffers)
       .where(eq(supportOffers.id, offerId));
     if (!o) throw new UserError("Dieses Angebot ist nicht verfügbar.");
     // CON05: Publikation nur mit gültiger, dokumentierter Prüfung.
     if (!o.reviewedAt || !o.nextReviewAt || o.nextReviewAt.getTime() <= Date.now())
       throw new UserError("Bitte erfasse zuerst eine gültige Prüfung beim Anbieter.");
+    // CON05: Medizinische und sozialrechtliche Leistungsangaben brauchen die passende, gültige Fachprüfung.
+    const valid = await db
+      .select({ method: verificationRecords.method })
+      .from(verificationRecords)
+      .where(and(eq(verificationRecords.targetType, "offer"), eq(verificationRecords.targetId, offerId), gt(verificationRecords.nextDueAt, new Date())));
+    const missing = missingExpertMethods(o.topicSlugs, valid.map((v) => v.method));
+    if (missing.length)
+      throw new UserError(`Für die gewählten Themen fehlt eine gültige Fachprüfung: ${missing.map(verifyMethodLabel).join(", ")}.`);
     if (o.status === "published") throw new UserError("Dieses Angebot ist bereits publiziert.");
     await db
       .update(supportOffers)
@@ -341,6 +349,17 @@ export async function setSafetyActiveAction(_prev: ActionState, formData: FormDa
     // SAF06: Nur fachlich verifizierte Kontaktdaten werden öffentlich.
     if (active && (!c.verifiedAt || !c.nextDueAt || c.nextDueAt.getTime() <= Date.now()))
       throw new UserError("Bitte erfasse zuerst eine gültige Verifikation.");
+    if (active) {
+      // PRD 09 VerificationRecord: Fachverantwortung bei kritischen Kontaktwegen – letzte Verifikation muss fachlich sein.
+      const [last] = await db
+        .select({ method: verificationRecords.method })
+        .from(verificationRecords)
+        .where(and(eq(verificationRecords.targetType, "safety_contact"), eq(verificationRecords.targetId, contactId)))
+        .orderBy(desc(verificationRecords.verifiedAt))
+        .limit(1);
+      if (!last || !(SAFETY_EXPERT_METHODS as readonly string[]).includes(last.method))
+        throw new UserError("Hilfewege werden erst nach fachlicher Verifikation (Krisenintervention oder Medizin) öffentlich.");
+    }
     await db.update(safetyContacts).set({ active }).where(eq(safetyContacts.id, contactId));
     await audit({
       actorId: viewer.accountId,

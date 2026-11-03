@@ -7,7 +7,9 @@ import { fail, ok, type ActionState } from "@/lib/action-state";
 import { cleanText, runAction, str, UserError } from "@/server/action";
 import { actionViewer, AuthError } from "@/server/auth/viewer";
 import { assertEnabled, FeatureDisabledError } from "@/server/flags";
+import { COMMUNITY_RULES_VERSION } from "@/lib/catalog";
 import { consume, LIMITS, peek } from "@/server/rate-limit";
+import { LIMIT_REVIEW_HINT, recordLimitHit } from "../community/limit-hits";
 import { isUuid } from "./access";
 import { blockMember, unblock } from "./blocks";
 import { endContact, respondToRequest, sendContactRequest, withdrawRequest } from "./contacts";
@@ -29,6 +31,13 @@ function requireId(v: string, message = "Dieser Vorgang ist nicht mehr verfügba
   return v;
 }
 
+const RULES_MESSAGE = "Bitte bestätige zuerst die aktuellen Community-Regeln.";
+
+/** SAF07: Kontaktanfragen und Nachrichten sind Community-Schreiben – aktuelle Regeln müssen bestätigt sein. */
+function rulesAccepted(viewer: { rulesAcceptedVersion: string | null }): boolean {
+  return viewer.rulesAcceptedVersion === COMMUNITY_RULES_VERSION;
+}
+
 /* ───────────────────────── Kontakte (MSG01, MSG02) ───────────────────────── */
 
 export async function sendContactRequestAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -36,10 +45,13 @@ export async function sendContactRequestAction(_prev: ActionState, formData: For
     const viewer = await actionViewer({ requireWrite: true });
     await assertEnabled("chat");
     const targetId = requireId(str(formData, "targetId"), "Diese Person ist nicht verfügbar.");
+    if (!rulesAccepted(viewer)) return fail(RULES_MESSAGE, { data: { rules: true } });
     const key = `contact:${viewer.accountId}`;
     // MSG02: höchstens fünf neue Anfragen pro Tag (gezählt werden nur gesendete Anfragen).
-    if ((await peek(key, LIMITS.contactRequestsPerDay.window)) >= LIMITS.contactRequestsPerDay.limit)
-      return fail("Du hast heute bereits fünf Kontaktanfragen gesendet. Morgen kannst du wieder Anfragen senden.");
+    if ((await peek(key, LIMITS.contactRequestsPerDay.window)) >= LIMITS.contactRequestsPerDay.limit) {
+      await recordLimitHit("contact_request", viewer.accountId, LIMITS.contactRequestsPerDay.window);
+      return fail(`Du hast heute bereits fünf Kontaktanfragen gesendet. Morgen kannst du wieder Anfragen senden. ${LIMIT_REVIEW_HINT}`);
+    }
     const outcome = await sendContactRequest(viewer, targetId);
     switch (outcome.kind) {
       case "sent":
@@ -64,6 +76,8 @@ export async function respondContactAction(_prev: ActionState, formData: FormDat
     const relationshipId = requireId(str(formData, "relationshipId"));
     const accept = str(formData, "decision") === "accept";
     if (accept) await assertEnabled("chat");
+    // Ablehnen bleibt ohne Regelbestätigung möglich (Schutzfunktion); Annehmen öffnet ein Gespräch.
+    if (accept && !rulesAccepted(viewer)) return fail(RULES_MESSAGE, { data: { rules: true } });
     const { conversationId } = await respondToRequest(viewer, relationshipId, accept);
     // F05: Annahme öffnet S40.
     if (accept && conversationId) redirect(`/community/gespraeche/${conversationId}?status=verbunden`);
@@ -123,15 +137,18 @@ export async function sendMessageAction(conversationId: string, rawBody: string,
     const viewer = await actionViewer({ requireWrite: true });
     await assertEnabled("chat");
     if (!isUuid(conversationId)) return { ok: false, message: "Dieses Gespräch ist nicht verfügbar.", retryable: false };
+    if (!rulesAccepted(viewer)) return { ok: false, message: RULES_MESSAGE, retryable: false };
     const opId = isUuid(clientOpId) ? clientOpId : randomUUID();
     const body = cleanText(typeof rawBody === "string" ? rawBody : "");
     // SAF08: höchstens 30 Nachrichten pro Minute je Sender.
-    if (!(await consume(`msg:${viewer.accountId}`, LIMITS.messagesPerMinute.limit, LIMITS.messagesPerMinute.window)))
+    if (!(await consume(`msg:${viewer.accountId}`, LIMITS.messagesPerMinute.limit, LIMITS.messagesPerMinute.window))) {
+      await recordLimitHit("message", viewer.accountId, LIMITS.messagesPerMinute.window);
       return {
         ok: false,
-        message: "Du hast in kurzer Zeit sehr viele Nachrichten gesendet. Bitte warte eine Minute und versuche es dann erneut.",
+        message: `Du hast in kurzer Zeit sehr viele Nachrichten gesendet. Bitte warte eine Minute und versuche es dann erneut. ${LIMIT_REVIEW_HINT}`,
         retryable: true,
       };
+    }
     const res = await sendMessage(viewer, conversationId, body, opId);
     return { ok: true, id: res.id, seq: res.seq, createdAt: res.createdAt };
   } catch (err) {

@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SymptomEntryForm } from "@/components/health/diary-forms";
+import { ActivatedNotice } from "@/components/health/health-notices";
 import { writeBlocker } from "@/components/health/write-gate";
 import { PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { addDays, localDateString, localTimeString } from "@/lib/time";
-import { createSymptomEntryAction } from "@/server/modules/health/actions";
+import { createSymptomEntryAction } from "@/server/modules/health/diary-actions";
 import { requireHealthViewer, timezoneLabel } from "@/server/modules/health/guard";
 import { listSymptomOptions } from "@/server/modules/health/queries";
 import { HEALTH_LIMITS } from "@/server/modules/health/validation";
@@ -12,16 +13,17 @@ import { HEALTH_LIMITS } from "@/server/modules/health/validation";
 export const metadata: Metadata = { title: "Symptom festhalten" };
 
 /** S22 Neuer Tagebucheintrag (DIA03, US05): beginnt mit dem Minimum, Ergänzungen auf Wunsch. */
-export default function NewEntryPage() {
+export default function NewEntryPage({ searchParams }: PageProps<"/mein-ms/eintrag/neu">) {
   return (
     <Suspense fallback={<PageSkeleton rows={3} />}>
-      <NewEntry />
+      <NewEntry searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function NewEntry() {
+async function NewEntry({ searchParams }: { searchParams: PageProps<"/mein-ms/eintrag/neu">["searchParams"] }) {
   const viewer = await requireHealthViewer();
+  const activated = (await searchParams).aktiviert === "1";
   const header = (
     <PageHeader
       eyebrow="Mein MS"
@@ -46,6 +48,11 @@ async function NewEntry() {
   return (
     <div className="flex flex-col gap-2">
       {header}
+      {activated && (
+        <div className="mb-6 max-w-2xl">
+          <ActivatedNotice />
+        </div>
+      )}
       <SymptomEntryForm
         mode="create"
         action={createSymptomEntryAction}

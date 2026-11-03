@@ -26,8 +26,9 @@ import { Icon } from "@/components/ui/icon";
 import { Badge, Card, EmptyState, KeyValue, Notice, PageHeader, PageSkeleton, PlainText } from "@/components/ui/primitives";
 import { formatDateTime } from "@/lib/time";
 import { requireStaff } from "@/server/auth/viewer";
-import { changeCaseStatusAction } from "@/server/modules/moderation/actions";
-import { getCaseForStaff, PRIORITY_WINDOW_MS, SECOND_APPROVAL_WINDOW_MS } from "@/server/modules/moderation/cases";
+import { reactionDone } from "@/server/modules/moderation/operating-hours";
+import { changeCaseStatusAction } from "@/server/modules/moderation/case-actions";
+import { getCaseForStaff, secondApprovalDueAt } from "@/server/modules/moderation/cases";
 
 export const metadata: Metadata = { title: "Moderationsfall" };
 
@@ -88,7 +89,7 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
           <div className="flex flex-wrap items-center gap-2 text-base">
             <Badge tone={PRIORITY_TONE[c.priority]}>{PRIORITY_LABEL[c.priority]}</Badge>
             <Badge tone={CASE_STATUS_TONE[c.status]}>{CASE_STATUS_LABEL[c.status]}</Badge>
-            <Deadline dueAt={c.dueAt} now={now} total={PRIORITY_WINDOW_MS[c.priority]} done={!open} />
+            <Deadline dueAt={c.dueAt} now={now} total={c.dueAt.getTime() - c.createdAt.getTime()} done={reactionDone(c.priority, c.status)} />
           </div>
         }
       />
@@ -261,9 +262,9 @@ async function Content({ params }: { params: PageProps<"/verwaltung/moderation/[
                               <p className="flex flex-wrap items-center gap-2 text-sm">
                                 <Badge tone="warning">{effectPending ? "Wartet auf zweite Freigabe" : "Zweitprüfung offen"}</Badge>
                                 <Deadline
-                                  dueAt={new Date(a.createdAt.getTime() + SECOND_APPROVAL_WINDOW_MS)}
+                                  dueAt={secondApprovalDueAt(a.createdAt)}
                                   now={now}
-                                  total={SECOND_APPROVAL_WINDOW_MS}
+                                  total={secondApprovalDueAt(a.createdAt).getTime() - a.createdAt.getTime()}
                                 />
                               </p>
                               {c.viewerIsLead && !a.ownAction && !isOwnCase ? (

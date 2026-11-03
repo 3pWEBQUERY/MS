@@ -5,6 +5,7 @@ import {
   customLabelProblem,
   daysBetween,
   formatOffset,
+  healthReturnPath,
   isDateString,
   monthGrid,
   normalizeLabel,
@@ -197,5 +198,35 @@ describe("formatOffset", () => {
   it("formatiert Offsets", () => {
     expect(formatOffset(60)).toBe("UTC+01:00");
     expect(formatOffset(-270)).toBe("UTC−04:30");
+  });
+});
+
+describe("healthReturnPath (F02: S08 → Erfassung, kein offener Redirect)", () => {
+  it("erlaubt nur die Erfassungsseiten von Mein MS", () => {
+    expect(healthReturnPath("/mein-ms/check-in")).toBe("/mein-ms/check-in");
+    expect(healthReturnPath("/mein-ms/check-in?datum=2026-03-29")).toBe("/mein-ms/check-in?datum=2026-03-29");
+    expect(healthReturnPath("/mein-ms/eintrag/neu")).toBe("/mein-ms/eintrag/neu");
+    expect(healthReturnPath("/mein-ms/fatigue/neu?x=1")).toBe("/mein-ms/fatigue/neu");
+  });
+  it("verwirft fremde, externe und ungültige Ziele", () => {
+    expect(healthReturnPath("https://example.org/mein-ms/check-in")).toBeNull();
+    expect(healthReturnPath("//example.org")).toBeNull();
+    expect(healthReturnPath("/mein-ms/aktivieren")).toBeNull();
+    expect(healthReturnPath("/community")).toBeNull();
+    expect(healthReturnPath("/mein-ms/check-in?datum=2026-02-31")).toBe("/mein-ms/check-in");
+    expect(healthReturnPath(null)).toBeNull();
+  });
+});
+
+describe("Sommerzeit bei Check-ins (DIA02, PRD 09 «Zeitlogik»)", () => {
+  it("ordnet den Check-in dem gewählten Tag zu – mit dem Offset dieses Tages", () => {
+    expect(offsetForLocalDate("2026-03-28", TZ)).toBe(60);
+    expect(offsetForLocalDate("2026-03-29", TZ)).toBe(120);
+    expect(offsetForLocalDate("2026-10-25", TZ)).toBe(60);
+  });
+  it("erlaubt genau 365 Tage rückwirkend, auch über einen Sommerzeitwechsel", () => {
+    expect(checkInDateProblem("2025-11-03", "2026-11-03")).toBeNull();
+    expect(checkInDateProblem("2025-11-02", "2026-11-03")).not.toBeNull();
+    expect(daysBetween("2026-03-28", "2026-03-30")).toBe(2);
   });
 });

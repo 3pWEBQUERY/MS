@@ -1,8 +1,8 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { utcOffsetMinutes } from "@/lib/time";
-import { requireViewer, type Viewer } from "../../auth/viewer";
-import { formatOffset } from "./validation";
+import { currentPath, requireViewer, type Viewer } from "../../auth/viewer";
+import { formatOffset, healthReturnPath } from "./validation";
 
 /**
  * Seitenschutz für Mein MS: Anmeldung wie üblich; ohne Entscheidung zum Gesundheitsbereich
@@ -10,7 +10,11 @@ import { formatOffset } from "./validation";
  */
 export async function requireHealthViewer(): Promise<Viewer> {
   const viewer = await requireViewer();
-  if (!viewer.healthDecided) redirect("/mein-ms/aktivieren");
+  if (!viewer.healthDecided) {
+    // Nach der Zustimmung geht es direkt zur gewählten Erfassung weiter (F02, HOM03).
+    const next = healthReturnPath(await currentPath());
+    redirect(next ? `/mein-ms/aktivieren?weiter=${encodeURIComponent(next)}` : "/mein-ms/aktivieren");
+  }
   return viewer;
 }
 

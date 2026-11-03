@@ -8,7 +8,9 @@ import { optStr, runAction, str, UserError } from "../../action";
 import { actionViewer, AuthError } from "../../auth/viewer";
 import { db } from "../../db";
 import { communityProfiles, userPreferences } from "../../db/schema";
+import { ANALYTICS_UI_VERSION } from "@/lib/analytics";
 import { consume } from "../../rate-limit";
+import { trackLater } from "../analytics/track";
 import {
   cleanCanton,
   cleanGoal,
@@ -92,9 +94,11 @@ export async function completeOnboardingAction(_prev: ActionState, formData: For
       throw err;
     }
 
+    // PRD 15: nur mit bereits erteilter Einwilligung «analytics»; keine Rolle, kein Ziel, keine Diagnose.
+    trackLater(viewer.accountId, { name: "onboarding_completed", params: { variant: "standard", uiVersion: ANALYTICS_UI_VERSION } });
     // F01: Ende ist S18 bzw. bei «Etwas festhalten» die gesonderte Aktivierung (S08)
     redirect(goal === "festhalten" ? "/mein-ms/aktivieren" : "/heute");
-  }, values);
+  }, values, { flow: "F01" });
 }
 
 /* ───────────────────────── S09 Eigenes Profil (ACC06, COM05) ───────────────────────── */

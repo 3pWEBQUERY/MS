@@ -11,8 +11,11 @@ import { db } from "../../db";
 import { comments, communityProfiles, consentRecords, groupMemberships, posts, topics } from "../../db/schema";
 import { assertEnabled } from "../../flags";
 import { consume, LIMITS } from "../../rate-limit";
+import { retireGroupNotifications } from "../messaging/access";
 import { notify } from "../messaging/notify";
+import { trackLater } from "../analytics/track";
 import { loadGroupForAction } from "./groups";
+import { LIMIT_REVIEW_HINT, recordLimitHit } from "./limit-hits";
 import { canViewPost, COMMENT_MAX, isUuid, loadPostAccess, POST_MAX, POST_TITLE_MAX } from "./queries";
 
 /* ───────────────────────── Hilfen ───────────────────────── */
@@ -124,11 +127,13 @@ export async function createPostAction(_prev: ActionState, formData: FormData): 
     if (intent !== "publish") return { status: "idle", values, data: { step: "preview" } };
 
     // SAF08: höchstens fünf Beiträge pro Stunde.
-    if (!(await consume(`post:${viewer.accountId}`, LIMITS.postsPerHour.limit, LIMITS.postsPerHour.window)))
+    if (!(await consume(`post:${viewer.accountId}`, LIMITS.postsPerHour.limit, LIMITS.postsPerHour.window))) {
+      await recordLimitHit("post", viewer.accountId, LIMITS.postsPerHour.window);
       return fail(
-        "Du hast in der letzten Stunde bereits fünf Beiträge veröffentlicht. Bitte warte etwas – dein Text bleibt hier erhalten.",
+        `Du hast in der letzten Stunde bereits fünf Beiträge veröffentlicht. Bitte warte etwas – dein Text bleibt hier erhalten. ${LIMIT_REVIEW_HINT}`,
         { values, data: { step: "preview" } },
       );
+    }
 
     const [created] = await db
       .insert(posts)
@@ -252,10 +257,13 @@ export async function createCommentAction(_prev: ActionState, formData: FormData
       return fail("Die Regeln dieser Gruppe wurden aktualisiert. Bitte bestätige sie zuerst im Gruppenraum.", { values: raw });
 
     // SAF08: höchstens 20 Antworten pro Stunde.
-    if (!(await consume(`comment:${viewer.accountId}`, LIMITS.commentsPerHour.limit, LIMITS.commentsPerHour.window)))
-      return fail("Du hast in der letzten Stunde bereits 20 Antworten geschrieben. Bitte warte etwas – dein Text bleibt erhalten.", {
-        values: raw,
-      });
+    if (!(await consume(`comment:${viewer.accountId}`, LIMITS.commentsPerHour.limit, LIMITS.commentsPerHour.window))) {
+      await recordLimitHit("comment", viewer.accountId, LIMITS.commentsPerHour.window);
+      return fail(
+        `Du hast in der letzten Stunde bereits 20 Antworten geschrieben. Bitte warte etwas – dein Text bleibt erhalten. ${LIMIT_REVIEW_HINT}`,
+        { values: raw },
+      );
+    }
 
     const commentId = await db.transaction(async (tx) => {
       const [c] = await tx
@@ -417,13 +425,15 @@ export async function joinGroupAction(_prev: ActionState, formData: FormData): P
         })
         .onConflictDoNothing({ target: [groupMemberships.groupId, groupMemberships.accountId] });
     }
+    // PRD 15: «Gruppe beigetreten» ohne Gruppen-ID, nur mit Einwilligung
+    if (status === "active") trackLater(viewer.accountId, { name: "useful_action_completed", params: { action: "group_joined", success: true } });
     refresh();
     return ok(
       status === "active"
         ? "Willkommen! Du bist jetzt Mitglied dieser Gruppe."
         : "Deine Anfrage ist gesendet. Du erhältst einen Hinweis, sobald die Moderation entschieden hat.",
     );
-  });
+  }, undefined, { flow: "F04" });
 }
 
 /** Rücknahme wirkt sofort (COM08). */
@@ -455,17 +465,22 @@ export async function leaveGroupAction(_prev: ActionState, formData: FormData): 
     const viewer = await actionViewer();
     const groupId = str(formData, "groupId");
     if (!isUuid(groupId)) return fail(UNAVAILABLE);
-    const updated = await db
-      .update(groupMemberships)
-      .set({ status: "left", version: sql`${groupMemberships.version} + 1` })
-      .where(
-        and(
-          eq(groupMemberships.groupId, groupId),
-          eq(groupMemberships.accountId, viewer.accountId),
-          eq(groupMemberships.status, "active"),
-        ),
-      )
-      .returning({ id: groupMemberships.id });
+    const updated = await db.transaction(async (tx) => {
+      const rows = await tx
+        .update(groupMemberships)
+        .set({ status: "left", version: sql`${groupMemberships.version} + 1` })
+        .where(
+          and(
+            eq(groupMemberships.groupId, groupId),
+            eq(groupMemberships.accountId, viewer.accountId),
+            eq(groupMemberships.status, "active"),
+          ),
+        )
+        .returning({ id: groupMemberships.id });
+      // MSG08/AT04: nach Austritt keine Hinweise mehr zu Gruppenbeiträgen.
+      if (rows.length > 0) await retireGroupNotifications(tx, viewer.accountId, groupId);
+      return rows;
+    });
     if (updated.length === 0) return fail("Du bist nicht Mitglied dieser Gruppe.");
     if (str(formData, "from") === "gruppe") redirect("/community/meine-gruppen?status=verlassen");
     refresh();

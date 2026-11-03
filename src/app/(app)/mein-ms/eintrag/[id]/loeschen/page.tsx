@@ -5,7 +5,7 @@ import { ConfirmDeleteForm } from "@/components/health/action-forms";
 import { Card, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { formatDateTime } from "@/lib/time";
 import { recordDenied } from "@/server/audit";
-import { deleteDiaryEntryAction } from "@/server/modules/health/actions";
+import { deleteDiaryEntryAction } from "@/server/modules/health/diary-actions";
 import { requireHealthViewer } from "@/server/modules/health/guard";
 import { getDiaryEntry } from "@/server/modules/health/queries";
 

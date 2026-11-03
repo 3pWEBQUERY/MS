@@ -135,6 +135,38 @@ export async function retireRequestNotifications(executor: Executor, relationshi
       );
 }
 
+/**
+ * Gruppenentzug (Austritt, Entfernung): Hinweise zu Beiträgen dieser Gruppe laufen sofort ab,
+ * wartende E-Mail-Aufträge entfallen (COM08, MSG08, AT04 «keine neuen Hinweise»).
+ */
+export async function retireGroupNotifications(executor: Executor, accountId: string, groupId: string) {
+  const rows = await executor
+    .update(notifications)
+    .set({ expiresAt: new Date() })
+    .where(
+      and(
+        eq(notifications.accountId, accountId),
+        eq(notifications.targetType, "post"),
+        dsql`${notifications.targetId} in (select p.id from community.posts p where p.group_id = ${groupId})`,
+        or(isNull(notifications.expiresAt), gt(notifications.expiresAt, new Date())),
+      ),
+    )
+    .returning({ id: notifications.id });
+  if (rows.length > 0)
+    await executor
+      .update(deliveryJobs)
+      .set({ status: "skipped", lastErrorCode: "group_access_ended" })
+      .where(
+        and(
+          inArray(
+            deliveryJobs.notificationId,
+            rows.map((r) => r.id),
+          ),
+          inArray(deliveryJobs.status, ["pending", "failed"]),
+        ),
+      );
+}
+
 /** Periodisch (Worker): abgelaufene Anfragen auf «expired» setzen, Sperrfrist 30 Tage (MSG02). */
 export async function expirePendingRequests(executor: Executor = db): Promise<number> {
   const rows = await executor

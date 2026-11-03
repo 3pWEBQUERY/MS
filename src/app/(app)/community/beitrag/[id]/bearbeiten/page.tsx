@@ -58,7 +58,7 @@ async function EditPost({ params }: { params: PageProps<"/community/beitrag/[id]
             Löschen bleibt möglich.
           </Notice>
         ) : viewer.rulesAcceptedVersion !== COMMUNITY_RULES_VERSION ? (
-          <RulesGate version={COMMUNITY_RULES_VERSION} updated={viewer.rulesAcceptedVersion !== null} />
+          <RulesGate version={COMMUNITY_RULES_VERSION} acceptedVersion={viewer.rulesAcceptedVersion} />
         ) : null}
 
         {canEdit && viewer.rulesAcceptedVersion === COMMUNITY_RULES_VERSION && (

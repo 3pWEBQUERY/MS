@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import Form from "next/form";
 import { Suspense } from "react";
 import { CheckInForm } from "@/components/health/check-in-form";
+import { ActivatedNotice } from "@/components/health/health-notices";
 import { writeBlocker } from "@/components/health/write-gate";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Input } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
 import { Notice, PageHeader, PageSkeleton } from "@/components/ui/primitives";
 import { addDays, formatDate, localDateString } from "@/lib/time";
-import { createCheckInAction } from "@/server/modules/health/actions";
+import { createCheckInAction } from "@/server/modules/health/checkin-actions";
 import { requireHealthViewer, timezoneLabel } from "@/server/modules/health/guard";
 import { getCheckInByDate } from "@/server/modules/health/queries";
 import { checkInDateProblem, HEALTH_LIMITS } from "@/server/modules/health/validation";
@@ -40,6 +41,7 @@ async function CheckIn({ searchParams }: { searchParams: PageProps<"/mein-ms/che
       back={{ href: "/mein-ms", label: "Mein MS" }}
     />
   );
+  const activated = sp.aktiviert === "1" ? <ActivatedNotice /> : null;
 
   const blocked = await writeBlocker(viewer);
   if (blocked)
@@ -56,6 +58,7 @@ async function CheckIn({ searchParams }: { searchParams: PageProps<"/mein-ms/che
     return (
       <div className="flex max-w-2xl flex-col gap-8">
         {header}
+        {activated}
         <Notice
           tone="info"
           title={date === today ? "Für heute hast du bereits einen Check-in festgehalten" : `Für den ${formatDate(date)} gibt es bereits einen Check-in`}
@@ -71,12 +74,15 @@ async function CheckIn({ searchParams }: { searchParams: PageProps<"/mein-ms/che
           <label htmlFor="datum" className="text-base font-semibold text-ink">
             Check-in für einen anderen Tag
           </label>
-          <p className="-mt-2 text-sm text-ink-2">Bis 365 Tage rückwirkend.</p>
+          <p id="datum-hinweis" className="-mt-2 text-sm text-ink-2">
+            Bis 365 Tage rückwirkend.
+          </p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Input
               id="datum"
               name="datum"
               type="date"
+              aria-describedby="datum-hinweis"
               min={minDate}
               max={today}
               defaultValue={date === today ? addDays(today, -1) : date}
@@ -96,6 +102,7 @@ async function CheckIn({ searchParams }: { searchParams: PageProps<"/mein-ms/che
   return (
     <div className="flex flex-col gap-2">
       {header}
+      {activated && <div className="mb-6 max-w-2xl">{activated}</div>}
       <CheckInForm
         mode="create"
         action={createCheckInAction}

@@ -15,7 +15,8 @@ export type OutboxType =
   | "email.password_reset"
   | "email.email_change"
   | "email.security_notice"
-  | "email.deletion_receipt";
+  | "email.deletion_receipt"
+  | "email.inactivity_notice";
 
 export async function enqueue(
   input: {

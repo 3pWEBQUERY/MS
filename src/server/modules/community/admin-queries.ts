@@ -42,6 +42,7 @@ export async function getGroupForAdmin(id: string) {
       discoverable: groups.discoverable,
       rules: groups.rules,
       rulesVersion: groups.rulesVersion,
+      rulesChangeNote: groups.rulesChangeNote,
       status: groups.status,
       moderatorAccountId: groups.moderatorAccountId,
       moderator: communityProfiles.pseudonym,

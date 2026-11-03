@@ -4,13 +4,8 @@ import { useActionState, useState } from "react";
 import { Checkbox, CountedTextarea, Field, FormMessage, RadioCards, Select, SubmitButton } from "@/components/ui/form";
 import { Notice } from "@/components/ui/primitives";
 import { idle } from "@/lib/action-state";
-import {
-  assignCaseAction,
-  decideCaseAction,
-  reviewMeasureAction,
-  setPriorityAction,
-  takeMeasureAction,
-} from "@/server/modules/moderation/actions";
+import { assignCaseAction, decideCaseAction, setPriorityAction } from "@/server/modules/moderation/case-actions";
+import { reviewMeasureAction, takeMeasureAction } from "@/server/modules/moderation/measure-actions";
 import { Hidden } from "./action-button";
 import { MEASURE_OPTIONS, PRIORITY_LABEL, PRIORITY_TARGET, RULE_REFS, type ActionKind, type Priority } from "./labels";
 

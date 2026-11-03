@@ -89,6 +89,8 @@ export const diaryEntries = health.table(
     index("diary_entries_account_time_idx").on(t.accountId, t.observedAt),
     uniqueIndex("diary_entries_op_uq").on(t.accountId, t.clientOpId),
     check("diary_entries_fatigue_range", sql`${t.fatigue} is null or (${t.fatigue} between 0 and 10)`),
+    /** PRD 09 «mindestens ein Messinhalt»: Fatigue-Einträge tragen immer einen Wert (Symptome über symptom_observations) */
+    check("diary_entries_fatigue_value", sql`${t.kind} <> 'fatigue' or ${t.fatigue} is not null`),
   ],
 );
 

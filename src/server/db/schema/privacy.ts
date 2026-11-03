@@ -11,6 +11,8 @@ export const requestType = privacy.enum("request_type", [
   "erasure_health",
   "erasure_account",
   "rectification",
+  /** Kontrollierte Wiederherstellung bei Verlust des zweiten Faktors (ACC05) */
+  "mfa_recovery",
 ]);
 export const requestStatus = privacy.enum("request_status", [
   "requested",

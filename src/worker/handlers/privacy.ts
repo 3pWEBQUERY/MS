@@ -1,5 +1,11 @@
-import { eraseHealthAfterWithdrawal, purgeOldConsentProofs, runErasureRequest } from "@/server/modules/privacy/erasure";
+import { runErasureRequest } from "@/server/modules/privacy/erasure";
 import { expireExports, generateExport } from "@/server/modules/privacy/export";
+import {
+  eraseHealthAfterWithdrawal,
+  eraseInactiveAccounts,
+  notifyInactiveAccounts,
+  purgeOldConsentProofs,
+} from "@/server/modules/privacy/retention";
 import type { Handler, PeriodicTask } from "../types";
 
 /**
@@ -22,4 +28,13 @@ export const privacyTasks: PeriodicTask[] = [
   { name: "privacy-health-withdrawal", everyMs: 6 * 60 * 60 * 1000, run: eraseHealthAfterWithdrawal },
   // PRD 11: Einwilligungsnachweise gelöschter Konten nach 3 Jahren entfernen
   { name: "privacy-consent-retention", everyMs: 24 * 60 * 60 * 1000, run: purgeOldConsentProofs },
+  // PRD 11: Konto und Profil – Vorwarnung nach 24 Monaten Inaktivität, Löschung nach weiteren 30 Tagen
+  {
+    name: "privacy-inactive-accounts",
+    everyMs: 6 * 60 * 60 * 1000,
+    run: async () => {
+      await eraseInactiveAccounts();
+      await notifyInactiveAccounts();
+    },
+  },
 ];

@@ -15,6 +15,8 @@ export type GroupFormDefaults = {
   description: string;
   rules: string;
   rulesVersion: string;
+  /** Zusammenfassung der letzten Regeländerung (SAF07) */
+  rulesChangeNote?: string;
   type: "open" | "closed" | "";
   discoverable: boolean;
   moderatorAccountId: string;
@@ -80,6 +82,18 @@ export function GroupForm({
       >
         {(p) => <Input {...p} name="rulesVersion" maxLength={40} defaultValue={v.rulesVersion ?? defaults.rulesVersion} autoComplete="off" />}
       </Field>
+      {isEdit && (
+        <Field
+          label="Was hat sich an den Regeln geändert?"
+          optional
+          hint="Pflicht bei neuer Fassung. Mitglieder sehen diese Zusammenfassung, bevor sie die neue Fassung bestätigen (SAF07)."
+          error={err.rulesChangeNote}
+        >
+          {(p) => (
+            <Textarea {...p} name="rulesChangeNote" rows={3} maxLength={600} defaultValue={v.rulesChangeNote ?? defaults.rulesChangeNote ?? ""} />
+          )}
+        </Field>
+      )}
 
       <RadioCards
         name="type"

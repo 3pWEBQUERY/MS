@@ -113,7 +113,7 @@ export function PostForm({
         maxLength={maxBody}
         rows={8}
         required
-        hint="Schreibe in deinen eigenen Worten. Links werden als Text angezeigt, ohne Vorschau."
+        hint="Schreibe in deinen eigenen Worten. Nur Text – Links werden als externe Links gekennzeichnet und ohne Vorschau angezeigt."
         defaultValue={v.body ?? ""}
         error={state.fieldErrors?.body}
       />

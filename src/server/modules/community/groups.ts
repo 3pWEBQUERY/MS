@@ -73,6 +73,8 @@ export type GroupDetail = GroupSummary & {
   archived: boolean;
   discoverable: boolean;
   rulesVersion: string;
+  /** Zusammenfassung der letzten Regeländerung (SAF07) */
+  rulesChangeNote: string | null;
   memberRulesVersion: string | null;
   /** Verantwortliche Moderation (Mitarbeitende, Pseudonym) */
   moderator: string | null;
@@ -96,6 +98,7 @@ export async function getGroupForViewer(viewer: ViewerRef, slug: string): Promis
       topic: topics.name,
       rules: groups.rules,
       rulesVersion: groups.rulesVersion,
+      rulesChangeNote: groups.rulesChangeNote,
       membership: groupMemberships.status,
       memberRulesVersion: groupMemberships.rulesVersionAccepted,
       moderator: communityProfiles.pseudonym,
@@ -127,6 +130,7 @@ export async function getGroupForViewer(viewer: ViewerRef, slug: string): Promis
     archived: row.status === "archived",
     discoverable: row.discoverable,
     rulesVersion: row.rulesVersion,
+    rulesChangeNote: row.rulesChangeNote,
     memberRulesVersion: row.memberRulesVersion,
     moderator: row.moderator,
   };

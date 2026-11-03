@@ -4,6 +4,7 @@ import { getViewer } from "@/server/auth/viewer";
 import { MEDIA_MAX_BYTES, storeMedia } from "@/server/modules/content/media";
 import { consume } from "@/server/rate-limit";
 import { storageConfigured } from "@/server/storage";
+import { correlationId, sameOrigin } from "../_lib/http";
 
 /**
  * Upload in die Medienbibliothek (Rollen editor, admin; MFA in dieser Sitzung).
@@ -23,21 +24,15 @@ const MESSAGES = {
 } as const;
 type Code = keyof typeof MESSAGES;
 
-function sameOrigin(req: NextRequest): boolean {
-  const origin = req.headers.get("origin");
-  if (!origin) return false;
-  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
-  try {
-    return Boolean(host) && new URL(origin).host === host;
-  } catch {
-    return false;
-  }
-}
-
 function respond(req: NextRequest, code: Code, status: number) {
   const wantsJson = (req.headers.get("accept") ?? "").includes("application/json");
   if (wantsJson) {
-    return NextResponse.json({ ok: code === "ok", message: MESSAGES[code] }, { status, headers: { "Cache-Control": "no-store" } });
+    // PRD 14: Fehlermeldungen enthalten eine Korrelations-ID und verständlichen Text ohne private Details.
+    const id = correlationId(req);
+    return NextResponse.json(
+      { ok: code === "ok", message: MESSAGES[code], ...(code === "ok" ? {} : { correlationId: id }) },
+      { status, headers: { "Cache-Control": "no-store", "X-Request-Id": id } },
+    );
   }
   // Ohne JavaScript: zurück zur Medienbibliothek mit Ergebniscode (kein Inhalt in der URL)
   const url = new URL("/verwaltung/medien", req.url);

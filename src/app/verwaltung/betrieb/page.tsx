@@ -5,10 +5,12 @@ import { ActionButton } from "@/components/admin/action-button";
 import { FLAG_LABEL, INCIDENT_STEPS } from "@/components/admin/labels";
 import { FlagForm, IncidentStepForm } from "@/components/admin/ops-forms";
 import { AdminSectionBlock, DateTime, formatSpan, StatGrid, StatTile } from "@/components/admin/ui";
+import { ALARM_LABEL, OpsSubNav } from "@/components/admin/ops-nav";
 import { Badge, Card, EmptyState, Notice, PageHeader, PageSkeleton, Table } from "@/components/ui/primitives";
 import { requireStaff } from "@/server/auth/viewer";
 import { requeueDeliveryAction, requeueOutboxAction } from "@/server/modules/admin/flags-actions";
 import { deliveryProblems, listFlags, OPS_ROLES, outboxProblems, outboxSummary, systemStatus } from "@/server/modules/admin/ops";
+import { WORKER_STALE_MS } from "@/server/modules/admin/ops-alarms";
 
 export const metadata: Metadata = { title: "Betrieb" };
 
@@ -59,6 +61,12 @@ async function Content() {
         description="Feature-Schalter, Warteschlangen, Zustellprobleme und technische Statusanzeigen. Keine Inhalte, keine Personendaten."
       />
       <div className="flex flex-col gap-10">
+        <OpsSubNav active="betrieb" />
+        {status.alarms.length > 0 && (
+          <Notice tone="danger" title="Aktive Betriebsalarme">
+            {status.alarms.map((a) => `${ALARM_LABEL[a.code] ?? a.code} (${a.value})`).join(" · ")}. Vorgehen siehe docs/RUNBOOKS.md.
+          </Notice>
+        )}
         {disabled.length > 0 && (
           <Notice tone="warning" title="Teilbetrieb aktiv">
             Abgeschaltet: {disabled.map((f) => FLAG_LABEL[f.key] ?? f.description).join(", ")}. Mitglieder sehen einen Hinweis; öffentliche
@@ -118,12 +126,15 @@ async function Content() {
               />
               <StatusRow
                 label="Hintergrundarbeiter"
-                ok={Boolean(status.lastWorkerActivity) && now.getTime() - (status.lastWorkerActivity?.getTime() ?? 0) < 60 * 60 * 1000}
+                ok={
+                  Boolean(status.lastWorkerActivity) &&
+                  now.getTime() - (status.lastWorkerActivity?.getTime() ?? 0) < (status.workerHeartbeat ? WORKER_STALE_MS : 60 * 60 * 1000)
+                }
                 okText="Aktiv"
                 failText={status.lastWorkerActivity ? "Länger inaktiv" : "Keine Aktivität"}
                 detail={
                   status.lastWorkerActivity
-                    ? `Letzte Aktivität vor ${formatSpan(now.getTime() - status.lastWorkerActivity.getTime())} (Näherung aus der Outbox)`
+                    ? `Letztes Lebenszeichen vor ${formatSpan(now.getTime() - status.lastWorkerActivity.getTime())}${status.workerHeartbeat ? "" : " (Näherung aus der Outbox)"}`
                     : "Noch keine verarbeiteten Ereignisse"
                 }
               />
@@ -131,7 +142,7 @@ async function Content() {
           </Table>
           <p className="text-sm text-ink-2">
             Fehlerquote, Latenz und Backup-Status werden in der Railway-Überwachung gemessen (Alarm bei über 2 % 5xx während 5 Minuten oder
-            veraltetem Backup). Verweigerte Zugriffe in den letzten 24 Stunden: <span className="tabular font-semibold">{status.deniedLast24h}</span>.
+            veraltetem Backup). Der externe Prüfer fragt zusätzlich <span className="font-mono">/api/v1/health/worker</span> ab. Verweigerte Zugriffe in den letzten 24 Stunden: <span className="tabular font-semibold">{status.deniedLast24h}</span>.
           </p>
         </AdminSectionBlock>
 

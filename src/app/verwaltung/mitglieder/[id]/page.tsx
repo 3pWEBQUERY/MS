@@ -109,6 +109,38 @@ async function Content({ params }: { params: PageProps<"/verwaltung/mitglieder/[
             )}
           </AdminSectionBlock>
 
+          <AdminSectionBlock
+            id="limits"
+            title="Automatische Begrenzungen"
+            description="SAF08: Überschreitungen der Limits in den letzten 30 Tagen – ohne Inhalte. Falsche Treffer lassen sich so überprüfen; die Begrenzung endet automatisch mit dem Zeitfenster."
+          >
+            {m.limitHits.length === 0 ? (
+              <p className="text-ink-2">Keine Begrenzungen ausgelöst.</p>
+            ) : (
+              <Table>
+                <caption className="sr-only">Ausgelöste Begrenzungen</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Limit</th>
+                    <th scope="col">Zeitfenster mit Überschreitung</th>
+                    <th scope="col">Zuletzt</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {m.limitHits.map((h) => (
+                    <tr key={h.kind}>
+                      <td>{h.label}</td>
+                      <td className="tabular">{h.count}</td>
+                      <td className="text-sm">
+                        <DateTime date={h.last} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+          </AdminSectionBlock>
+
           <AdminSectionBlock id="faelle" title="Fälle als betroffene Person" description="Nur Metadaten. Belege sind ausschliesslich im zugewiesenen Fall sichtbar.">
             {m.cases.length === 0 ? (
               <p className="text-ink-2">Keine Fälle.</p>

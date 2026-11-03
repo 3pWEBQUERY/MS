@@ -11,9 +11,22 @@ export type MailTemplate =
   | { kind: "verify_email"; link: string }
   | { kind: "password_reset"; link: string }
   | { kind: "email_change_confirm"; link: string }
-  | { kind: "security_notice"; what: "email_changed" | "password_changed" | "mfa_changed" | "new_login" }
+  | { kind: "security_notice"; what: SecurityNoticeWhat }
   | { kind: "social_digest"; count: number; link: string }
-  | { kind: "deletion_receipt"; receipt: string };
+  | { kind: "deletion_receipt"; receipt: string }
+  /** PRD 11 Aufbewahrung: Vorwarnung 30 Tage vor Löschung wegen 24 Monaten Inaktivität */
+  | { kind: "inactivity_notice"; deleteOn: string; link: string };
+
+export type SecurityNoticeWhat =
+  | "email_changed"
+  | "password_changed"
+  | "mfa_changed"
+  | "new_login"
+  /** F01: Registrierung mit bereits verwendeter Adresse – Login-/Resetweg ohne Kontoaufzählung */
+  | "registration_attempt"
+  /** ACC05: Wiederherstellung des zweiten Faktors angefordert bzw. durchgeführt */
+  | "mfa_recovery_requested"
+  | "mfa_reset";
 
 const SIGNATURE = "\n\n—\nMS Plattform · Diese Nachricht wurde automatisch versendet.\nAkute Hilfe: Notruf 144";
 
@@ -40,12 +53,27 @@ function render(t: MailTemplate): { subject: string; text: string } {
         password_changed: "Das Passwort deines Kontos wurde geändert.",
         mfa_changed: "Die Zwei-Faktor-Anmeldung deines Kontos wurde geändert.",
         new_login: "Es gab eine neue Anmeldung in deinem Konto.",
+        registration_attempt:
+          "Jemand wollte mit dieser E-Mail-Adresse ein neues Konto anlegen. Für diese Adresse besteht bereits ein Konto – es wurde kein zweites angelegt. Du kannst dich wie gewohnt anmelden oder über «Passwort vergessen» ein neues Passwort festlegen.",
+        mfa_recovery_requested:
+          "Für dein Konto wurde die Wiederherstellung des zweiten Faktors angefordert. Die Datenschutzstelle prüft deine Identität, bevor etwas geändert wird.",
+        mfa_reset:
+          "Der zweite Faktor deines Kontos wurde nach einer geprüften Anfrage zurückgesetzt. Alle Sitzungen wurden beendet. Richte die Zwei-Faktor-Anmeldung nach der nächsten Anmeldung neu ein.",
       }[t.what];
+      const advice =
+        t.what === "registration_attempt"
+          ? "Warst du das nicht? Dann musst du nichts tun."
+          : "Warst du das nicht? Melde dich an, beende alle Sitzungen und setze dein Passwort zurück.";
       return {
         subject: "Sicherheitshinweis zu deinem Konto",
-        text: `Hallo\n\n${what}\n\nWarst du das nicht? Melde dich an, beende alle Sitzungen und setze dein Passwort zurück.${SIGNATURE}`,
+        text: `Hallo\n\n${what}\n\n${advice}${SIGNATURE}`,
       };
     }
+    case "inactivity_notice":
+      return {
+        subject: "Dein Konto wird wegen Inaktivität gelöscht",
+        text: `Hallo\n\nDu hast dich seit über 24 Monaten nicht mehr angemeldet. Damit wir keine Daten auf Vorrat aufbewahren, wird dein Konto am ${t.deleteOn} gelöscht – mit Profil, Einstellungen, Beiträgen, Nachrichten und Gesundheitsdaten.\n\nMöchtest du dein Konto behalten, melde dich einfach vorher an:\n\n${t.link}\n\nVor der Löschung kannst du nach der Anmeldung unter «Daten und Konto» einen Export erstellen.${SIGNATURE}`,
+      };
     case "social_digest":
       return {
         subject: "Neue Hinweise auf der Plattform",

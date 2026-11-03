@@ -102,3 +102,15 @@ export const accessReviews = ops.table("access_reviews", {
   note: text("note"),
   createdAt: createdAt(),
 });
+
+/**
+ * Lebenszeichen des Hintergrundarbeiters und Stand der Betriebsalarme (NFR16, NFR19).
+ * Eine Zeile je Instanzname; nur technische Zeitpunkte, keine Inhalte.
+ */
+export const workerHeartbeats = ops.table("worker_heartbeats", {
+  name: text("name").primaryKey(),
+  beatAt: ts("beat_at").notNull().defaultNow(),
+  /** Zuletzt gemeldete Alarmcodes, z. B. «queue_age,dead_letters» */
+  alarms: text("alarms"),
+  alarmsAt: ts("alarms_at"),
+});

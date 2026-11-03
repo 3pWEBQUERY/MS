@@ -240,7 +240,7 @@ function ReplyArea({ post, viewer, writeEnabled }: { post: PostDetail; viewer: V
       </Notice>
     );
   else if (viewer.rulesAcceptedVersion !== COMMUNITY_RULES_VERSION)
-    return <RulesGate version={COMMUNITY_RULES_VERSION} updated={viewer.rulesAcceptedVersion !== null} />;
+    return <RulesGate version={COMMUNITY_RULES_VERSION} acceptedVersion={viewer.rulesAcceptedVersion} />;
   else if (!post.groupRulesAccepted && post.group)
     content = (
       <Notice tone="info" title="Die Gruppenregeln wurden aktualisiert">

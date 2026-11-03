@@ -34,7 +34,7 @@ const MOMENTS: { href: string; title: string; text: string; icon: IconName }[] =
 const PRINCIPLES = [
   ["Keine Streaks", "Du musst nicht täglich kommen. Pausen sind normal und bleiben ohne Folgen."],
   ["Keine Pflichtangaben", "Kein Diagnosenachweis, keine Angaben zum Verlauf. Community funktioniert ohne Tagebuch."],
-  ["Kein Datenverkauf", "Keine Werbung, keine Tracker, keine Weitergabe. Daten in der Schweiz gespeichert."],
+  ["Kein Datenverkauf", "Keine Werbung, keine Tracker von Dritten, keine Weitergabe. Nutzungsstatistik nur, wenn du sie selbst einschaltest."],
   ["Keine Interpretation", "Deine Einträge werden nicht bewertet, nicht verglichen und nicht ausgewertet."],
 ];
 
@@ -186,7 +186,7 @@ export default function HomePage() {
             <dl className="grid grid-cols-3 gap-2">
               {[
                 ["≤ 3", "nächste Schritte"],
-                ["≤ 2", "Klicks zu allem"],
+                ["1", "Klick zur Sicherheitsseite"],
                 ["0", "Pflichtfelder"],
               ].map(([v, l]) => (
                 <div key={l} className="rounded-[16px] bg-ink-inverse/10 p-4">
@@ -200,7 +200,7 @@ export default function HomePage() {
             </dl>
           </article>
           {[
-            { title: "Mein MS", icon: "notebook" as IconName, text: "Check-in in unter einer Minute. Symptome, Fatigue und Notizen mit Verlauf als Datentabelle.", tone: "bg-accent-soft" },
+            { title: "Mein MS", icon: "notebook" as IconName, text: "Kurzer Check-in ohne Pflichtfelder. Symptome, Fatigue und Notizen mit Verlauf als Datentabelle.", tone: "bg-accent-soft" },
             { title: "Community", icon: "users" as IconName, text: "Chronologischer Feed ohne Rankings. Betreute offene und geschlossene Gruppen.", tone: "bg-surface border border-line" },
             { title: "Wissen", icon: "book" as IconName, text: "Artikel mit Kurzfassung, Quellen, Autorenschaft und fachlicher Prüfung.", tone: "bg-verified-soft" },
             { title: "Hilfe", icon: "lifebuoy" as IconName, text: "Schweizer Angebote nach Thema und Kanton – ohne Standortfreigabe.", tone: "bg-sunk" },
@@ -295,7 +295,7 @@ export default function HomePage() {
         <div className="flex flex-col items-start gap-8 rounded-[28px] bg-ink p-8 text-ink-inverse sm:p-12 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex max-w-2xl flex-col gap-3">
             <h2 className="text-3xl font-[650] tracking-[-0.025em] sm:text-4xl">Bereit, wenn du es bist.</h2>
-            <p className="text-lg opacity-80">Konto in zwei Minuten. Ohne Diagnosenachweis. Jederzeit vollständig löschbar.</p>
+            <p className="text-lg opacity-80">Konto mit E-Mail und Passwort. Ohne Diagnosenachweis. Jederzeit vollständig löschbar.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <ButtonLink href="/registrieren" size="lg" variant="accent">

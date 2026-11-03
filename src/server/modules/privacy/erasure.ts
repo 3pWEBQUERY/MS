@@ -4,6 +4,7 @@ import { encrypt, receiptNumber } from "../../crypto";
 import { db, type Executor, type Tx } from "../../db";
 import {
   accounts,
+  analyticsSubjects,
   appeals,
   blocks,
   bookmarks,
@@ -28,6 +29,7 @@ import {
   reports,
   roleAssignments,
   sessions,
+  specialAccessGrants,
   symptomDefinitions,
   symptomObservations,
   userPreferences,
@@ -169,8 +171,13 @@ export async function eraseHealthData(
  * Vorschauen und Zustellaufträge entzogen; eigene Beiträge und Nachrichtentexte aus beiden
  * Ansichten ausgeblendet (Platzhalter ohne Text und Autor). Keine Wiederaktivierung durch Login.
  */
-export async function deactivateAccountForErasure(accountId: string): Promise<{ requestId: string; receipt: string } | null> {
+export async function deactivateAccountForErasure(
+  accountId: string,
+  opts: { actorId?: string | null; identityMethod?: string } = {},
+): Promise<{ requestId: string; receipt: string } | null> {
   const receipt = receiptNumber("D");
+  // Ohne Angabe handelt die Kontoinhaberin selbst (S16); null = automatischer Systemauftrag (Inaktivität).
+  const actorId = opts.actorId === undefined ? accountId : opts.actorId;
   const now = new Date();
   return db.transaction(async (tx) => {
     const changed = await tx
@@ -188,9 +195,14 @@ export async function deactivateAccountForErasure(accountId: string): Promise<{ 
     await tx.update(sessions).set({ revokedAt: now }).where(and(eq(sessions.accountId, accountId), isNull(sessions.revokedAt)));
     await tx
       .update(roleAssignments)
-      .set({ revokedAt: now, revokedBy: accountId })
+      .set({ revokedAt: now, revokedBy: actorId })
       .where(and(eq(roleAssignments.accountId, accountId), isNull(roleAssignments.revokedAt)));
     await tx.update(communityProfiles).set({ discoverable: false }).where(eq(communityProfiles.accountId, accountId));
+    // Offene oder laufende Sonderzugriffe enden mit dem Konto (PRI07, PRI08)
+    await tx
+      .update(specialAccessGrants)
+      .set({ status: "revoked" })
+      .where(and(eq(specialAccessGrants.requesterId, accountId), inArray(specialAccessGrants.status, ["requested", "approved"])));
 
     // Kontakte beenden bzw. Anfragen zurückziehen/ablehnen (MSG02-Zustände)
     const mine = or(eq(contactRelationships.accountLow, accountId), eq(contactRelationships.accountHigh, accountId));
@@ -249,7 +261,7 @@ export async function deactivateAccountForErasure(accountId: string): Promise<{ 
         receiptNumber: receipt,
         type: "erasure_account",
         status: "deactivated",
-        identityMethod: IDENTITY_METHODS.session_reauth,
+        identityMethod: opts.identityMethod ?? IDENTITY_METHODS.session_reauth,
         dueAt: dueDate(now),
       })
       .returning({ id: privacyRequests.id });
@@ -260,7 +272,16 @@ export async function deactivateAccountForErasure(accountId: string): Promise<{ 
       { type: "erasure.account", aggregateType: "privacy_request", aggregateId: req.id, dedupeKey: `erasure.account:${req.id}` },
       tx,
     );
-    await audit({ actorId: accountId, action: "privacy.erasure_account.requested", objectType: "privacy_request", objectId: req.id }, tx);
+    await audit(
+      {
+        actorId,
+        actorRole: actorId === null ? "system" : null,
+        action: "privacy.erasure_account.requested",
+        objectType: "privacy_request",
+        objectId: req.id,
+      },
+      tx,
+    );
     return { requestId: req.id, receipt };
   });
 }
@@ -361,10 +382,12 @@ const ACCOUNT_STEPS: Record<string, StepFn> = {
       await tx.delete(mfaFactors).where(eq(mfaFactors.accountId, accountId));
       await tx.delete(recoveryCodes).where(eq(recoveryCodes.accountId, accountId));
       await tx.delete(sessions).where(eq(sessions.accountId, accountId));
+      // Optionale Analytics: zufälliger Bezug samt Rohereignissen (Kaskade), PRD 15
+      await tx.delete(analyticsSubjects).where(eq(analyticsSubjects.accountId, accountId));
       // Meldungen und Einsprüche bleiben Falldaten der Moderation (Frist PRD 11), ohne Personenverknüpfung
       await tx.update(reports).set({ reporterId: null }).where(eq(reports.reporterId, accountId));
       await tx.update(appeals).set({ appellantId: null }).where(eq(appeals.appellantId, accountId));
-      return "Profil, Einstellungen, Merkliste, Mitgliedschaften, Blockierungen, Mitteilungen, Tokens, zweiter Faktor und Sitzungen entfernt; Meldungen entkoppelt";
+      return "Profil, Einstellungen, Merkliste, Mitgliedschaften, Blockierungen, Mitteilungen, Tokens, zweiter Faktor, Sitzungen und Analysebezug entfernt; Meldungen entkoppelt";
     }),
 
   "queues:outbox_delivery": async (accountId) => {
@@ -531,38 +554,4 @@ export async function runErasureRequest(requestId: string): Promise<void> {
     .set({ status: "completed", completedAt: new Date() })
     .where(eq(privacyRequests.id, requestId));
   await audit({ actorId: null, actorRole: "system", action: `privacy.${req.type}.completed`, objectType: "privacy_request", objectId: requestId });
-}
-
-/* ───────────────────────── Periodisch ───────────────────────── */
-
-/**
- * PRI02: Nach Widerruf ohne andere zulässige Grundlage werden Gesundheitsdaten binnen
- * 30 Tagen gelöscht. Ausgeführt ab Tag 28, damit die Frist sicher eingehalten wird;
- * eine erneute Aktivierung in der Zwischenzeit verhindert die Löschung.
- */
-export async function eraseHealthAfterWithdrawal(): Promise<void> {
-  const due = await db.execute<{ account_id: string }>(dsql`
-    with latest as (
-      select distinct on (account_id) account_id, decision, decided_at
-      from identity.consent_records where purpose = 'health_area'
-      order by account_id, decided_at desc
-    )
-    select l.account_id from latest l
-    join identity.accounts a on a.id = l.account_id
-    where l.decision = 'withdrawn' and l.decided_at < now() - interval '28 days'
-      and a.status not in ('deletion_pending', 'deleted')
-      and (exists (select 1 from health.check_ins c where c.account_id = l.account_id)
-        or exists (select 1 from health.diary_entries d where d.account_id = l.account_id)
-        or exists (select 1 from health.symptom_definitions s where s.owner_account_id = l.account_id))
-    limit 100`);
-  for (const row of due) {
-    await eraseHealthData(row.account_id, { actorId: null, identityMethod: IDENTITY_METHODS.automatic });
-  }
-}
-
-/** Einwilligungsnachweise gelöschter Konten nach 3 Jahren entfernen (PRD 11, Vorschlag D05). */
-export async function purgeOldConsentProofs(): Promise<void> {
-  await db.execute(dsql`
-    delete from identity.consent_records r using identity.accounts a
-    where a.id = r.account_id and a.status = 'deleted' and a.deactivated_at < now() - interval '3 years'`);
 }

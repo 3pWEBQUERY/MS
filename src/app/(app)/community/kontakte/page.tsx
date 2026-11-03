@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { CommunityNav } from "@/components/community/community-nav";
+import { RulesGate } from "@/components/community/rules-gate";
 import { ActionForm, ConfirmAction } from "@/components/messaging/action-form";
 import { StatusNotice } from "@/components/messaging/status-notice";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Badge, EmptyState, Monogram, Notice, PageHeader, PageSkeleton, SectionHeader } from "@/components/ui/primitives";
+import { COMMUNITY_RULES_VERSION } from "@/lib/catalog";
 import { formatDate } from "@/lib/time";
 import { requireViewer } from "@/server/auth/viewer";
 import { isEnabled } from "@/server/flags";
@@ -60,6 +62,11 @@ async function Contacts({ searchParams }: { searchParams: PageProps<"/community/
 
       <div className="flex flex-col gap-10">
         <StatusNotice code={status} />
+
+        {lists.incoming.length > 0 && viewer.rulesAcceptedVersion !== COMMUNITY_RULES_VERSION && (
+          // SAF07: Annehmen öffnet ein Gespräch – zuerst die aktuellen Regeln bestätigen. Ablehnen geht immer.
+          <RulesGate version={COMMUNITY_RULES_VERSION} acceptedVersion={viewer.rulesAcceptedVersion} />
+        )}
         {!chatEnabled && (
           <Notice tone="warning" title="Kontaktanfragen und Gespräche sind vorübergehend eingeschränkt">
             Bestehende Kontakte und Verläufe bleiben erhalten. Kontakt beenden und Blockieren sind weiterhin möglich.

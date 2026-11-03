@@ -6,7 +6,7 @@ export default defineConfig({
   out: "./drizzle",
   casing: "snake_case",
   dbCredentials: { url: process.env.DATABASE_URL ?? "postgres://postgres@localhost:5432/ms" },
-  schemaFilter: ["identity", "health", "community", "messaging", "content", "moderation", "privacy", "ops"],
+  schemaFilter: ["identity", "health", "community", "messaging", "content", "moderation", "privacy", "ops", "analytics"],
   strict: true,
   verbose: false,
 });

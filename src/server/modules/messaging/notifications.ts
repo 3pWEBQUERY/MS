@@ -19,7 +19,7 @@ export const NOTIFICATION_LABELS: Record<NotificationType, string> = {
   contact_request: "Neue Kontaktanfrage",
   contact_accepted: "Deine Kontaktanfrage wurde angenommen",
   comment_reply: "Neue Antwort auf deinen Beitrag",
-  group_decision: "Entscheidung zu deiner Gruppenanfrage",
+  group_decision: "Entscheidung zu deiner Gruppenmitgliedschaft",
   new_message: "Neue Nachricht",
   moderation_decision: "Entscheidung der Moderation",
   security: "Sicherheitshinweis zu deinem Konto",
@@ -32,7 +32,7 @@ export const SOCIAL_TYPES = [
   ["contact_accepted", "Angenommene Anfragen", "Wenn jemand deine Kontaktanfrage annimmt."],
   ["new_message", "Neue Nachrichten", "Höchstens ein Hinweis je Gespräch, bis du es geöffnet hast."],
   ["comment_reply", "Antworten auf deine Beiträge", "Wenn jemand auf deinen Beitrag antwortet."],
-  ["group_decision", "Gruppenanfragen", "Wenn über deine Anfrage für eine geschlossene Gruppe entschieden wurde."],
+  ["group_decision", "Gruppenentscheidungen", "Wenn über deine Anfrage für eine geschlossene Gruppe oder deine Mitgliedschaft entschieden wurde."],
 ] as const satisfies readonly (readonly [NotificationType, string, string])[];
 
 export type NotificationItem = {

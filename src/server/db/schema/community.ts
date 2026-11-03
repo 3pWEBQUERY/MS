@@ -41,6 +41,8 @@ export const groups = community.table(
     discoverable: boolean("discoverable").notNull().default(true),
     rules: text("rules").notNull(),
     rulesVersion: text("rules_version").notNull(),
+    /** Kurze Zusammenfassung der letzten Regeländerung, Mitgliedern vor erneuter Bestätigung gezeigt (SAF07) */
+    rulesChangeNote: text("rules_change_note"),
     status: groupStatus("status").notNull().default("active"),
     moderatorAccountId: uuid("moderator_account_id").references(() => accounts.id),
     createdBy: uuid("created_by").references(() => accounts.id),

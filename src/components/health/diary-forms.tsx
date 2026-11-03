@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import {
   CountedTextarea,
@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
 import { Notice } from "@/components/ui/primitives";
-import { idle, type ActionState } from "@/lib/action-state";
+import type { ActionState } from "@/lib/action-state";
+import { useHealthAction } from "./use-health-action";
 import { FATIGUE_SCALE, INTENSITY_SCALE } from "@/lib/catalog";
 import { formatDate } from "@/lib/time";
 import { HEALTH_LIMITS } from "@/server/modules/health/validation";
@@ -116,7 +117,7 @@ export function SymptomEntryForm({
   rows: initialRows,
   ...common
 }: Common & { catalog: Option[]; own: Option[]; extra?: Option[]; rows?: SymptomRowInit[] }) {
-  const [state, formAction] = useActionState(common.action, idle);
+  const [state, formAction] = useHealthAction(common.action);
   const fe = state.fieldErrors ?? {};
   const v = state.values ?? {};
   const [rows, setRows] = useState<Row[]>(() =>
@@ -310,7 +311,7 @@ export function FatigueEntryForm({
   sleepNote,
   ...common
 }: Common & { fatigue: number | null; sleepNote: string | null }) {
-  const [state, formAction] = useActionState(common.action, idle);
+  const [state, formAction] = useHealthAction(common.action);
   const fe = state.fieldErrors ?? {};
   const v = state.values ?? {};
   const conflict = state.data?.conflict ? (state.data.current as ConflictCurrent) : null;
