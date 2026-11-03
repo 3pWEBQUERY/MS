@@ -19,7 +19,9 @@
     "test:db": "npm run test:db:prepare && vitest run --config vitest.db.config.mts",
     "test:e2e": "playwright test",
     "help:serve": "tsx src/static-help/server.ts",
-    "drill:worker": "tsx scripts/drills/worker-restart.ts"
+    "drill:worker": "tsx scripts/drills/worker-restart.ts",
+    "backup:run": "tsx scripts/backup/run.ts",
+    "backup:restore": "tsx scripts/backup/restore.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1161.0",

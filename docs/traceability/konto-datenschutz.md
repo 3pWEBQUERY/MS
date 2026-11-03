@@ -119,7 +119,7 @@ Abkürzungen: `auth-actions` = `src/server/modules/account/auth-actions.ts`, `vi
 | Rohe Webserverlogs | 14 Tage | – (Plattform-Logs von Railway) | offen – D04 | Aufbewahrung beim Hoster einstellen und im Lieferantenverzeichnis belegen. |
 | Analytics-Rohdaten | 30 Tage | Analytics-Modul (anderer Bereich); Widerruf löscht sofort (`setAnalyticsConsentAction`) | erfüllt (Einwilligung) | Rohdatenfrist prüft der Bereich Analytics. |
 | Exporte | ≤ 24 h, verschlüsselt, authentifiziert | `expireExports`, `effectiveExport`, Download-Route | erfüllt | |
-| Backups | ≤ 35 Tage; Löschjournal vor Wiederfreigabe | **Neu:** `scripts/apply-deletion-journal.ts` (Probelauf `--dry-run`, Ziel ≠ Quelle, stoppt alte Outbox-Aufträge) | teilweise | Backup-Rotation beim Hoster (D04); Restore-Übung vor Pilot (AT09) durchführen und protokollieren. |
+| Backups | ≤ 35 Tage; Löschjournal vor Wiederfreigabe | `scripts/apply-deletion-journal.ts` (Probelauf `--dry-run`, Ziel ≠ Quelle, stoppt alte Outbox-Aufträge); **neu** stündliche Dumps löschen sich nach 35 Tagen selbst (`BACKUP_RETENTION_DAYS`, `scripts/backup/run.ts`) | teilweise | Rotation der Railway-Volume-Backups beim Hoster auf ≤ 35 Tage einstellen (D04); Restore-Übung vor Pilot (AT09) durchführen und protokollieren. |
 | Rechteprozess | Auskunft, Berichtigung, Export, Löschung; Identität verhältnismässig | S15, S58, `IDENTITY_METHODS` | erfüllt | Gesetzliche Fristenliste → D01. |
 
 ## Kapitel 14 Authentifizierung

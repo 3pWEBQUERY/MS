@@ -12,6 +12,7 @@ import { bucket, defineRailway, github, postgres, preserve, project, service } f
 export default defineRailway((ctx) => {
   const db = postgres("Postgres");
   const media = bucket("ms-medien", { region: "ams" });
+  const backups = bucket("ms-backups", { region: "ams" }); // NFR07: eigene, nicht öffentliche Ablage
 
   const shared = {
     DATABASE_URL: db.env.DATABASE_URL, // direkt referenzieren – verschachtelte shared-Referenzen werden nicht aufgelöst
@@ -64,5 +65,23 @@ export default defineRailway((ctx) => {
     env: { DATABASE_URL: db.env.DATABASE_URL, PLATFORM_URL: ctx.shared.APP_URL, NODE_ENV: "production", TZ: "Europe/Zurich" },
   });
 
-  return project("MS Plattform", { resources: [db, media, web, worker, hilfe] });
+  // NFR07: stündliche, verschlüsselte Sicherung als Cron-Service (beendet sich nach jedem Lauf).
+  const backup = service("backup", {
+    source: github("3pwebquery/ms", { branch: "claude/laughing-bell-1whiqu" }),
+    dockerfile: "ops/backup/Dockerfile",
+    cron: "17 * * * *",
+    restartPolicy: "NEVER",
+    replicas: { "europe-west4": 1 },
+    env: {
+      BACKUP_DATABASE_URL: db.env.DATABASE_URL,
+      BACKUP_ENCRYPTION_KEY: preserve(),
+      BACKUP_BUCKET: backups.env.BUCKET,
+      BACKUP_ENDPOINT: backups.env.ENDPOINT,
+      BACKUP_REGION: backups.env.REGION,
+      BACKUP_ACCESS_KEY_ID: backups.env.ACCESS_KEY_ID,
+      BACKUP_SECRET_ACCESS_KEY: backups.env.SECRET_ACCESS_KEY,
+    },
+  });
+
+  return project("MS Plattform", { resources: [db, media, backups, web, worker, hilfe, backup] });
 });
