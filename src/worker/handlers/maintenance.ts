@@ -1,17 +1,19 @@
 import { sql as dsql } from "drizzle-orm";
 import { db } from "@/server/db";
+import { RETENTION } from "@/server/modules/privacy/retention-rules";
 import type { PeriodicTask } from "../types";
 
 /** Betriebliche Bereinigung gemäss Aufbewahrungsplan (PRD 11). */
 export const maintenanceTasks: PeriodicTask[] = [
   {
-    // Unbestätigte Konten nach 7 Tagen löschen (ACC02)
+    // Unbestätigte Konten nach 7 Tagen löschen (ACC02, PRD 11); Token gelten ohnehin höchstens 24 h
     name: "unverified-accounts",
     everyMs: 60 * 60 * 1000,
     run: async () => {
       await db.execute(dsql`
         delete from identity.accounts
-        where status = 'unverified' and email_verified_at is null and created_at < now() - interval '7 days'`);
+        where status = 'unverified' and email_verified_at is null
+          and created_at < now() - make_interval(days => ${RETENTION.unverifiedDays})`);
     },
   },
   {
