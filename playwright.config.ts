@@ -22,6 +22,8 @@ export default defineConfig({
     locale: "de-CH",
     timezoneId: "Europe/Zurich",
     trace: "retain-on-failure",
+    actionTimeout: 15_000,
+    navigationTimeout: 30_000,
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {

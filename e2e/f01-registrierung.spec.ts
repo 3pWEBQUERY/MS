@@ -32,13 +32,15 @@ test("F01: Registrierung → Bestätigung → Einstieg → Heute", async ({ page
   await page.getByRole("button", { name: "Weiter" }).click();
   await page.getByRole("button", { name: "Ohne Angaben weiter" }).click();
   await page.getByRole("radio", { name: /Andere Menschen kennenlernen/ }).check();
-  await page.getByRole("button", { name: "Weiter" }).click();
-  await page.getByRole("radio", { name: /Nein, nicht mitzählen/ }).check();
-  // Weitere Schritte bis zum Abschluss (Regeln/Zusammenfassung)
-  for (let i = 0; i < 3; i++) {
-    const next = page.getByRole("button", { name: "Weiter" });
-    if ((await next.count()) === 0) break;
-    await next.click();
+  // Restliche Schritte (u. a. freiwillige Nutzungsstatistik, nie vorausgewählt – PRI01)
+  const submit = page.getByRole("button", { name: "Profil anlegen und loslegen" });
+  for (let i = 0; i < 4 && !(await submit.isVisible()); i++) {
+    const noStats = page.getByRole("radio", { name: /Nein, nicht mitzählen/ });
+    if (await noStats.isVisible()) {
+      await expect(noStats).not.toBeChecked();
+      await noStats.check();
+    }
+    await page.getByRole("button", { name: "Weiter" }).click();
   }
   await page.getByRole("button", { name: "Profil anlegen und loslegen" }).click();
   await expect(page).toHaveURL(/\/heute/);

@@ -267,7 +267,7 @@ export function HistoryView({ rows, days, from }: { rows: HistoryRow[]; days: nu
           {shown.length === 1 ? "1 Angabe" : `${shown.length} Angaben`}, chronologisch. «nicht erfasst» bedeutet: an diesem
           Tag ohne Angabe – das ist kein Wert von 0.
         </p>
-        <Table>
+        <Table scrollLabel="Datentabelle">
           <caption className="sr-only">Selbst dokumentierte Beobachtungen im gewählten Zeitraum</caption>
           <thead>
             <tr>
